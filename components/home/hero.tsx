@@ -59,8 +59,8 @@ export function Hero() {
               you navigate the content and get real answers to your real questions.
             </p>
 
-            <div className="mt-6 flex flex-col items-center gap-2 md:items-start">
-              <div className="flex flex-col items-center justify-center gap-3 sm:flex-row md:justify-start">
+            <div className="mt-6 flex flex-col items-center gap-2">
+              <div className="flex flex-col items-center justify-center gap-3 sm:flex-row">
                 <Button
                   asChild
                   size="lg"
