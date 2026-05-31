@@ -114,31 +114,32 @@ export function RemiChat({
   const scrollRef = useRef<HTMLDivElement>(null)
   const lastUserRef = useRef<HTMLDivElement>(null)
   const didAutoSend = useRef(false)
-  // Tracks the in-progress (interim) dictation so it can be replaced as speech is refined.
-  const interimRef = useRef('')
+  // The message text that existed when the current dictation session began.
+  const dictationBaseRef = useRef('')
 
   const isPanel = variant === 'panel'
   const busy = status === 'submitted' || status === 'streaming'
 
-  // Voice-to-text: feed recognized speech into the message box.
-  function handleTranscript(transcript: string, isFinal: boolean) {
-    setInput((prev) => {
-      const interim = interimRef.current
-      const base =
-        interim && prev.endsWith(interim) ? prev.slice(0, prev.length - interim.length) : prev
-      const sep = base && !base.endsWith(' ') ? ' ' : ''
-      if (isFinal) {
-        interimRef.current = ''
-        return `${base}${sep}${transcript.trim()} `
-      }
-      interimRef.current = transcript
-      return `${base}${sep}${transcript}`
-    })
+  // Voice-to-text: replace this session's dictation onto the text present before listening began.
+  function handleSessionTranscript(sessionTranscript: string) {
+    const base = dictationBaseRef.current
+    const sep = base && !base.endsWith(' ') ? ' ' : ''
+    setInput(sessionTranscript ? `${base}${sep}${sessionTranscript}` : base)
   }
 
-  const { isListening, isSupported, toggle, stop: stopListening } = useSpeechRecognition({
-    onTranscript: handleTranscript,
+  const { isListening, isSupported, start, stop: stopListening } = useSpeechRecognition({
+    onSessionTranscript: handleSessionTranscript,
   })
+
+  function toggleMic() {
+    if (isListening) {
+      stopListening()
+      return
+    }
+    // Capture the existing text so dictation is appended, not overwritten.
+    dictationBaseRef.current = input
+    start()
+  }
 
   // Auto-send a question passed in from the public search bar (/library?q=…).
   useEffect(() => {
@@ -164,7 +165,7 @@ export function RemiChat({
     const trimmed = text.trim()
     if (!trimmed || busy) return
     if (isListening) stopListening()
-    interimRef.current = ''
+    dictationBaseRef.current = ''
     sendMessage({ text: trimmed })
     setInput('')
   }
@@ -418,7 +419,7 @@ export function RemiChat({
                 type="button"
                 size="icon"
                 variant="outline"
-                onClick={toggle}
+                onClick={toggleMic}
                 aria-label={isListening ? 'Stop voice input' : 'Start voice input'}
                 aria-pressed={isListening}
                 className={cn(

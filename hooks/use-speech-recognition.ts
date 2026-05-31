@@ -37,19 +37,22 @@ function getRecognitionConstructor(): SpeechRecognitionConstructor | null {
 }
 
 export function useSpeechRecognition({
-  onTranscript,
+  onSessionTranscript,
   lang = 'en-US',
 }: {
-  // Called as speech is recognized. `isFinal` marks a completed phrase.
-  onTranscript: (transcript: string, isFinal: boolean) => void
+  // Called with the FULL transcript for the current listening session (finalized + interim).
+  // It replaces, rather than appends, so the consumer should set `base + sessionTranscript`.
+  onSessionTranscript: (sessionTranscript: string) => void
   lang?: string
 }) {
   const [isListening, setIsListening] = useState(false)
   const [isSupported, setIsSupported] = useState(false)
   const recognitionRef = useRef<SpeechRecognitionLike | null>(null)
+  // Accumulates only the finalized text for the current session; interim is added per-event.
+  const finalTranscriptRef = useRef('')
   // Keep the latest callback without re-creating the recognition instance.
-  const onTranscriptRef = useRef(onTranscript)
-  onTranscriptRef.current = onTranscript
+  const onTranscriptRef = useRef(onSessionTranscript)
+  onTranscriptRef.current = onSessionTranscript
 
   useEffect(() => {
     const Ctor = getRecognitionConstructor()
@@ -66,16 +69,18 @@ export function useSpeechRecognition({
 
     recognition.onresult = (event) => {
       let interim = ''
+      // Walk every result: append finalized chunks once, collect the live interim tail.
       for (let i = event.resultIndex; i < event.results.length; i++) {
         const result = event.results[i]
         const transcript = result[0].transcript
         if (result.isFinal) {
-          onTranscriptRef.current(transcript, true)
+          finalTranscriptRef.current += transcript
         } else {
           interim += transcript
         }
       }
-      if (interim) onTranscriptRef.current(interim, false)
+      const combined = (finalTranscriptRef.current + interim).replace(/\s+/g, ' ').trim()
+      onTranscriptRef.current(combined)
     }
 
     recognition.onerror = () => setIsListening(false)
@@ -96,6 +101,7 @@ export function useSpeechRecognition({
     const recognition = recognitionRef.current
     if (!recognition || isListening) return
     try {
+      finalTranscriptRef.current = ''
       recognition.start()
       setIsListening(true)
     } catch {
