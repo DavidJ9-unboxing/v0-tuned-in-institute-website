@@ -53,10 +53,9 @@ export function Hero() {
             <p className="mx-auto max-w-2xl font-sans text-lg leading-relaxed text-off-white/85 md:mx-0">
               Get all our research and self-help tools, plus{' '}
               <span className="font-semibold text-off-white">Remi</span>, your AI concierge who helps
-              you navigate the content and get real answers to your real questions. The Institute is
-              the research and education arm of{' '}
-              <span className="font-semibold text-off-white">Rooted Rhythm</span>, led by{' '}
-              <span className="font-semibold text-off-white">Sophie Schauermann, MSW, LCSW</span>.
+              you navigate the content and get real answers to your real questions. The Tuned In
+              Institute is the research and education arm of{' '}
+              <span className="font-semibold text-off-white">Rooted Rhythm Therapy</span>.
             </p>
 
             <div className="mt-6 flex flex-col items-center justify-center gap-3 sm:flex-row md:justify-start">
@@ -67,14 +66,19 @@ export function Hero() {
               >
                 <Link href="/sign-in">Sign In to the Library</Link>
               </Button>
-              <Button
-                asChild
-                size="lg"
-                variant="outline"
-                className="border-off-white/40 bg-transparent font-sans font-semibold text-off-white hover:bg-off-white hover:text-deep-teal"
-              >
-                <Link href="/request-access">Request Access</Link>
-              </Button>
+              <div className="flex flex-col items-center gap-1 md:items-start">
+                <Button
+                  asChild
+                  size="lg"
+                  variant="outline"
+                  className="border-off-white/40 bg-transparent font-sans font-semibold text-off-white hover:bg-off-white hover:text-deep-teal"
+                >
+                  <Link href="/request-access">Request Access</Link>
+                </Button>
+                <span className="font-sans text-xs text-off-white/60">
+                  Full access requires membership
+                </span>
+              </div>
             </div>
           </div>
         </div>
