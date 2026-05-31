@@ -48,18 +48,15 @@ export function SiteHeader() {
           className="flex items-center gap-3"
           aria-label="The Tuned In Institute, home"
         >
-          <span className="relative block h-[56px] w-[176px] overflow-hidden sm:h-[84px] sm:w-[345px]">
+          <span className="relative block h-[64px] w-[202px] overflow-hidden sm:h-[98px] sm:w-[400px]">
             <Image
               src="/logos/tii-logo-horizontal.png"
               alt="The Tuned In Institute"
               fill
               priority
-              sizes="345px"
+              sizes="400px"
               className="scale-[1.6] object-contain object-center"
             />
-          </span>
-          <span className="hidden max-w-[12rem] border-l border-stone pl-3 font-serif text-[12.5px] italic leading-snug text-charcoal/60 sm:block 2xl:hidden">
-            Research, education, and support for sensitive humans.
           </span>
         </Link>
 

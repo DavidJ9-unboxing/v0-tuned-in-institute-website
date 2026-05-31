@@ -27,6 +27,13 @@ const accessPoints = [
 export function Hero() {
   return (
     <section className="bg-deep-teal text-off-white">
+      {/* Tagline band — sits in the gap between the header and the hero logo */}
+      <div className="border-b border-off-white/15 bg-deep-teal/40">
+        <p className="mx-auto max-w-6xl px-5 py-2.5 text-center font-serif text-sm italic leading-snug text-off-white/80 sm:px-8 sm:text-base">
+          Research, education, and support for sensitive humans.
+        </p>
+      </div>
+
       <div className="mx-auto max-w-6xl px-5 py-12 sm:px-8 md:py-14">
         <div className="flex flex-col items-center gap-8 text-center md:flex-row md:items-center md:gap-10 md:text-left">
           {/* Logo mark */}
@@ -44,16 +51,12 @@ export function Hero() {
           {/* Title block */}
           <div className="flex-1">
             <p className="mx-auto max-w-2xl font-sans text-lg leading-relaxed text-off-white/85 md:mx-0">
-              <span className="font-semibold text-off-white">The Tuned In Institute</span> is the
-              research and education arm of{' '}
-              <span className="font-semibold text-off-white">Rooted Rhythm</span>, under the
-              leadership of{' '}
-              <span className="font-semibold text-off-white">
-                Sophie Schauermann, MSW, LCSW
-              </span>
-              , Founder and CEO. Most of our deep, research-backed content on high sensitivity is
-              available to clients only&nbsp;&mdash;&nbsp;ask your Rooted Rhythm therapist about how
-              to get access.
+              Get all our research and self-help tools, plus{' '}
+              <span className="font-semibold text-off-white">Remi</span>, your AI concierge who helps
+              you navigate the content and get real answers to your real questions. The research and
+              education arm of{' '}
+              <span className="font-semibold text-off-white">Rooted Rhythm</span>, led by{' '}
+              <span className="font-semibold text-off-white">Sophie Schauermann, MSW, LCSW</span>.
             </p>
 
             <div className="mt-6 flex flex-col items-center justify-center gap-3 sm:flex-row md:justify-start">
