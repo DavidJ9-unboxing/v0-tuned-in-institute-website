@@ -162,13 +162,17 @@ function RemiPanel({
         className="flex w-full flex-col gap-0 p-0 sm:max-w-lg lg:max-w-xl"
       >
         <SheetHeader className="flex-row items-center gap-3 border-b border-stone bg-card px-5 py-4">
-          <span className="flex size-9 shrink-0 items-center justify-center overflow-hidden rounded-full border border-stone bg-off-white">
+          <span className="relative flex size-9 shrink-0 items-center justify-center overflow-hidden rounded-full border border-stone bg-off-white">
             <Image
-              src="/logos/remi-avatar.png"
+              src="/logos/tii-logo-mark.png"
               alt="Remi"
-              width={36}
-              height={36}
-              className="size-full object-cover"
+              width={30}
+              height={30}
+              className="size-7 object-contain"
+            />
+            <Sparkles
+              className="absolute -bottom-0.5 -right-0.5 size-4 rounded-full bg-deep-teal p-0.5 text-off-white"
+              aria-hidden="true"
             />
           </span>
           <div className="flex flex-col">

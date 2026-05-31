@@ -12,6 +12,7 @@ import {
   LifeBuoy,
   Loader2,
   PlayCircle,
+  Sparkles,
 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { cn } from '@/lib/utils'
@@ -63,13 +64,17 @@ function KindIcon({ kind }: { kind: string }) {
 
 function RemiAvatar() {
   return (
-    <span className="flex size-8 shrink-0 items-center justify-center overflow-hidden rounded-full border border-stone bg-card">
+    <span className="relative flex size-8 shrink-0 items-center justify-center overflow-hidden rounded-full border border-stone bg-off-white">
       <Image
-        src="/logos/remi-avatar.png"
+        src="/logos/tii-logo-mark.png"
         alt="Remi"
-        width={32}
-        height={32}
-        className="size-full object-cover"
+        width={28}
+        height={28}
+        className="size-6 object-contain"
+      />
+      <Sparkles
+        className="absolute -bottom-0.5 -right-0.5 size-3.5 rounded-full bg-deep-teal p-0.5 text-off-white"
+        aria-hidden="true"
       />
     </span>
   )
