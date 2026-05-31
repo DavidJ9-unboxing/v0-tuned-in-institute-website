@@ -6,6 +6,7 @@ import { useChat } from '@ai-sdk/react'
 import { DefaultChatTransport } from 'ai'
 import {
   ArrowUp,
+  ChevronDown,
   ExternalLink,
   FileText,
   LifeBuoy,
@@ -111,6 +112,9 @@ export function RemiChat({
     transport: new DefaultChatTransport({ api: '/api/library/remi' }),
   })
   const [input, setInput] = useState('')
+  // In the slide-over the resource list is collapsed by default so it doesn't eat the small
+  // mobile screen; members still see a labelled, tappable header telling them links are there.
+  const [resourcesOpen, setResourcesOpen] = useState(false)
   const scrollRef = useRef<HTMLDivElement>(null)
   const lastUserRef = useRef<HTMLDivElement>(null)
   const didAutoSend = useRef(false)
@@ -204,23 +208,53 @@ export function RemiChat({
     }
   }
 
-  const resourcesPanel = sharedResources.length > 0 && (
-    <section
-      aria-label="Resources Remi shared"
-      className={cn(
-        'border-stone bg-paper',
-        isPanel ? 'shrink-0 border-t px-5 py-4' : 'rounded-2xl border px-5 py-5',
-      )}
-    >
-      <h3 className="font-sans text-xs font-semibold uppercase tracking-[0.12em] text-charcoal/55">
-        Resources Remi shared
-      </h3>
-      {/* In the slide-over, cap the link list and let it scroll so the dialogue keeps room. */}
-      <div className={cn(isPanel && 'max-h-36 overflow-y-auto pr-1')}>
+  const resourceCount = sharedResources.length
+
+  const resourcesPanel = resourceCount > 0 &&
+    (isPanel ? (
+      // Slide-over: collapsible so the dialogue keeps the small mobile screen. The header
+      // always shows so members know links are available, with a count and a toggle.
+      <section
+        aria-label="Resources Remi shared"
+        className="shrink-0 border-t border-stone bg-paper"
+      >
+        <button
+          type="button"
+          onClick={() => setResourcesOpen((v) => !v)}
+          aria-expanded={resourcesOpen}
+          className="flex w-full items-center justify-between gap-2 px-5 py-3 text-left transition-colors hover:bg-card/60"
+        >
+          <span className="flex items-center gap-2">
+            <FileText className="size-4 shrink-0 text-deep-teal" aria-hidden="true" />
+            <span className="font-sans text-xs font-semibold uppercase tracking-[0.12em] text-charcoal/65">
+              {resourceCount} resource{resourceCount > 1 ? 's' : ''} below
+            </span>
+          </span>
+          <ChevronDown
+            className={cn(
+              'size-4 shrink-0 text-charcoal/55 transition-transform',
+              resourcesOpen && 'rotate-180',
+            )}
+            aria-hidden="true"
+          />
+        </button>
+        {resourcesOpen && (
+          <div className="max-h-44 overflow-y-auto px-5 pb-4 pr-1">
+            <ResourceCards resources={sharedResources} />
+          </div>
+        )}
+      </section>
+    ) : (
+      <section
+        aria-label="Resources Remi shared"
+        className="rounded-2xl border border-stone bg-paper px-5 py-5"
+      >
+        <h3 className="font-sans text-xs font-semibold uppercase tracking-[0.12em] text-charcoal/55">
+          Resources Remi shared
+        </h3>
         <ResourceCards resources={sharedResources} />
-      </div>
-    </section>
-  )
+      </section>
+    ))
 
   const safetyNote = (
     <div
