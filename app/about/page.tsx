@@ -72,6 +72,41 @@ export default function AboutPage() {
         </div>
       </section>
 
+      {/* Chief Medical Officer */}
+      <section className="border-t border-stone bg-off-white">
+        <div className="mx-auto grid max-w-6xl items-start gap-12 px-5 py-20 sm:px-8 md:grid-cols-[1.2fr_0.8fr]">
+          <div className="md:order-1 md:row-start-1">
+            <SectionLabel>Leadership</SectionLabel>
+            <h2 className="mt-5 font-serif text-3xl font-semibold leading-tight text-deep-teal text-balance sm:text-4xl">
+              Joel Schauermann, MD
+            </h2>
+            <p className="mt-2 font-sans text-sm font-medium uppercase tracking-[0.12em] text-teal-mid">
+              Chief Medical Officer, Rooted Rhythm and The Tuned In Institute
+            </p>
+            <p className="mt-6 font-serif text-lg leading-relaxed text-charcoal/85">
+              Joel Schauermann is a board-certified physician who brings the rigor of clinical
+              medicine to the Institute&apos;s work on high sensitivity. As Chief Medical Officer, he
+              ensures that everything we teach is grounded in current research and sound medical
+              practice.
+            </p>
+            <p className="mt-4 font-serif text-lg leading-relaxed text-charcoal/85">
+              He partners closely with our clinical team to bridge the gap between the science of the
+              sensitive nervous system and the day-to-day care of the children, teens, and adults we
+              serve, keeping our education both accurate and genuinely useful.
+            </p>
+          </div>
+          <figure className="overflow-hidden rounded-xl border border-stone shadow-[0_24px_50px_-30px_rgba(27,80,90,0.6)] md:order-2 md:row-start-1">
+            <Image
+              src="/team/joel.png"
+              alt="Joel Schauermann, MD, Chief Medical Officer, smiling in a white shirt"
+              width={900}
+              height={900}
+              className="aspect-[4/5] h-auto w-full object-cover object-top"
+            />
+          </figure>
+        </div>
+      </section>
+
       {/* Mission, vision, promise */}
       <section className="border-y border-stone bg-paper">
         <div className="mx-auto grid max-w-6xl gap-10 px-5 py-20 sm:px-8 md:grid-cols-3">
