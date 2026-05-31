@@ -63,7 +63,7 @@ export default function HomePage() {
 
       {/* Why we exist */}
       <section className="bg-sage-light">
-        <div className="mx-auto max-w-3xl px-5 py-20 sm:px-8 md:py-24">
+        <div className="mx-auto max-w-3xl px-5 py-12 sm:px-8 md:py-16">
           <SectionLabel>Why we exist</SectionLabel>
           <h2 className="mt-5 font-serif text-3xl font-semibold leading-tight text-deep-teal text-balance sm:text-4xl">
             Sensitivity is not a flaw. It&apos;s a different operating system.
@@ -84,7 +84,7 @@ export default function HomePage() {
 
       {/* Four pillars */}
       <section className="border-y border-stone bg-paper">
-        <div className="mx-auto max-w-6xl px-5 py-20 sm:px-8">
+        <div className="mx-auto max-w-6xl px-5 py-12 sm:px-8 md:py-16">
           <div className="grid gap-10 md:grid-cols-2 lg:grid-cols-4">
             {pillars.map((p) => (
               <div key={p.title}>
@@ -101,12 +101,12 @@ export default function HomePage() {
 
       {/* Four program tracks */}
       <section className="bg-off-white">
-        <div className="mx-auto max-w-6xl px-5 py-20 sm:px-8 md:py-24">
+        <div className="mx-auto max-w-6xl px-5 py-12 sm:px-8 md:py-16">
           <SectionLabel>The programs</SectionLabel>
           <h2 className="mt-5 max-w-2xl font-serif text-3xl font-semibold leading-tight text-deep-teal text-balance sm:text-4xl">
             Four program tracks. One research foundation.
           </h2>
-          <div className="mt-12 grid gap-6 md:grid-cols-2">
+          <div className="mt-8 grid gap-6 md:grid-cols-2">
             {programs.map((program) => (
               <ProgramCard
                 key={program.slug}
@@ -123,7 +123,7 @@ export default function HomePage() {
 
       {/* The book */}
       <section className="border-y border-stone bg-paper">
-        <div className="mx-auto max-w-3xl px-5 py-20 sm:px-8 md:py-24">
+        <div className="mx-auto max-w-3xl px-5 py-12 sm:px-8 md:py-16">
           <div>
             <SectionLabel>Now available</SectionLabel>
             <h2 className="mt-5 font-serif text-3xl font-semibold leading-tight text-deep-teal text-balance sm:text-4xl">
@@ -162,7 +162,7 @@ export default function HomePage() {
 
       {/* Membership unlock band */}
       <section className="bg-deep-teal text-off-white">
-        <div className="mx-auto max-w-5xl px-5 py-20 text-center sm:px-8 md:py-24">
+        <div className="mx-auto max-w-5xl px-5 py-12 text-center sm:px-8 md:py-16">
           <p className="section-label section-label-center !text-sage-light">One membership</p>
           <h2 className="mx-auto mt-6 max-w-2xl font-serif text-3xl font-semibold leading-tight text-balance sm:text-4xl">
             Rooted Rhythm clients unlock the full Tuned In library.
@@ -190,7 +190,7 @@ export default function HomePage() {
 
       {/* AI Concierge preview */}
       <section className="bg-off-white">
-        <div className="mx-auto max-w-5xl px-5 py-20 sm:px-8 md:py-24">
+        <div className="mx-auto max-w-5xl px-5 py-12 sm:px-8 md:py-16">
           <SectionLabel center>Meet Remi</SectionLabel>
           <h2 className="mt-5 text-center font-serif text-3xl font-semibold leading-tight text-deep-teal text-balance sm:text-4xl">
             24/7 AI Concierge. Personal answers, anytime.
@@ -199,7 +199,7 @@ export default function HomePage() {
             Parenting a sensitive child at 11pm and hit a wall? Remi is there, trained on every
             module, every resource, and every principle in our curriculum.
           </p>
-          <div className="mt-12">
+          <div className="mt-8">
             <ConciergeExchange
               question={conciergeExamples[0].question}
               answer={conciergeExamples[0].answer}
@@ -216,7 +216,7 @@ export default function HomePage() {
 
       {/* Founder story */}
       <section className="border-y border-stone bg-paper">
-        <div className="mx-auto max-w-3xl px-5 py-20 sm:px-8 md:py-24">
+        <div className="mx-auto max-w-3xl px-5 py-12 sm:px-8 md:py-16">
           <div>
             <SectionLabel>Our story</SectionLabel>
             <h2 className="mt-5 font-serif text-3xl font-semibold leading-tight text-deep-teal text-balance sm:text-4xl">
@@ -243,7 +243,7 @@ export default function HomePage() {
 
       {/* Stats strip */}
       <section className="bg-off-white">
-        <div className="mx-auto grid max-w-5xl gap-10 px-5 py-16 sm:px-8 sm:grid-cols-3">
+        <div className="mx-auto grid max-w-5xl gap-10 px-5 py-12 sm:px-8 sm:grid-cols-3">
           {stats.map((s) => (
             <div key={s.label} className="text-center">
               <p className="font-serif text-5xl font-semibold text-deep-teal">{s.number}</p>
@@ -255,12 +255,12 @@ export default function HomePage() {
 
       {/* Clinical approach */}
       <section className="bg-deep-teal text-off-white">
-        <div className="mx-auto max-w-6xl px-5 py-20 sm:px-8 md:py-24">
+        <div className="mx-auto max-w-6xl px-5 py-12 sm:px-8 md:py-16">
           <p className="section-label !text-sage-light">Our clinical approach</p>
           <h2 className="mt-5 max-w-2xl font-serif text-3xl font-semibold leading-tight text-balance sm:text-4xl">
             The science of sensitivity, made practical.
           </h2>
-          <div className="mt-12 grid gap-5 sm:grid-cols-2 lg:grid-cols-5">
+          <div className="mt-8 grid gap-5 sm:grid-cols-2 lg:grid-cols-5">
             {clinicalFoundations.map((f) => (
               <div
                 key={f.title}
@@ -279,7 +279,7 @@ export default function HomePage() {
 
       {/* Rooted Rhythm partnership */}
       <section className="bg-off-white">
-        <div className="mx-auto max-w-3xl px-5 py-20 sm:px-8">
+        <div className="mx-auto max-w-3xl px-5 py-12 sm:px-8 md:py-16">
           <SectionLabel>In-person care</SectionLabel>
           <h2 className="mt-5 font-serif text-3xl font-semibold leading-tight text-deep-teal text-balance sm:text-4xl">
             Therapy in Dallas, Atlanta and Colorado.
