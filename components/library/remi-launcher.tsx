@@ -51,7 +51,9 @@ export function RemiProvider({ children }: { children: ReactNode }) {
   const pathname = usePathname()
 
   const open = useCallback((query?: string) => {
-    setInitialQuery(query?.trim() ?? '')
+    // Guard against being used directly as an event handler (e.g. onClick={open}),
+    // where the first argument would be a synthetic event rather than a string.
+    setInitialQuery(typeof query === 'string' ? query.trim() : '')
     setIsOpen(true)
   }, [])
   const close = useCallback(() => setIsOpen(false), [])
