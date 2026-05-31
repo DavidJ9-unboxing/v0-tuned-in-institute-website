@@ -14,32 +14,34 @@ export function SearchBar({
 }) {
   const { open } = useRemi()
   const [value, setValue] = useState('')
-  // Tracks the in-progress (interim) dictation so it can be replaced as speech is refined.
-  const interimRef = useRef('')
+  // The text that existed when the current dictation session began.
+  const dictationBaseRef = useRef('')
 
-  function handleTranscript(transcript: string, isFinal: boolean) {
-    setValue((prev) => {
-      const interim = interimRef.current
-      const base =
-        interim && prev.endsWith(interim) ? prev.slice(0, prev.length - interim.length) : prev
-      const sep = base && !base.endsWith(' ') ? ' ' : ''
-      if (isFinal) {
-        interimRef.current = ''
-        return `${base}${sep}${transcript.trim()} `
-      }
-      interimRef.current = transcript
-      return `${base}${sep}${transcript}`
-    })
+  // Voice-to-text: replace this session's dictation onto the text present before listening began.
+  function handleSessionTranscript(sessionTranscript: string) {
+    const base = dictationBaseRef.current
+    const sep = base && !base.endsWith(' ') ? ' ' : ''
+    setValue(sessionTranscript ? `${base}${sep}${sessionTranscript}` : base)
   }
 
-  const { isListening, isSupported, toggle, stop: stopListening } = useSpeechRecognition({
-    onTranscript: handleTranscript,
+  const { isListening, isSupported, start, stop: stopListening } = useSpeechRecognition({
+    onSessionTranscript: handleSessionTranscript,
   })
+
+  function toggleMic() {
+    if (isListening) {
+      stopListening()
+      return
+    }
+    // Capture the existing text so dictation is appended, not overwritten.
+    dictationBaseRef.current = value
+    start()
+  }
 
   function onSubmit(e: React.FormEvent) {
     e.preventDefault()
     if (isListening) stopListening()
-    interimRef.current = ''
+    dictationBaseRef.current = ''
     // Open Remi in the slide-over panel, pre-filling the typed question.
     open(value.trim())
     setValue('')
@@ -64,7 +66,7 @@ export function SearchBar({
           {isSupported && (
             <button
               type="button"
-              onClick={toggle}
+              onClick={toggleMic}
               aria-label={isListening ? 'Stop voice input' : 'Start voice input'}
               aria-pressed={isListening}
               className={cn(
