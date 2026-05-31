@@ -1,0 +1,146 @@
+@import 'tailwindcss';
+@import 'tw-animate-css';
+
+@custom-variant dark (&:is(.dark *));
+
+:root {
+  /* Brand palette */
+  --deep-teal: #1b505a;
+  --teal-mid: #3f7682;
+  --teal-deep: #0f3940;
+  --teal-light: #ddeaec;
+  --sage: #97ad6b;
+  --sage-deep: #6d8147;
+  --sage-light: #d4e0b3;
+  --off-white: #faf5ed;
+  --paper: #faf7f1;
+  --charcoal: #2a2a2a;
+  --stone: #d8d2c5;
+  --amber: #c4894a;
+
+  /* Semantic tokens */
+  --background: var(--off-white);
+  --foreground: var(--charcoal);
+  --card: #fdfaf4;
+  --card-foreground: var(--charcoal);
+  --popover: #fdfaf4;
+  --popover-foreground: var(--charcoal);
+  --primary: var(--deep-teal);
+  --primary-foreground: var(--off-white);
+  --secondary: var(--sage-light);
+  --secondary-foreground: var(--deep-teal);
+  --muted: #efe8dc;
+  --muted-foreground: #5b574f;
+  --accent: var(--sage);
+  --accent-foreground: #ffffff;
+  --destructive: oklch(0.577 0.245 27.325);
+  --destructive-foreground: #ffffff;
+  --border: var(--stone);
+  --input: var(--stone);
+  --ring: var(--deep-teal);
+  --chart-1: var(--deep-teal);
+  --chart-2: var(--sage);
+  --chart-3: var(--teal-mid);
+  --chart-4: var(--sage-deep);
+  --chart-5: var(--amber);
+  --radius: 0.75rem;
+  --sidebar: var(--off-white);
+  --sidebar-foreground: var(--charcoal);
+  --sidebar-primary: var(--deep-teal);
+  --sidebar-primary-foreground: var(--off-white);
+  --sidebar-accent: var(--sage-light);
+  --sidebar-accent-foreground: var(--deep-teal);
+  --sidebar-border: var(--stone);
+  --sidebar-ring: var(--deep-teal);
+}
+
+@theme inline {
+  --font-sans: var(--font-inter), -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif;
+  --font-serif: var(--font-lora), 'Source Serif Pro', Georgia, 'Times New Roman', serif;
+
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+
+  /* Brand color utilities */
+  --color-deep-teal: var(--deep-teal);
+  --color-teal-mid: var(--teal-mid);
+  --color-teal-deep: var(--teal-deep);
+  --color-teal-light: var(--teal-light);
+  --color-sage: var(--sage);
+  --color-sage-deep: var(--sage-deep);
+  --color-sage-light: var(--sage-light);
+  --color-off-white: var(--off-white);
+  --color-paper: var(--paper);
+  --color-charcoal: var(--charcoal);
+  --color-stone: var(--stone);
+  --color-amber: var(--amber);
+
+  --color-chart-1: var(--chart-1);
+  --color-chart-2: var(--chart-2);
+  --color-chart-3: var(--chart-3);
+  --color-chart-4: var(--chart-4);
+  --color-chart-5: var(--chart-5);
+  --radius-sm: calc(var(--radius) - 4px);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) + 4px);
+  --color-sidebar: var(--sidebar);
+  --color-sidebar-foreground: var(--sidebar-foreground);
+  --color-sidebar-primary: var(--sidebar-primary);
+  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
+  --color-sidebar-accent: var(--sidebar-accent);
+  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
+  --color-sidebar-border: var(--sidebar-border);
+  --color-sidebar-ring: var(--sidebar-ring);
+}
+
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+  }
+  body {
+    @apply bg-background text-foreground;
+    font-family: var(--font-serif);
+  }
+}
+
+@layer components {
+  /* Small caps section label with sage rule beneath */
+  .section-label {
+    font-family: var(--font-sans);
+    font-weight: 500;
+    font-size: 0.75rem;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--deep-teal);
+  }
+  .section-label::after {
+    content: '';
+    display: block;
+    width: 24px;
+    height: 2px;
+    background: var(--sage);
+    margin-top: 0.625rem;
+  }
+  .section-label-center::after {
+    margin-left: auto;
+    margin-right: auto;
+  }
+}
