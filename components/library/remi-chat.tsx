@@ -9,10 +9,14 @@ import {
   ArrowUp,
   ExternalLink,
   FileText,
+  LifeBuoy,
   Loader2,
   PlayCircle,
 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
+
+const CRISIS_RESOURCE_URL =
+  'https://988lifeline.org/learn/our-crisis-centers/crisis-centers-by-state-and-u-s-territory/'
 
 type RemiResource = {
   id: number
@@ -120,7 +124,26 @@ export function RemiChat({ initialQuery = '' }: { initialQuery?: string }) {
 
   const hasConversation = messages.length > 0
 
+  // Collect every resource Remi has cited across the whole conversation,
+  // de-duplicated and shown together below the dialogue.
+  const sharedResources: RemiResource[] = []
+  const seen = new Set<number>()
+  for (const message of messages) {
+    for (const part of message.parts) {
+      if (part.type === 'tool-citeResources' && part.state === 'output-available') {
+        const output = part.output as { resources: RemiResource[] }
+        for (const r of output.resources ?? []) {
+          if (!seen.has(r.id)) {
+            seen.add(r.id)
+            sharedResources.push(r)
+          }
+        }
+      }
+    }
+  }
+
   return (
+    <div className="flex flex-col gap-4">
     <div className="overflow-hidden rounded-2xl border border-stone bg-paper">
       {/* Header */}
       <div className="flex items-center gap-3 border-b border-stone bg-card px-5 py-4">
@@ -184,10 +207,8 @@ export function RemiChat({ initialQuery = '' }: { initialQuery?: string }) {
                       </p>
                     )
                   }
-                  if (part.type === 'tool-citeResources' && part.state === 'output-available') {
-                    const output = part.output as { resources: RemiResource[] }
-                    return <ResourceCards key={i} resources={output.resources} />
-                  }
+                  // Cited resources are collected and shown below the dialogue,
+                  // not inline in the conversation bubbles.
                   return null
                 })}
               </div>
@@ -265,6 +286,38 @@ export function RemiChat({ initialQuery = '' }: { initialQuery?: string }) {
           </Button>
         </div>
       </form>
+    </div>
+
+      {/* Linked articles Remi has shared, collected below the dialogue */}
+      {sharedResources.length > 0 && (
+        <section
+          aria-label="Resources Remi shared"
+          className="rounded-2xl border border-stone bg-paper px-5 py-5"
+        >
+          <h3 className="font-sans text-xs font-semibold uppercase tracking-[0.12em] text-charcoal/55">
+            Resources Remi shared
+          </h3>
+          <ResourceCards resources={sharedResources} />
+        </section>
+      )}
+
+      {/* Always-visible safety note */}
+      <div className="flex items-start gap-2.5 rounded-xl border border-stone bg-card px-4 py-3">
+        <LifeBuoy className="mt-0.5 size-4 shrink-0 text-deep-teal" aria-hidden="true" />
+        <p className="font-sans text-xs leading-relaxed text-charcoal/65">
+          Remi is a guide, not a therapist or crisis service. If you&apos;re in immediate danger,
+          call your local emergency number (911 in the US) or call or text 988. You can also find a{' '}
+          <a
+            href={CRISIS_RESOURCE_URL}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="font-medium text-deep-teal underline underline-offset-2 hover:text-teal-mid"
+          >
+            crisis center near you
+          </a>
+          .
+        </p>
+      </div>
     </div>
   )
 }
