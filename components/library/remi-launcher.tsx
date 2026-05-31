@@ -19,7 +19,8 @@ import { useSession } from '@/lib/auth-client'
 import { RemiChat } from '@/components/library/remi-chat'
 
 type RemiContextValue = {
-  open: () => void
+  /** Open Remi, optionally pre-filling and auto-sending a question. */
+  open: (initialQuery?: string) => void
   close: () => void
 }
 
@@ -46,9 +47,13 @@ const HIDE_FAB_PREFIXES = [
 
 export function RemiProvider({ children }: { children: ReactNode }) {
   const [isOpen, setIsOpen] = useState(false)
+  const [initialQuery, setInitialQuery] = useState('')
   const pathname = usePathname()
 
-  const open = useCallback(() => setIsOpen(true), [])
+  const open = useCallback((query?: string) => {
+    setInitialQuery(query?.trim() ?? '')
+    setIsOpen(true)
+  }, [])
   const close = useCallback(() => setIsOpen(false), [])
   const value = useMemo(() => ({ open, close }), [open, close])
 
@@ -87,7 +92,14 @@ export function RemiProvider({ children }: { children: ReactNode }) {
         </button>
       )}
 
-      <RemiPanel open={isOpen} onOpenChange={setIsOpen} />
+      <RemiPanel
+        open={isOpen}
+        onOpenChange={(v) => {
+          setIsOpen(v)
+          if (!v) setInitialQuery('')
+        }}
+        initialQuery={initialQuery}
+      />
     </RemiContext.Provider>
   )
 }
@@ -125,9 +137,11 @@ export function AskRemiButton({
 function RemiPanel({
   open,
   onOpenChange,
+  initialQuery,
 }: {
   open: boolean
   onOpenChange: (v: boolean) => void
+  initialQuery: string
 }) {
   const { data: session, isPending } = useSession()
   const user = session?.user
@@ -168,7 +182,7 @@ function RemiPanel({
               <Loader2 className="size-6 animate-spin text-teal-mid" aria-hidden="true" />
             </div>
           ) : user ? (
-            <RemiChat variant="panel" />
+            <RemiChat key={initialQuery || 'blank'} variant="panel" initialQuery={initialQuery} />
           ) : (
             <RemiGate />
           )}
@@ -190,6 +204,10 @@ function RemiGate() {
       <p className="max-w-xs font-serif text-[15px] leading-relaxed text-charcoal/75">
         Remi draws only on Tuned In Institute and Rooted Rhythm resources, so she&apos;s reserved for
         signed-in members. Sign in or request access to start a conversation.
+      </p>
+      <p className="max-w-xs font-sans text-xs leading-relaxed text-charcoal/55">
+        Remi is an educational guide, not a therapist, and does not provide diagnosis or treatment.
+        For care, she points you to a Rooted Rhythm therapist.
       </p>
       <div className="flex w-full max-w-xs flex-col gap-2.5">
         <Button asChild size="lg" className="font-sans font-semibold">

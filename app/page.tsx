@@ -8,7 +8,6 @@ import { ProgramCard } from '@/components/site/program-card'
 import { ConciergeExchange, conciergeExamples } from '@/components/site/concierge-exchange'
 import { Hero } from '@/components/home/hero'
 import { programs, clinicalFoundations } from '@/lib/site'
-import { getCurrentUser } from '@/lib/session'
 
 const pillars = [
   {
@@ -42,21 +41,22 @@ const stats = [
   { number: '4', label: 'program tracks: children, teens, adults' },
 ]
 
-export default async function HomePage() {
-  const user = await getCurrentUser()
-
+export default function HomePage() {
   return (
     <>
       <Hero />
 
-      {/* Natural language search bar */}
+      {/* Ask Remi, the AI concierge */}
       <section className="bg-sage-light">
         <div className="mx-auto max-w-4xl px-5 py-12 text-center sm:px-8">
-          <SearchBar isMember={!!user} />
+          <SearchBar />
           <p className="mt-4 font-sans text-sm text-deep-teal/80">
-            {user
-              ? 'Ask the concierge anything — it searches your full library for the most relevant resources.'
-              : 'Search the full Tuned In library. Members get personalized concierge answers.'}
+            Meet Remi, our AI concierge. She draws on everything across the Tuned In Institute and
+            Rooted Rhythm to point you to the right resources.
+          </p>
+          <p className="mx-auto mt-2 max-w-xl font-sans text-xs leading-relaxed text-charcoal/55">
+            Remi is an educational guide, not a therapist — she doesn&apos;t diagnose or provide
+            treatment. For clinical care, she&apos;ll help you connect with a Rooted Rhythm therapist.
           </p>
         </div>
       </section>
@@ -344,16 +344,28 @@ export default async function HomePage() {
           <p className="mt-6 font-serif text-lg leading-relaxed text-charcoal/85">
             The Tuned In Institute partners with Rooted Rhythm Therapy, a network of clinicians
             specializing in sensitive children, teens, and adults. Our educational content and their
-            clinical care are designed to work together.
+            clinical care are designed to work together. When you need real support from a licensed
+            professional, you can set up a consultation with a Rooted Rhythm therapist.
           </p>
-          <a
-            href="https://www.rootedrhythm.com"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="mt-6 inline-flex items-center gap-1.5 font-sans text-sm font-semibold text-deep-teal underline decoration-sage decoration-2 underline-offset-4 hover:text-teal-mid"
-          >
-            Visit Rooted Rhythm Therapy <ArrowRight className="size-4" />
-          </a>
+          <div className="mt-8 flex flex-col gap-3 sm:flex-row sm:items-center">
+            <Button asChild size="lg" className="font-sans font-semibold">
+              <a
+                href="https://www.rootedrhythm.com/contactus"
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                Book a consultation
+              </a>
+            </Button>
+            <a
+              href="https://www.rootedrhythm.com"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center gap-1.5 font-sans text-sm font-semibold text-deep-teal underline decoration-sage decoration-2 underline-offset-4 hover:text-teal-mid"
+            >
+              Visit Rooted Rhythm Therapy <ArrowRight className="size-4" />
+            </a>
+          </div>
         </div>
       </section>
     </>
