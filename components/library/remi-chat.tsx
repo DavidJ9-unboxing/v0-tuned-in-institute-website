@@ -10,11 +10,13 @@ import {
   FileText,
   LifeBuoy,
   Loader2,
+  Mic,
   PlayCircle,
   Sparkles,
 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { cn } from '@/lib/utils'
+import { useSpeechRecognition } from '@/hooks/use-speech-recognition'
 
 const CRISIS_RESOURCE_URL =
   'https://988lifeline.org/learn/our-crisis-centers/crisis-centers-by-state-and-u-s-territory/'
@@ -112,9 +114,31 @@ export function RemiChat({
   const scrollRef = useRef<HTMLDivElement>(null)
   const lastUserRef = useRef<HTMLDivElement>(null)
   const didAutoSend = useRef(false)
+  // Tracks the in-progress (interim) dictation so it can be replaced as speech is refined.
+  const interimRef = useRef('')
 
   const isPanel = variant === 'panel'
   const busy = status === 'submitted' || status === 'streaming'
+
+  // Voice-to-text: feed recognized speech into the message box.
+  function handleTranscript(transcript: string, isFinal: boolean) {
+    setInput((prev) => {
+      const interim = interimRef.current
+      const base =
+        interim && prev.endsWith(interim) ? prev.slice(0, prev.length - interim.length) : prev
+      const sep = base && !base.endsWith(' ') ? ' ' : ''
+      if (isFinal) {
+        interimRef.current = ''
+        return `${base}${sep}${transcript.trim()} `
+      }
+      interimRef.current = transcript
+      return `${base}${sep}${transcript}`
+    })
+  }
+
+  const { isListening, isSupported, toggle, stop: stopListening } = useSpeechRecognition({
+    onTranscript: handleTranscript,
+  })
 
   // Auto-send a question passed in from the public search bar (/library?q=…).
   useEffect(() => {
@@ -139,6 +163,8 @@ export function RemiChat({
   function submit(text: string) {
     const trimmed = text.trim()
     if (!trimmed || busy) return
+    if (isListening) stopListening()
+    interimRef.current = ''
     sendMessage({ text: trimmed })
     setInput('')
   }
@@ -387,6 +413,24 @@ export function RemiChat({
               aria-label="Message Remi"
               className="max-h-32 min-h-[2.75rem] flex-1 resize-none rounded-xl border border-stone bg-off-white px-4 py-2.5 font-sans text-[15px] text-charcoal placeholder:text-charcoal/45 focus:border-deep-teal focus:outline-none focus:ring-2 focus:ring-deep-teal/20"
             />
+            {isSupported && (
+              <Button
+                type="button"
+                size="icon"
+                variant="outline"
+                onClick={toggle}
+                aria-label={isListening ? 'Stop voice input' : 'Start voice input'}
+                aria-pressed={isListening}
+                className={cn(
+                  'size-11 shrink-0 rounded-xl border-stone',
+                  isListening
+                    ? 'animate-pulse border-deep-teal bg-deep-teal text-off-white hover:bg-deep-teal hover:text-off-white'
+                    : 'text-charcoal/70 hover:text-deep-teal',
+                )}
+              >
+                <Mic className="size-5" aria-hidden="true" />
+              </Button>
+            )}
             <Button
               type="submit"
               size="icon"
