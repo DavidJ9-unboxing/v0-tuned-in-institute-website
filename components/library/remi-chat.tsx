@@ -1,7 +1,6 @@
 'use client'
 
 import { useEffect, useRef, useState } from 'react'
-import Image from 'next/image'
 import Link from 'next/link'
 import { useChat } from '@ai-sdk/react'
 import { DefaultChatTransport } from 'ai'
@@ -64,18 +63,9 @@ function KindIcon({ kind }: { kind: string }) {
 
 function RemiAvatar() {
   return (
-    <span className="relative flex size-8 shrink-0 items-center justify-center overflow-hidden rounded-full border border-stone bg-off-white">
-      <Image
-        src="/logos/tii-logo-mark.png"
-        alt="Remi"
-        width={28}
-        height={28}
-        className="size-6 object-contain"
-      />
-      <Sparkles
-        className="absolute -bottom-0.5 -right-0.5 size-3.5 rounded-full bg-deep-teal p-0.5 text-off-white"
-        aria-hidden="true"
-      />
+    <span className="flex size-8 shrink-0 items-center justify-center rounded-full bg-deep-teal">
+      <Sparkles className="size-4 text-off-white" aria-hidden="true" />
+      <span className="sr-only">Remi</span>
     </span>
   )
 }
