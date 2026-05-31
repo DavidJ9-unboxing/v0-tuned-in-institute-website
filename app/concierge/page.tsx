@@ -62,6 +62,20 @@ export default function ConciergePage() {
         <AskRemiButton label="Talk to Remi now" />
       </PageHero>
 
+      {/* Meet Remi — name meaning */}
+      <section className="border-b border-stone bg-sage-light">
+        <div className="mx-auto max-w-3xl px-5 py-16 text-center sm:px-8">
+          <SectionLabel center>Meet Remi</SectionLabel>
+          <p className="mx-auto mt-6 max-w-2xl font-serif text-lg leading-relaxed text-charcoal/85 text-pretty">
+            Remi is your Tuned In AI Concierge, here to help you quickly find answers, resources, and
+            guidance throughout your journey with us. Derived from a French name meaning
+            &ldquo;oarsman&rdquo; or &ldquo;guide,&rdquo; Remi reflects our commitment to helping
+            families navigate parenting, healing, and growth with greater ease, confidence, and
+            connection.
+          </p>
+        </div>
+      </section>
+
       {/* Live examples */}
       <section className="bg-off-white">
         <div className="mx-auto max-w-5xl px-5 py-20 sm:px-8">

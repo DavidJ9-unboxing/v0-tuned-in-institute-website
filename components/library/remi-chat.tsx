@@ -257,16 +257,28 @@ export function RemiChat({
           aria-live="polite"
         >
           {!hasConversation && (
-            <div className="flex items-start gap-3">
-              <RemiAvatar />
-              <div className="max-w-[85%] rounded-2xl rounded-tl-sm border border-stone bg-card px-4 py-3">
-                <p className="font-serif text-[15px] leading-relaxed text-charcoal/85">
-                  Hi, I&apos;m Remi. Tell me what&apos;s on your mind — a hard moment with your
-                  child, or something you&apos;re carrying yourself — and I&apos;ll point you to the
-                  Institute resources that can help.
+            <>
+              <div className="rounded-2xl border border-deep-teal/15 bg-sage-light px-4 py-4">
+                <h3 className="font-serif text-base font-semibold text-deep-teal">Meet Remi</h3>
+                <p className="mt-1.5 font-serif text-[14px] leading-relaxed text-charcoal/80">
+                  Remi is your Tuned In AI Concierge, here to help you quickly find answers,
+                  resources, and guidance throughout your journey with us. Derived from a French
+                  name meaning &ldquo;oarsman&rdquo; or &ldquo;guide,&rdquo; Remi reflects our
+                  commitment to helping families navigate parenting, healing, and growth with
+                  greater ease, confidence, and connection.
                 </p>
               </div>
-            </div>
+              <div className="flex items-start gap-3">
+                <RemiAvatar />
+                <div className="max-w-[85%] rounded-2xl rounded-tl-sm border border-stone bg-card px-4 py-3">
+                  <p className="font-serif text-[15px] leading-relaxed text-charcoal/85">
+                    Hi, I&apos;m Remi. Tell me what&apos;s on your mind — a hard moment with your
+                    child, or something you&apos;re carrying yourself — and I&apos;ll point you to
+                    the Institute resources that can help.
+                  </p>
+                </div>
+              </div>
+            </>
           )}
 
           {messages.map((message, index) => {
