@@ -79,18 +79,8 @@ export function RemiProvider({ children }: { children: ReactNode }) {
           aria-label="Ask Remi, the Tuned In Institute AI concierge"
           className="group fixed bottom-5 right-5 z-40 flex items-center gap-2.5 rounded-full bg-deep-teal py-2.5 pl-2.5 pr-4 text-off-white shadow-[0_10px_30px_-10px_rgba(27,80,90,0.7)] transition-transform hover:scale-[1.03] focus:outline-none focus-visible:ring-2 focus-visible:ring-deep-teal/40 focus-visible:ring-offset-2 sm:bottom-6 sm:right-6"
         >
-          <span className="relative flex size-9 shrink-0 items-center justify-center overflow-hidden rounded-full bg-off-white">
-            <Image
-              src="/logos/tii-logo-mark.png"
-              alt=""
-              width={30}
-              height={30}
-              className="size-7 object-contain"
-            />
-            <Sparkles
-              className="absolute -right-0.5 -top-0.5 size-3.5 rounded-full bg-deep-teal p-0.5 text-off-white"
-              aria-hidden="true"
-            />
+          <span className="flex size-9 shrink-0 items-center justify-center rounded-full bg-off-white">
+            <Sparkles className="size-5 text-deep-teal" aria-hidden="true" />
           </span>
           <span className="flex flex-col items-start leading-none">
             <span className="font-sans text-[13px] font-semibold">Ask Remi</span>
@@ -169,7 +159,7 @@ function RemiPanel({
     <Sheet open={open} onOpenChange={onOpenChange}>
       <SheetContent
         side="right"
-        className="flex w-full flex-col gap-0 p-0 sm:max-w-md"
+        className="flex w-full flex-col gap-0 p-0 sm:max-w-lg lg:max-w-xl"
       >
         <SheetHeader className="flex-row items-center gap-3 border-b border-stone bg-card px-5 py-4">
           <span className="relative flex size-9 shrink-0 items-center justify-center overflow-hidden rounded-full border border-stone bg-off-white">

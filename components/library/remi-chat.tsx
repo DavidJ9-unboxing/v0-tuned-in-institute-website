@@ -180,13 +180,16 @@ export function RemiChat({
       aria-label="Resources Remi shared"
       className={cn(
         'border-stone bg-paper',
-        isPanel ? 'border-t px-5 py-4' : 'rounded-2xl border px-5 py-5',
+        isPanel ? 'shrink-0 border-t px-5 py-4' : 'rounded-2xl border px-5 py-5',
       )}
     >
       <h3 className="font-sans text-xs font-semibold uppercase tracking-[0.12em] text-charcoal/55">
         Resources Remi shared
       </h3>
-      <ResourceCards resources={sharedResources} />
+      {/* In the slide-over, cap the link list and let it scroll so the dialogue keeps room. */}
+      <div className={cn(isPanel && 'max-h-36 overflow-y-auto pr-1')}>
+        <ResourceCards resources={sharedResources} />
+      </div>
     </section>
   )
 
@@ -194,7 +197,7 @@ export function RemiChat({
     <div
       className={cn(
         'flex items-start gap-2.5 border-stone bg-card',
-        isPanel ? 'border-t px-5 py-3' : 'rounded-xl border px-4 py-3',
+        isPanel ? 'shrink-0 border-t px-5 py-3' : 'rounded-xl border px-4 py-3',
       )}
     >
       <LifeBuoy className="mt-0.5 size-4 shrink-0 text-deep-teal" aria-hidden="true" />
@@ -350,7 +353,7 @@ export function RemiChat({
         )}
 
         {/* Input */}
-        <form onSubmit={onSubmit} className="border-t border-stone bg-card px-4 py-3">
+        <form onSubmit={onSubmit} className="shrink-0 border-t border-stone bg-card px-4 py-3">
           <div className="flex items-end gap-2">
             <textarea
               value={input}
