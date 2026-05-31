@@ -37,25 +37,25 @@ export function Hero() {
       <div className="mx-auto max-w-6xl px-5 py-12 sm:px-8 md:py-14">
         <div className="flex flex-col items-center gap-8 text-center md:flex-row md:items-center md:gap-10 md:text-left">
           {/* Logo mark */}
-          <div className="flex size-28 shrink-0 items-center justify-center overflow-hidden rounded-full bg-off-white sm:size-32">
+          <div className="flex size-16 shrink-0 items-center justify-center overflow-hidden rounded-full bg-off-white sm:size-20">
             <Image
               src="/logos/tii-logo-mark.png"
               alt=""
-              width={160}
-              height={160}
+              width={96}
+              height={96}
               priority
-              className="size-28 scale-[1.4] object-contain sm:size-32"
+              className="size-16 scale-[1.4] object-contain sm:size-20"
             />
           </div>
 
           {/* Title block */}
           <div className="flex-1">
             <p className="mx-auto max-w-2xl font-sans text-lg leading-relaxed text-off-white/85 md:mx-0">
-              Get all our research and self-help tools, plus{' '}
+              The Tuned In Institute is the research and education arm of{' '}
+              <span className="font-semibold text-off-white">Rooted Rhythm Therapy</span>. Get all
+              our research and self-help tools, plus{' '}
               <span className="font-semibold text-off-white">Remi</span>, your AI concierge who helps
-              you navigate the content and get real answers to your real questions. The Tuned In
-              Institute is the research and education arm of{' '}
-              <span className="font-semibold text-off-white">Rooted Rhythm Therapy</span>.
+              you navigate the content and get real answers to your real questions.
             </p>
 
             <div className="mt-6 flex flex-col items-center justify-center gap-3 sm:flex-row md:justify-start">
