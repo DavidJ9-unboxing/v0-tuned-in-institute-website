@@ -68,10 +68,10 @@ export default function ConciergePage() {
           <SectionLabel center>Meet Remi</SectionLabel>
           <p className="mx-auto mt-6 max-w-2xl font-serif text-lg leading-relaxed text-charcoal/85 text-pretty">
             Remi is your Tuned In AI Concierge, here to help you quickly find answers, resources, and
-            guidance throughout your journey with us. Derived from a French name meaning
-            &ldquo;oarsman&rdquo; or &ldquo;guide,&rdquo; Remi reflects our commitment to helping
-            families navigate parenting, healing, and growth with greater ease, confidence, and
-            connection.
+            support whenever you need it. Derived from a French name meaning &ldquo;oarsman&rdquo; or
+            &ldquo;guide,&rdquo; Remi embodies our belief that no one should have to navigate growth,
+            healing, or life&apos;s challenges alone. Whether you&apos;re a parent, teen, adult, or
+            sensitive soul seeking deeper understanding, Remi is here to help guide the way.
           </p>
         </div>
       </section>

@@ -262,10 +262,11 @@ export function RemiChat({
                 <h3 className="font-serif text-base font-semibold text-deep-teal">Meet Remi</h3>
                 <p className="mt-1.5 font-serif text-[14px] leading-relaxed text-charcoal/80">
                   Remi is your Tuned In AI Concierge, here to help you quickly find answers,
-                  resources, and guidance throughout your journey with us. Derived from a French
-                  name meaning &ldquo;oarsman&rdquo; or &ldquo;guide,&rdquo; Remi reflects our
-                  commitment to helping families navigate parenting, healing, and growth with
-                  greater ease, confidence, and connection.
+                  resources, and support whenever you need it. Derived from a French name meaning
+                  &ldquo;oarsman&rdquo; or &ldquo;guide,&rdquo; Remi embodies our belief that no one
+                  should have to navigate growth, healing, or life&apos;s challenges alone. Whether
+                  you&apos;re a parent, teen, adult, or sensitive soul seeking deeper understanding,
+                  Remi is here to help guide the way.
                 </p>
               </div>
               <div className="flex items-start gap-3">
