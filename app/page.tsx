@@ -62,41 +62,9 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* Editorial statement */}
-      <section className="bg-off-white">
-        <div className="mx-auto grid max-w-6xl items-center gap-12 px-5 py-20 sm:px-8 md:py-24 lg:grid-cols-[1.05fr_0.95fr]">
-          <div>
-            <h2 className="font-serif text-[2.4rem] font-semibold leading-[1.08] tracking-tight text-deep-teal text-balance sm:text-5xl">
-              You were never{' '}
-              <span className="italic underline decoration-sage decoration-4 underline-offset-[6px]">
-                too much.
-              </span>{' '}
-              You were just in the wrong environment.
-            </h2>
-            <p className="mt-6 max-w-xl font-serif text-lg italic leading-relaxed text-charcoal/80">
-              Research-backed education and support for sensitive children, teens, and adults, and
-              the people who love them.
-            </p>
-            <p className="mt-8 font-serif text-base font-medium text-charcoal/70">
-              <span className="font-semibold text-deep-teal">15–20%</span> of people are born highly
-              sensitive.
-            </p>
-          </div>
-          <div className="overflow-hidden rounded-2xl border border-stone">
-            <Image
-              src="/images/supportive-conversation-v5.png"
-              alt="Two women in a quiet, attentive conversation over tea at a sunlit kitchen table"
-              width={720}
-              height={820}
-              className="h-auto w-full object-cover"
-            />
-          </div>
-        </div>
-      </section>
-
       {/* Why we exist */}
       <section className="bg-sage-light">
-        <div className="mx-auto max-w-3xl px-5 py-20 sm:px-8 md:py-24">
+        <div className="mx-auto max-w-3xl px-5 py-14 sm:px-8 md:py-16">
           <SectionLabel>Why we exist</SectionLabel>
           <h2 className="mt-5 font-serif text-3xl font-semibold leading-tight text-deep-teal text-balance sm:text-4xl">
             Sensitivity is not a flaw. It&apos;s a different operating system.
@@ -117,7 +85,7 @@ export default function HomePage() {
 
       {/* Four pillars */}
       <section className="border-y border-stone bg-paper">
-        <div className="mx-auto max-w-6xl px-5 py-20 sm:px-8">
+        <div className="mx-auto max-w-6xl px-5 py-14 sm:px-8">
           <div className="grid gap-10 md:grid-cols-2 lg:grid-cols-4">
             {pillars.map((p) => (
               <div key={p.title}>
@@ -134,7 +102,7 @@ export default function HomePage() {
 
       {/* Four program tracks */}
       <section className="bg-off-white">
-        <div className="mx-auto max-w-6xl px-5 py-20 sm:px-8 md:py-24">
+        <div className="mx-auto max-w-6xl px-5 py-14 sm:px-8 md:py-16">
           <SectionLabel>The programs</SectionLabel>
           <h2 className="mt-5 max-w-2xl font-serif text-3xl font-semibold leading-tight text-deep-teal text-balance sm:text-4xl">
             Four program tracks. One research foundation.
@@ -156,7 +124,7 @@ export default function HomePage() {
 
       {/* The book */}
       <section className="border-y border-stone bg-paper">
-        <div className="mx-auto grid max-w-6xl items-center gap-12 px-5 py-20 sm:px-8 md:grid-cols-2">
+        <div className="mx-auto grid max-w-6xl items-center gap-12 px-5 py-14 sm:px-8 md:grid-cols-2">
           <div className="order-2 md:order-1">
             <Image
               src="/images/tuned-in-book.webp"
@@ -204,7 +172,7 @@ export default function HomePage() {
 
       {/* Membership unlock band */}
       <section className="bg-deep-teal text-off-white">
-        <div className="mx-auto max-w-5xl px-5 py-20 text-center sm:px-8 md:py-24">
+        <div className="mx-auto max-w-5xl px-5 py-14 text-center sm:px-8 md:py-16">
           <p className="section-label section-label-center !text-sage-light">One membership</p>
           <h2 className="mx-auto mt-6 max-w-2xl font-serif text-3xl font-semibold leading-tight text-balance sm:text-4xl">
             Rooted Rhythm clients unlock the full Tuned In library.
@@ -232,7 +200,7 @@ export default function HomePage() {
 
       {/* AI Concierge preview */}
       <section className="bg-off-white">
-        <div className="mx-auto max-w-5xl px-5 py-20 sm:px-8 md:py-24">
+        <div className="mx-auto max-w-5xl px-5 py-14 sm:px-8 md:py-16">
           <SectionLabel center>Meet Remi</SectionLabel>
           <h2 className="mt-5 text-center font-serif text-3xl font-semibold leading-tight text-deep-teal text-balance sm:text-4xl">
             24/7 AI Concierge. Personal answers, anytime.
@@ -258,43 +226,32 @@ export default function HomePage() {
 
       {/* Founder story */}
       <section className="border-y border-stone bg-paper">
-        <div className="mx-auto grid max-w-6xl items-center gap-12 px-5 py-20 sm:px-8 md:grid-cols-2">
-          <div>
-            <SectionLabel>Our story</SectionLabel>
-            <h2 className="mt-5 font-serif text-3xl font-semibold leading-tight text-deep-teal text-balance sm:text-4xl">
-              Born from a decade of families who felt unseen.
-            </h2>
-            <p className="mt-6 font-serif text-lg leading-relaxed text-charcoal/85">
-              After twelve years sitting with parents who felt confused, overwhelmed, and sometimes
-              defeated by their child&apos;s intensity, our founder saw a pattern: the children
-              weren&apos;t broken. The understanding around them was.
-            </p>
-            <p className="mt-4 font-serif text-lg leading-relaxed text-charcoal/85">
-              The Institute is where that clinical experience becomes a curriculum, so the next
-              parent does not have to start from scratch at the hardest moment of the day.
-            </p>
-            <Link
-              href="/about"
-              className="mt-6 inline-flex items-center gap-1.5 font-sans text-sm font-semibold text-deep-teal underline decoration-sage decoration-2 underline-offset-4 hover:text-teal-mid"
-            >
-              Read our story <ArrowRight className="size-4" />
-            </Link>
-          </div>
-          <figure className="overflow-hidden rounded-xl border border-stone shadow-[0_24px_50px_-30px_rgba(27,80,90,0.6)]">
-            <Image
-              src="/images/parent-child-moment-v5.png"
-              alt="A parent crouched down sharing a tender, attentive moment with their young child in soft natural light"
-              width={720}
-              height={900}
-              className="aspect-[4/5] h-auto w-full object-cover"
-            />
-          </figure>
+        <div className="mx-auto max-w-3xl px-5 py-14 sm:px-8 md:py-16">
+          <SectionLabel>Our story</SectionLabel>
+          <h2 className="mt-5 font-serif text-3xl font-semibold leading-tight text-deep-teal text-balance sm:text-4xl">
+            Born from a decade of families who felt unseen.
+          </h2>
+          <p className="mt-6 font-serif text-lg leading-relaxed text-charcoal/85">
+            After twelve years sitting with parents who felt confused, overwhelmed, and sometimes
+            defeated by their child&apos;s intensity, our founder saw a pattern: the children
+            weren&apos;t broken. The understanding around them was.
+          </p>
+          <p className="mt-4 font-serif text-lg leading-relaxed text-charcoal/85">
+            The Institute is where that clinical experience becomes a curriculum, so the next
+            parent does not have to start from scratch at the hardest moment of the day.
+          </p>
+          <Link
+            href="/about"
+            className="mt-6 inline-flex items-center gap-1.5 font-sans text-sm font-semibold text-deep-teal underline decoration-sage decoration-2 underline-offset-4 hover:text-teal-mid"
+          >
+            Read our story <ArrowRight className="size-4" />
+          </Link>
         </div>
       </section>
 
       {/* Stats strip */}
       <section className="bg-off-white">
-        <div className="mx-auto grid max-w-5xl gap-10 px-5 py-16 sm:px-8 sm:grid-cols-3">
+        <div className="mx-auto grid max-w-5xl gap-10 px-5 py-12 sm:px-8 sm:grid-cols-3">
           {stats.map((s) => (
             <div key={s.label} className="text-center">
               <p className="font-serif text-5xl font-semibold text-deep-teal">{s.number}</p>
@@ -306,7 +263,7 @@ export default function HomePage() {
 
       {/* Clinical approach */}
       <section className="bg-deep-teal text-off-white">
-        <div className="mx-auto max-w-6xl px-5 py-20 sm:px-8 md:py-24">
+        <div className="mx-auto max-w-6xl px-5 py-14 sm:px-8 md:py-16">
           <p className="section-label !text-sage-light">Our clinical approach</p>
           <h2 className="mt-5 max-w-2xl font-serif text-3xl font-semibold leading-tight text-balance sm:text-4xl">
             The science of sensitivity, made practical.
@@ -330,7 +287,7 @@ export default function HomePage() {
 
       {/* Rooted Rhythm partnership */}
       <section className="bg-off-white">
-        <div className="mx-auto max-w-3xl px-5 py-20 sm:px-8">
+        <div className="mx-auto max-w-3xl px-5 py-14 sm:px-8">
           <SectionLabel>In-person care</SectionLabel>
           <h2 className="mt-5 font-serif text-3xl font-semibold leading-tight text-deep-teal text-balance sm:text-4xl">
             Therapy in Dallas, Atlanta and Colorado.
