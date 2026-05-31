@@ -1,5 +1,4 @@
 import Link from 'next/link'
-import Image from 'next/image'
 import { ArrowRight } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { SectionLabel } from '@/components/site/section-label'
@@ -59,38 +58,6 @@ export default function HomePage() {
             Remi is an educational guide, not a therapist — she doesn&apos;t diagnose or provide
             treatment. For clinical care, she&apos;ll help you connect with a Rooted Rhythm therapist.
           </p>
-        </div>
-      </section>
-
-      {/* Editorial statement */}
-      <section className="bg-off-white">
-        <div className="mx-auto grid max-w-6xl items-center gap-12 px-5 py-20 sm:px-8 md:py-24 lg:grid-cols-[1.05fr_0.95fr]">
-          <div>
-            <h2 className="font-serif text-[2.4rem] font-semibold leading-[1.08] tracking-tight text-deep-teal text-balance sm:text-5xl">
-              You were never{' '}
-              <span className="italic underline decoration-sage decoration-4 underline-offset-[6px]">
-                too much.
-              </span>{' '}
-              You were just in the wrong environment.
-            </h2>
-            <p className="mt-6 max-w-xl font-serif text-lg italic leading-relaxed text-charcoal/80">
-              Research-backed education and support for sensitive children, teens, and adults, and
-              the people who love them.
-            </p>
-            <p className="mt-8 font-serif text-base font-medium text-charcoal/70">
-              <span className="font-semibold text-deep-teal">15–20%</span> of people are born highly
-              sensitive.
-            </p>
-          </div>
-          <div className="overflow-hidden rounded-2xl border border-stone">
-            <Image
-              src="/images/supportive-conversation-v5.png"
-              alt="Two women in a quiet, attentive conversation over tea at a sunlit kitchen table"
-              width={720}
-              height={820}
-              className="h-auto w-full object-cover"
-            />
-          </div>
         </div>
       </section>
 
@@ -156,17 +123,8 @@ export default function HomePage() {
 
       {/* The book */}
       <section className="border-y border-stone bg-paper">
-        <div className="mx-auto grid max-w-6xl items-center gap-12 px-5 py-20 sm:px-8 md:grid-cols-2">
-          <div className="order-2 md:order-1">
-            <Image
-              src="/images/tuned-in-book.webp"
-              alt="Tuned In: A Guide for Parents of Sensitive Children by Sophie Schauermann, LCSW"
-              width={800}
-              height={1000}
-              className="mx-auto h-auto w-full max-w-sm object-contain drop-shadow-[0_24px_40px_rgba(27,80,90,0.25)]"
-            />
-          </div>
-          <div className="order-1 md:order-2">
+        <div className="mx-auto max-w-3xl px-5 py-20 sm:px-8 md:py-24">
+          <div>
             <SectionLabel>Now available</SectionLabel>
             <h2 className="mt-5 font-serif text-3xl font-semibold leading-tight text-deep-teal text-balance sm:text-4xl">
               The book that started everything.
@@ -258,7 +216,7 @@ export default function HomePage() {
 
       {/* Founder story */}
       <section className="border-y border-stone bg-paper">
-        <div className="mx-auto grid max-w-6xl items-center gap-12 px-5 py-20 sm:px-8 md:grid-cols-2">
+        <div className="mx-auto max-w-3xl px-5 py-20 sm:px-8 md:py-24">
           <div>
             <SectionLabel>Our story</SectionLabel>
             <h2 className="mt-5 font-serif text-3xl font-semibold leading-tight text-deep-teal text-balance sm:text-4xl">
@@ -280,15 +238,6 @@ export default function HomePage() {
               Read our story <ArrowRight className="size-4" />
             </Link>
           </div>
-          <figure className="overflow-hidden rounded-xl border border-stone shadow-[0_24px_50px_-30px_rgba(27,80,90,0.6)]">
-            <Image
-              src="/images/parent-child-moment-v5.png"
-              alt="A parent crouched down sharing a tender, attentive moment with their young child in soft natural light"
-              width={720}
-              height={900}
-              className="aspect-[4/5] h-auto w-full object-cover"
-            />
-          </figure>
         </div>
       </section>
 
