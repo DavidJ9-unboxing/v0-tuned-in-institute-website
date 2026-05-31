@@ -39,11 +39,12 @@ export default function AboutPage() {
         <div className="mx-auto grid max-w-6xl items-start gap-12 px-5 py-20 sm:px-8 md:grid-cols-[0.8fr_1.2fr]">
           <figure className="overflow-hidden rounded-xl border border-stone shadow-[0_24px_50px_-30px_rgba(27,80,90,0.6)]">
             <Image
-              src="/images/notebook-desk.png"
-              alt="A clinician's desk with an open notebook and pen in soft daylight"
-              width={720}
+              src="/team/sophie.png"
+              alt="Sophie Schauermann, MSW, LCSW, Founder and CEO, smiling with arms crossed"
+              width={900}
               height={900}
-              className="aspect-[4/5] h-auto w-full object-cover"
+              className="aspect-[4/5] h-auto w-full object-cover object-top"
+              priority
             />
           </figure>
           <div>
