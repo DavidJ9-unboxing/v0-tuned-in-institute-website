@@ -1,7 +1,7 @@
 'use client'
 
 import { useRef, useState } from 'react'
-import { Mic, Sparkles } from 'lucide-react'
+import { ArrowUp, Mic, Sparkles } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { useRemi } from '@/components/library/remi-launcher'
 import { useSpeechRecognition } from '@/hooks/use-speech-recognition'
@@ -60,25 +60,36 @@ export function SearchBar({
             aria-label="Ask Remi, the Tuned In Institute AI concierge"
             className={cn(
               'h-14 w-full rounded-xl border border-stone bg-card pl-12 font-sans text-[15px] text-charcoal placeholder:text-charcoal/45 focus:border-deep-teal focus:outline-none focus:ring-2 focus:ring-deep-teal/20',
-              isSupported ? 'pr-14' : 'pr-4',
+              isSupported && value.trim() ? 'pr-24' : isSupported ? 'pr-14' : 'pr-4',
             )}
           />
-          {isSupported && (
-            <button
-              type="button"
-              onClick={toggleMic}
-              aria-label={isListening ? 'Stop voice input' : 'Start voice input'}
-              aria-pressed={isListening}
-              className={cn(
-                'absolute right-2 top-1/2 flex size-10 -translate-y-1/2 items-center justify-center rounded-lg transition-colors',
-                isListening
-                  ? 'animate-pulse bg-deep-teal text-off-white'
-                  : 'text-charcoal/60 hover:bg-sage-light hover:text-deep-teal',
-              )}
-            >
-              <Mic className="size-5" aria-hidden="true" />
-            </button>
-          )}
+          <div className="absolute right-2 top-1/2 flex -translate-y-1/2 items-center gap-1">
+            {isSupported && (
+              <button
+                type="button"
+                onClick={toggleMic}
+                aria-label={isListening ? 'Stop voice input' : 'Start voice input'}
+                aria-pressed={isListening}
+                className={cn(
+                  'flex size-10 items-center justify-center rounded-lg transition-colors',
+                  isListening
+                    ? 'animate-pulse bg-deep-teal text-off-white'
+                    : 'text-charcoal/60 hover:bg-sage-light hover:text-deep-teal',
+                )}
+              >
+                <Mic className="size-5" aria-hidden="true" />
+              </button>
+            )}
+            {value.trim() && (
+              <button
+                type="submit"
+                aria-label="Send message to Remi"
+                className="flex size-10 items-center justify-center rounded-lg bg-deep-teal text-off-white transition-colors hover:bg-teal-mid"
+              >
+                <ArrowUp className="size-5" aria-hidden="true" />
+              </button>
+            )}
+          </div>
         </div>
         <Button type="submit" size="lg" className="h-14 gap-2 px-7 font-sans font-semibold">
           <Sparkles className="size-4" aria-hidden="true" />
