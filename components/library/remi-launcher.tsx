@@ -13,6 +13,13 @@ import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { Loader2, Lock, Sparkles } from 'lucide-react'
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from '@/components/ui/sheet'
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+} from '@/components/ui/dialog'
 import { Button } from '@/components/ui/button'
 import { cn } from '@/lib/utils'
 import { useSession } from '@/lib/auth-client'
@@ -148,6 +155,16 @@ function RemiPanel({
   const { data: session, isPending } = useSession()
   const user = session?.user
 
+  // While the session is resolving, hold off rendering either surface so we
+  // never flash the members-only popup at someone who is actually signed in.
+  if (isPending) return null
+
+  // Non-members get a focused, centered popup asking them to sign in / request access.
+  if (!user) {
+    return <RemiGate open={open} onOpenChange={onOpenChange} />
+  }
+
+  // Members get the full slide-over concierge chat.
   return (
     <Sheet open={open} onOpenChange={onOpenChange}>
       <SheetContent
@@ -179,51 +196,59 @@ function RemiPanel({
         </SheetHeader>
 
         <div className="min-h-0 flex-1">
-          {isPending ? (
-            <div className="flex h-full items-center justify-center">
-              <Loader2 className="size-6 animate-spin text-teal-mid" aria-hidden="true" />
-            </div>
-          ) : user ? (
-            <RemiChat key={initialQuery || 'blank'} variant="panel" initialQuery={initialQuery} />
-          ) : (
-            <RemiGate />
-          )}
+          <RemiChat key={initialQuery || 'blank'} variant="panel" initialQuery={initialQuery} />
         </div>
       </SheetContent>
     </Sheet>
   )
 }
 
-function RemiGate() {
+function RemiGate({
+  open,
+  onOpenChange,
+}: {
+  open: boolean
+  onOpenChange: (v: boolean) => void
+}) {
   return (
-    <div className="flex h-full flex-col items-center justify-center gap-5 px-8 text-center">
-      <span className="flex size-12 items-center justify-center rounded-full bg-deep-teal/10">
-        <Lock className="size-6 text-deep-teal" aria-hidden="true" />
-      </span>
-      <h3 className="font-serif text-xl font-semibold text-deep-teal text-balance">
-        Remi is available to members
-      </h3>
-      <p className="max-w-xs font-serif text-[15px] leading-relaxed text-charcoal/75">
-        Remi draws only on Tuned In Institute and Rooted Rhythm resources, so she&apos;s reserved for
-        signed-in members. Sign in or request access to start a conversation.
-      </p>
-      <p className="max-w-xs font-sans text-xs leading-relaxed text-charcoal/55">
-        Remi is an educational guide, not a therapist, and does not provide diagnosis or treatment.
-        For care, she points you to a Rooted Rhythm therapist.
-      </p>
-      <div className="flex w-full max-w-xs flex-col gap-2.5">
-        <Button asChild size="lg" className="font-sans font-semibold">
-          <Link href="/request-access">Request Access</Link>
-        </Button>
-        <Button
-          asChild
-          size="lg"
-          variant="outline"
-          className="border-deep-teal/30 bg-transparent font-sans font-semibold text-deep-teal hover:bg-deep-teal hover:text-off-white"
-        >
-          <Link href="/sign-in">Sign In</Link>
-        </Button>
-      </div>
-    </div>
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContent className="max-w-sm gap-0 p-0">
+        <div className="flex flex-col items-center gap-5 px-7 py-8 text-center">
+          <span className="relative flex size-12 items-center justify-center rounded-full bg-deep-teal/10">
+            <Lock className="size-6 text-deep-teal" aria-hidden="true" />
+            <Sparkles
+              className="absolute -right-1 -top-1 size-5 rounded-full bg-deep-teal p-1 text-off-white"
+              aria-hidden="true"
+            />
+          </span>
+          <DialogHeader className="gap-2">
+            <DialogTitle className="text-center font-serif text-xl font-semibold text-deep-teal text-balance">
+              Sign in to talk with Remi
+            </DialogTitle>
+            <DialogDescription className="text-center font-serif text-[15px] leading-relaxed text-charcoal/75">
+              Remi is our members-only AI concierge, drawing only on Tuned In Institute and Rooted
+              Rhythm resources. Sign in or request access to start a conversation.
+            </DialogDescription>
+          </DialogHeader>
+          <p className="font-sans text-xs leading-relaxed text-charcoal/55">
+            Remi is an educational guide, not a therapist, and does not provide diagnosis or
+            treatment. For care, she points you to a Rooted Rhythm therapist.
+          </p>
+          <div className="flex w-full flex-col gap-2.5">
+            <Button asChild size="lg" className="font-sans font-semibold">
+              <Link href="/request-access">Request Access</Link>
+            </Button>
+            <Button
+              asChild
+              size="lg"
+              variant="outline"
+              className="border-deep-teal/30 bg-transparent font-sans font-semibold text-deep-teal hover:bg-deep-teal hover:text-off-white"
+            >
+              <Link href="/sign-in">Sign In</Link>
+            </Button>
+          </div>
+        </div>
+      </DialogContent>
+    </Dialog>
   )
 }
