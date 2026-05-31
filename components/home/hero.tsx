@@ -53,8 +53,8 @@ export function Hero() {
             <p className="mx-auto max-w-2xl font-sans text-lg leading-relaxed text-off-white/85 md:mx-0">
               Get all our research and self-help tools, plus{' '}
               <span className="font-semibold text-off-white">Remi</span>, your AI concierge who helps
-              you navigate the content and get real answers to your real questions. The research and
-              education arm of{' '}
+              you navigate the content and get real answers to your real questions. The Institute is
+              the research and education arm of{' '}
               <span className="font-semibold text-off-white">Rooted Rhythm</span>, led by{' '}
               <span className="font-semibold text-off-white">Sophie Schauermann, MSW, LCSW</span>.
             </p>
