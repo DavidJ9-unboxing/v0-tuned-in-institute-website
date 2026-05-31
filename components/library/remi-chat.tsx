@@ -65,11 +65,11 @@ function RemiAvatar() {
   return (
     <span className="flex size-8 shrink-0 items-center justify-center overflow-hidden rounded-full border border-stone bg-card">
       <Image
-        src="/logos/tii-logo-mark.png"
-        alt=""
-        width={28}
-        height={28}
-        className="size-7 object-contain"
+        src="/logos/remi-avatar.png"
+        alt="Remi"
+        width={32}
+        height={32}
+        className="size-full object-cover"
       />
     </span>
   )
@@ -115,6 +115,7 @@ export function RemiChat({
   })
   const [input, setInput] = useState('')
   const scrollRef = useRef<HTMLDivElement>(null)
+  const lastUserRef = useRef<HTMLDivElement>(null)
   const didAutoSend = useRef(false)
 
   const isPanel = variant === 'panel'
@@ -129,10 +130,16 @@ export function RemiChat({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [initialQuery])
 
-  // Keep the latest message in view as it streams.
+  const userMessageCount = messages.filter((m) => m.role === 'user').length
+
+  // When a new question is asked, pin that question to the top of the scroll area so the
+  // answer reads top-down below it, instead of snapping to the bottom and forcing a scroll up.
   useEffect(() => {
-    scrollRef.current?.scrollTo({ top: scrollRef.current.scrollHeight, behavior: 'smooth' })
-  }, [messages, busy])
+    const container = scrollRef.current
+    const anchor = lastUserRef.current
+    if (!container || !anchor) return
+    container.scrollTo({ top: anchor.offsetTop - 16, behavior: 'smooth' })
+  }, [userMessageCount])
 
   function submit(text: string) {
     const trimmed = text.trim()
@@ -262,11 +269,14 @@ export function RemiChat({
             </div>
           )}
 
-          {messages.map((message) => {
+          {messages.map((message, index) => {
             const isUser = message.role === 'user'
+            const isLastUser =
+              isUser && !messages.slice(index + 1).some((m) => m.role === 'user')
             return (
               <div
                 key={message.id}
+                ref={isLastUser ? lastUserRef : undefined}
                 className={`flex items-start gap-3 ${isUser ? 'flex-row-reverse' : ''}`}
               >
                 {isUser ? (
