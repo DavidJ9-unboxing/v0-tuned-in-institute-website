@@ -83,7 +83,7 @@ export default function HomePage() {
           </div>
           <div className="overflow-hidden rounded-2xl border border-stone">
             <Image
-              src="/images/two-women-coffee-v3.png"
+              src="/images/two-women-coffee-v4.png"
               alt="Two women having a warm, supportive conversation over coffee at a cafe table"
               width={720}
               height={820}
