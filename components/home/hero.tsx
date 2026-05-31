@@ -59,27 +59,27 @@ export function Hero() {
               you navigate the content and get real answers to your real questions.
             </p>
 
-            <div className="mt-6 flex flex-col items-center justify-center gap-3 sm:flex-row md:justify-start">
-              <Button
-                asChild
-                size="lg"
-                className="bg-sage font-sans font-semibold text-deep-teal hover:bg-sage/90"
-              >
-                <Link href="/sign-in">Sign In to the Library</Link>
-              </Button>
-              <div className="flex flex-col items-center gap-1 md:items-start">
+            <div className="mt-6 flex flex-col items-center gap-2 md:items-start">
+              <div className="flex flex-col items-center justify-center gap-3 sm:flex-row md:justify-start">
+                <Button
+                  asChild
+                  size="lg"
+                  className="h-12 w-full px-8 text-base font-semibold bg-sage font-sans text-deep-teal shadow-sm transition-shadow hover:bg-sage/90 hover:shadow-md sm:w-auto"
+                >
+                  <Link href="/sign-in">Sign In to the Library</Link>
+                </Button>
                 <Button
                   asChild
                   size="lg"
                   variant="outline"
-                  className="border-off-white/40 bg-transparent font-sans font-semibold text-off-white hover:bg-off-white hover:text-deep-teal"
+                  className="h-12 w-full border-2 border-off-white/50 bg-transparent px-8 text-base font-semibold text-off-white font-sans transition-colors hover:bg-off-white hover:text-deep-teal sm:w-auto"
                 >
                   <Link href="/request-access">Request Access</Link>
                 </Button>
-                <span className="font-sans text-xs text-off-white/60">
-                  Full access requires membership
-                </span>
               </div>
+              <span className="font-sans text-xs text-off-white/60">
+                Full access requires membership
+              </span>
             </div>
           </div>
         </div>
