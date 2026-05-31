@@ -1,5 +1,4 @@
 import Link from 'next/link'
-import Image from 'next/image'
 import { ArrowRight, BookOpen, GraduationCap, MessageCircle } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 
@@ -27,51 +26,47 @@ const accessPoints = [
 export function Hero() {
   return (
     <section className="bg-deep-teal text-off-white">
-      <div className="mx-auto max-w-6xl px-5 py-12 sm:px-8 md:py-14">
-        <div className="flex flex-col items-center gap-8 text-center md:flex-row md:items-center md:gap-10 md:text-left">
-          {/* Logo mark */}
-          <div className="flex size-28 shrink-0 items-center justify-center overflow-hidden rounded-full bg-off-white sm:size-32">
-            <Image
-              src="/logos/tii-logo-mark.png"
-              alt=""
-              width={160}
-              height={160}
-              priority
-              className="size-28 scale-[1.4] object-contain sm:size-32"
-            />
-          </div>
+      {/* Tagline band — sits in the gap between the header and the hero logo */}
+      <div className="border-b border-off-white/15 bg-deep-teal/40">
+        <p className="mx-auto max-w-6xl px-5 py-2.5 text-center font-serif text-sm italic leading-snug text-off-white/80 sm:px-8 sm:text-base">
+          Research, education, and support for sensitive humans.
+        </p>
+      </div>
 
+      <div className="mx-auto max-w-6xl px-5 py-3 sm:px-8 md:py-5">
+        <div className="text-center md:text-left">
           {/* Title block */}
           <div className="flex-1">
             <p className="mx-auto max-w-2xl font-sans text-lg leading-relaxed text-off-white/85 md:mx-0">
               <span className="font-semibold text-off-white">The Tuned In Institute</span> is the
               research and education arm of{' '}
-              <span className="font-semibold text-off-white">Rooted Rhythm</span>, under the
-              leadership of{' '}
-              <span className="font-semibold text-off-white">
-                Sophie Schauermann, MSW, LCSW
-              </span>
-              , Founder and CEO. Most of our deep, research-backed content on high sensitivity is
-              available to clients only&nbsp;&mdash;&nbsp;ask your Rooted Rhythm therapist about how
-              to get access.
+              <span className="font-semibold text-off-white">Rooted Rhythm Therapy</span>. Get all
+              our research and self-help tools, plus{' '}
+              <span className="font-semibold text-off-white">Remi</span>, your AI concierge who helps
+              you navigate the content and get real answers to your real questions.
             </p>
 
-            <div className="mt-6 flex flex-col items-center justify-center gap-3 sm:flex-row md:justify-start">
-              <Button
-                asChild
-                size="lg"
-                className="bg-sage font-sans font-semibold text-deep-teal hover:bg-sage/90"
-              >
-                <Link href="/sign-in">Sign In to the Library</Link>
-              </Button>
-              <Button
-                asChild
-                size="lg"
-                variant="outline"
-                className="border-off-white/40 bg-transparent font-sans font-semibold text-off-white hover:bg-off-white hover:text-deep-teal"
-              >
-                <Link href="/request-access">Request Access</Link>
-              </Button>
+            <div className="mt-6 flex flex-col items-center gap-2 md:items-start">
+              <div className="flex flex-col items-center justify-center gap-3 sm:flex-row md:justify-start">
+                <Button
+                  asChild
+                  size="lg"
+                  className="h-12 w-full px-8 text-base font-semibold bg-sage font-sans text-deep-teal shadow-sm transition-shadow hover:bg-sage/90 hover:shadow-md sm:w-auto"
+                >
+                  <Link href="/sign-in">Sign In to the Library</Link>
+                </Button>
+                <Button
+                  asChild
+                  size="lg"
+                  variant="outline"
+                  className="h-12 w-full border-2 border-off-white/50 bg-transparent px-8 text-base font-semibold text-off-white font-sans transition-colors hover:bg-off-white hover:text-deep-teal sm:w-auto"
+                >
+                  <Link href="/request-access">Request Access</Link>
+                </Button>
+              </div>
+              <span className="w-full text-center font-sans text-xs text-off-white/60 md:text-left">
+                Full access requires membership
+              </span>
             </div>
           </div>
         </div>
