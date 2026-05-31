@@ -34,6 +34,22 @@ const EXAMPLES = [
   'How do I set boundaries calmly?',
 ]
 
+// Distinguish "Remi is temporarily busy" (rate limit / overload) from genuine errors,
+// so members see a calm, reassuring note instead of a scary failure.
+function isBusyError(error?: Error): boolean {
+  if (!error) return false
+  const text = `${error.message} ${(error as { cause?: string }).cause ?? ''}`.toLowerCase()
+  return (
+    text.includes('rate limit') ||
+    text.includes('rate_limit') ||
+    text.includes('429') ||
+    text.includes('overloaded') ||
+    text.includes('too many requests') ||
+    text.includes('quota') ||
+    text.includes('capacity')
+  )
+}
+
 function KindIcon({ kind }: { kind: string }) {
   if (kind === 'article') {
     return <FileText className="size-4 shrink-0 text-sage-deep" aria-hidden="true" />
@@ -123,6 +139,15 @@ export function RemiChat({ initialQuery = '' }: { initialQuery?: string }) {
   }
 
   const hasConversation = messages.length > 0
+
+  // The most recent thing the member said, so the error note can offer a one-tap retry.
+  const lastUserText = [...messages]
+    .reverse()
+    .find((m) => m.role === 'user')
+    ?.parts.filter((p) => p.type === 'text')
+    .map((p) => (p as { text: string }).text)
+    .join('')
+    .trim()
 
   // Collect every resource Remi has cited across the whole conversation,
   // de-duplicated and shown together below the dialogue.
@@ -231,8 +256,19 @@ export function RemiChat({ initialQuery = '' }: { initialQuery?: string }) {
             <RemiAvatar />
             <div className="max-w-[85%] rounded-2xl rounded-tl-sm border border-stone bg-card px-4 py-3">
               <p className="font-serif text-[15px] leading-relaxed text-charcoal/70">
-                Sorry, I had trouble responding just then. Please try again in a moment.
+                {isBusyError(error)
+                  ? 'Remi is helping a lot of families right now and needs a moment to catch up. Please try again shortly — your message wasn’t lost.'
+                  : 'Sorry, I had trouble responding just then. Please try again in a moment.'}
               </p>
+              {lastUserText && (
+                <button
+                  type="button"
+                  onClick={() => submit(lastUserText)}
+                  className="mt-2 font-sans text-xs font-medium text-deep-teal underline underline-offset-2 hover:text-teal-mid"
+                >
+                  Try again
+                </button>
+              )}
             </div>
           </div>
         ) : null}
