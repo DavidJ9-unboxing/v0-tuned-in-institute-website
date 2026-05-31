@@ -34,8 +34,8 @@ export function Hero() {
         </p>
       </div>
 
-      <div className="mx-auto max-w-6xl px-5 py-12 sm:px-8 md:py-14">
-        <div className="flex flex-col items-center gap-8 text-center md:flex-row md:items-center md:gap-10 md:text-left">
+      <div className="mx-auto max-w-6xl px-5 py-6 sm:px-8 md:py-8">
+        <div className="flex flex-col items-center gap-4 text-center md:flex-row md:items-center md:gap-8 md:text-left">
           {/* Logo mark */}
           <div className="flex size-16 shrink-0 items-center justify-center overflow-hidden rounded-full bg-off-white sm:size-20">
             <Image
