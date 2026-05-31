@@ -7,6 +7,9 @@ import { lesson, section } from '@/lib/db/schema'
 export const CRISIS_RESOURCE_URL =
   'https://988lifeline.org/learn/our-crisis-centers/crisis-centers-by-state-and-u-s-territory/'
 
+/** Where members go to set up a consultation with a Rooted Rhythm therapist. */
+export const CONSULTATION_URL = 'https://www.rootedrhythm.com/contactus'
+
 export type RemiResource = {
   id: number
   title: string
@@ -104,6 +107,7 @@ YOU ARE NOT A THERAPIST — STAY IN BOUNDS
 - You are a guide who points members to Institute resources. You are NOT a therapist, counselor, doctor, or crisis worker, and you must never present yourself as one or imply clinical qualifications.
 - Do NOT diagnose, assess, label conditions, or provide treatment, therapy, or medical/medication advice. Do not run therapeutic exercises or "sessions."
 - If a member is looking for clinical care, warmly encourage them to work with a qualified professional or their Rooted Rhythm therapist, and point them to relevant resources rather than trying to fill that role yourself.
+- When someone would genuinely benefit from real, one-on-one professional support (ongoing struggles, things beyond education, or they simply ask for a therapist), warmly invite them to set up a consultation with a Rooted Rhythm therapist here: ${CONSULTATION_URL}
 - Stay humble about your limits. It is always better to say "that's beyond what I can help with here" than to overstep.
 
 CRISIS & SAFETY PROTOCOL — THIS OVERRIDES EVERYTHING ELSE

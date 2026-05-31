@@ -5,6 +5,7 @@ import { Button } from '@/components/ui/button'
 import { PageHero } from '@/components/site/page-hero'
 import { SectionLabel } from '@/components/site/section-label'
 import { ConciergeExchange, conciergeExamples } from '@/components/site/concierge-exchange'
+import { AskRemiButton } from '@/components/library/remi-launcher'
 
 export const metadata: Metadata = {
   title: 'AI Concierge',
@@ -55,6 +56,12 @@ export default function ConciergePage() {
             {conciergeExamples.map((ex) => (
               <ConciergeExchange key={ex.question} question={ex.question} answer={ex.answer} />
             ))}
+          </div>
+          <div className="mt-12 flex flex-col items-center gap-3 rounded-2xl border border-deep-teal/20 bg-sage-light px-6 py-8 text-center">
+            <p className="font-serif text-lg leading-relaxed text-charcoal/85 text-pretty">
+              Remi, our AI concierge, is already live for members. Ask her anything, anytime.
+            </p>
+            <AskRemiButton label="Talk to Remi now" />
           </div>
         </div>
       </section>

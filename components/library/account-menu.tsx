@@ -42,12 +42,12 @@ export function AccountMenu({
 
   return (
     <DropdownMenu>
-      <DropdownMenuTrigger className="flex items-center gap-2 rounded-full border border-stone bg-card px-2 py-1.5 font-sans text-sm font-medium text-charcoal transition-colors hover:border-deep-teal/40">
+      <DropdownMenuTrigger className="flex shrink-0 items-center gap-2 rounded-full border border-stone bg-card p-1 font-sans text-sm font-medium text-charcoal transition-colors hover:border-deep-teal/40 sm:px-2 sm:py-1.5">
         <span className="flex size-7 items-center justify-center rounded-full bg-deep-teal font-sans text-xs font-semibold text-off-white">
           {initials || 'U'}
         </span>
         <span className="hidden max-w-[8rem] truncate sm:inline">{name}</span>
-        <ChevronDown className="size-4 text-charcoal/50" aria-hidden="true" />
+        <ChevronDown className="hidden size-4 text-charcoal/50 sm:block" aria-hidden="true" />
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end" className="w-56">
         <DropdownMenuLabel className="font-sans">

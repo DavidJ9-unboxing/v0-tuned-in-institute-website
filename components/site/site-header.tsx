@@ -4,17 +4,19 @@ import { useEffect, useState } from 'react'
 import Link from 'next/link'
 import Image from 'next/image'
 import { usePathname } from 'next/navigation'
-import { Menu, X } from 'lucide-react'
+import { Menu, Sparkles, X } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { Button } from '@/components/ui/button'
 import { navLinks } from '@/lib/site'
 import { useSession } from '@/lib/auth-client'
 import { AccountMenu } from '@/components/library/account-menu'
+import { useRemi } from '@/components/library/remi-launcher'
 
 export function SiteHeader() {
   const [scrolled, setScrolled] = useState(false)
   const [open, setOpen] = useState(false)
   const pathname = usePathname()
+  const { open: openRemi } = useRemi()
   const { data: session } = useSession()
   const user = session?.user as
     | { name: string; email: string; role?: string }
@@ -46,7 +48,7 @@ export function SiteHeader() {
           className="flex items-center gap-3"
           aria-label="The Tuned In Institute, home"
         >
-          <span className="relative block h-[72px] w-[270px] overflow-hidden sm:h-[84px] sm:w-[345px]">
+          <span className="relative block h-[56px] w-[176px] overflow-hidden sm:h-[84px] sm:w-[345px]">
             <Image
               src="/logos/tii-logo-horizontal.png"
               alt="The Tuned In Institute"
@@ -80,6 +82,17 @@ export function SiteHeader() {
         </nav>
 
         <div className="flex items-center gap-2">
+          <Button
+            type="button"
+            onClick={openRemi}
+            variant="outline"
+            size="icon"
+            aria-label="Ask Remi, the AI concierge"
+            className="size-10 shrink-0 border-deep-teal/30 bg-transparent font-sans font-semibold text-deep-teal hover:bg-deep-teal hover:text-off-white sm:h-11 sm:w-auto sm:gap-2 sm:px-6"
+          >
+            <Sparkles className="size-4" aria-hidden="true" />
+            <span className="hidden sm:inline">Ask Remi</span>
+          </Button>
           {user ? (
             <>
               <Button
@@ -118,7 +131,7 @@ export function SiteHeader() {
           <button
             type="button"
             onClick={() => setOpen((v) => !v)}
-            className="inline-flex size-10 items-center justify-center rounded-md text-deep-teal 2xl:hidden"
+            className="inline-flex size-10 shrink-0 items-center justify-center rounded-md text-deep-teal 2xl:hidden"
             aria-label={open ? 'Close menu' : 'Open menu'}
             aria-expanded={open}
           >
@@ -139,8 +152,18 @@ export function SiteHeader() {
                 {link.label}
               </Link>
             ))}
+            <Button
+              type="button"
+              onClick={openRemi}
+              variant="outline"
+              size="lg"
+              className="mt-4 gap-2 border-deep-teal/30 bg-transparent font-sans font-semibold text-deep-teal"
+            >
+              <Sparkles className="size-4" aria-hidden="true" />
+              Ask Remi
+            </Button>
             {user ? (
-              <Button asChild className="mt-4 font-sans font-semibold" size="lg">
+              <Button asChild className="mt-2 font-sans font-semibold" size="lg">
                 <Link href="/library">Go to Library</Link>
               </Button>
             ) : (
