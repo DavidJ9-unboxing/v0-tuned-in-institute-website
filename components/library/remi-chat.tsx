@@ -65,11 +65,11 @@ function RemiAvatar() {
   return (
     <span className="flex size-8 shrink-0 items-center justify-center overflow-hidden rounded-full border border-stone bg-card">
       <Image
-        src="/logos/tii-logo-mark.png"
-        alt=""
-        width={28}
-        height={28}
-        className="size-7 object-contain"
+        src="/logos/remi-avatar.png"
+        alt="Remi"
+        width={32}
+        height={32}
+        className="size-full object-cover"
       />
     </span>
   )
