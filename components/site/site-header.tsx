@@ -48,7 +48,7 @@ export function SiteHeader() {
           className="flex items-center gap-3"
           aria-label="The Tuned In Institute, home"
         >
-          <span className="relative block h-[72px] w-[270px] overflow-hidden sm:h-[84px] sm:w-[345px]">
+          <span className="relative block h-[56px] w-[176px] overflow-hidden sm:h-[84px] sm:w-[345px]">
             <Image
               src="/logos/tii-logo-horizontal.png"
               alt="The Tuned In Institute"
@@ -86,9 +86,9 @@ export function SiteHeader() {
             type="button"
             onClick={openRemi}
             variant="outline"
-            size="lg"
+            size="icon"
             aria-label="Ask Remi, the AI concierge"
-            className="gap-2 border-deep-teal/30 bg-transparent font-sans font-semibold text-deep-teal hover:bg-deep-teal hover:text-off-white"
+            className="size-10 shrink-0 border-deep-teal/30 bg-transparent font-sans font-semibold text-deep-teal hover:bg-deep-teal hover:text-off-white sm:h-11 sm:w-auto sm:gap-2 sm:px-6"
           >
             <Sparkles className="size-4" aria-hidden="true" />
             <span className="hidden sm:inline">Ask Remi</span>
@@ -131,7 +131,7 @@ export function SiteHeader() {
           <button
             type="button"
             onClick={() => setOpen((v) => !v)}
-            className="inline-flex size-10 items-center justify-center rounded-md text-deep-teal 2xl:hidden"
+            className="inline-flex size-10 shrink-0 items-center justify-center rounded-md text-deep-teal 2xl:hidden"
             aria-label={open ? 'Close menu' : 'Open menu'}
             aria-expanded={open}
           >
