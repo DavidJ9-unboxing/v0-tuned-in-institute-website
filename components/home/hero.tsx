@@ -1,5 +1,4 @@
 import Link from 'next/link'
-import Image from 'next/image'
 import { ArrowRight, BookOpen, GraduationCap, MessageCircle } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 
@@ -35,19 +34,7 @@ export function Hero() {
       </div>
 
       <div className="mx-auto max-w-6xl px-5 py-3 sm:px-8 md:py-5">
-        <div className="flex flex-col items-center gap-3 text-center md:flex-row md:items-center md:gap-8 md:text-left">
-          {/* Logo mark */}
-          <div className="flex size-16 shrink-0 items-center justify-center overflow-hidden rounded-full bg-off-white sm:size-20">
-            <Image
-              src="/logos/tii-logo-mark.png"
-              alt=""
-              width={96}
-              height={96}
-              priority
-              className="size-16 scale-[1.4] object-contain sm:size-20"
-            />
-          </div>
-
+        <div className="text-center md:text-left">
           {/* Title block */}
           <div className="flex-1">
             <p className="mx-auto max-w-2xl font-sans text-lg leading-relaxed text-off-white/85 md:mx-0">
@@ -77,7 +64,7 @@ export function Hero() {
                   <Link href="/request-access">Request Access</Link>
                 </Button>
               </div>
-              <span className="w-full text-center font-sans text-xs text-off-white/60">
+              <span className="w-full text-center font-sans text-xs text-off-white/60 md:text-left">
                 Full access requires membership
               </span>
             </div>
