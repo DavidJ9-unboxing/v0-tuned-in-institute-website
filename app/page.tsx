@@ -6,6 +6,7 @@ import { SectionLabel } from '@/components/site/section-label'
 import { SearchBar } from '@/components/site/search-bar'
 import { ProgramCard } from '@/components/site/program-card'
 import { ConciergeExchange, conciergeExamples } from '@/components/site/concierge-exchange'
+import { AskRemiButton } from '@/components/library/remi-launcher'
 import { Hero } from '@/components/home/hero'
 import { programs, clinicalFoundations } from '@/lib/site'
 
@@ -232,13 +233,13 @@ export default function HomePage() {
       {/* AI Concierge preview */}
       <section className="bg-off-white">
         <div className="mx-auto max-w-5xl px-5 py-20 sm:px-8 md:py-24">
-          <SectionLabel center>Coming soon</SectionLabel>
+          <SectionLabel center>Meet Remi</SectionLabel>
           <h2 className="mt-5 text-center font-serif text-3xl font-semibold leading-tight text-deep-teal text-balance sm:text-4xl">
             24/7 AI Concierge. Personal answers, anytime.
           </h2>
           <p className="mx-auto mt-5 max-w-2xl text-center font-serif text-lg leading-relaxed text-charcoal/85">
-            Parenting a sensitive child at 11pm and hit a wall? Your Tuned In concierge will be
-            there, trained on every module, every resource, and every principle in our curriculum.
+            Parenting a sensitive child at 11pm and hit a wall? Remi is there, trained on every
+            module, every resource, and every principle in our curriculum.
           </p>
           <div className="mt-12">
             <ConciergeExchange
@@ -246,15 +247,8 @@ export default function HomePage() {
               answer={conciergeExamples[0].answer}
             />
           </div>
-          <div className="mt-8 text-center">
-            <Button
-              asChild
-              size="lg"
-              variant="outline"
-              className="border-deep-teal font-sans font-semibold text-deep-teal hover:bg-deep-teal hover:text-off-white"
-            >
-              <a href="mailto:hello@tunedinstitute.com">Get early access</a>
-            </Button>
+          <div className="mt-8 flex justify-center">
+            <AskRemiButton label="Ask Remi" />
           </div>
           <p className="mt-8 text-center font-sans text-sm text-charcoal/60">
             Available 24/7 · Trained on Tuned In curriculum · Personalized to your child&apos;s age
