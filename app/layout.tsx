@@ -3,6 +3,7 @@ import { Lora, Inter } from 'next/font/google'
 import { Analytics } from '@vercel/analytics/next'
 import { SiteHeader } from '@/components/site/site-header'
 import { SiteFooter } from '@/components/site/site-footer'
+import { RemiProvider } from '@/components/library/remi-launcher'
 import './globals.css'
 
 const lora = Lora({
@@ -42,9 +43,11 @@ export default function RootLayout({
   return (
     <html lang="en" className={`${lora.variable} ${inter.variable} bg-background`}>
       <body className="font-serif antialiased">
-        <SiteHeader />
-        <main id="main">{children}</main>
-        <SiteFooter />
+        <RemiProvider>
+          <SiteHeader />
+          <main id="main">{children}</main>
+          <SiteFooter />
+        </RemiProvider>
         {process.env.NODE_ENV === 'production' && <Analytics />}
       </body>
     </html>
