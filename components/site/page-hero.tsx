@@ -4,10 +4,12 @@ export function PageHero({
   label,
   title,
   intro,
+  children,
 }: {
   label: string
   title: string
   intro?: string
+  children?: React.ReactNode
 }) {
   return (
     <section className="border-b border-stone bg-paper">
@@ -21,6 +23,7 @@ export function PageHero({
             {intro}
           </p>
         )}
+        {children && <div className="mt-8">{children}</div>}
       </div>
     </section>
   )

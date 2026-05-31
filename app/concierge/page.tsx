@@ -8,9 +8,9 @@ import { ConciergeExchange, conciergeExamples } from '@/components/site/concierg
 import { AskRemiButton } from '@/components/library/remi-launcher'
 
 export const metadata: Metadata = {
-  title: 'AI Concierge',
+  title: 'Meet Remi, your AI Concierge',
   description:
-    'A 24/7 AI concierge trained on the full Tuned In curriculum, giving sensitive families personalized, research-grounded answers in the moment. Coming soon.',
+    'Remi is a 24/7 AI concierge trained on the full Tuned In Institute and Rooted Rhythm libraries, giving sensitive families personalized, research-grounded answers in the moment. Live now for members.',
 }
 
 const features = [
@@ -36,14 +36,31 @@ const features = [
   },
 ]
 
+const howItWorks = [
+  {
+    title: 'Ask in plain language',
+    body: 'Open Remi from anywhere on the site and describe what is happening, the same way you would text a trusted friend.',
+  },
+  {
+    title: 'She searches the library',
+    body: 'Remi draws only on Tuned In Institute and Rooted Rhythm resources to ground her answer, then links you to the exact modules and articles she used.',
+  },
+  {
+    title: 'You get a calm next step',
+    body: 'You receive a warm, practical response in the moment, and a clear nudge toward a Rooted Rhythm therapist whenever real clinical care is the better fit.',
+  },
+]
+
 export default function ConciergePage() {
   return (
     <>
       <PageHero
-        label="Coming soon"
-        title="A concierge that knows the science, available 24/7."
-        intro="Imagine having a knowledgeable, calm guide in your pocket, trained on every module and resource in the Tuned In curriculum, ready the moment a sensitive child melts down or a sensitive adult hits a wall."
-      />
+        label="Now live for members"
+        title="Meet Remi, a concierge that knows the science, available 24/7."
+        intro="Remi is a knowledgeable, calm guide in your pocket, trained on every module and resource across the Tuned In Institute and Rooted Rhythm. She is ready the moment a sensitive child melts down or a sensitive adult hits a wall."
+      >
+        <AskRemiButton label="Talk to Remi now" />
+      </PageHero>
 
       {/* Live examples */}
       <section className="bg-off-white">
@@ -59,9 +76,34 @@ export default function ConciergePage() {
           </div>
           <div className="mt-12 flex flex-col items-center gap-3 rounded-2xl border border-deep-teal/20 bg-sage-light px-6 py-8 text-center">
             <p className="font-serif text-lg leading-relaxed text-charcoal/85 text-pretty">
-              Remi, our AI concierge, is already live for members. Ask her anything, anytime.
+              Remi is live for members right now. Ask her anything, anytime.
             </p>
             <AskRemiButton label="Talk to Remi now" />
+          </div>
+        </div>
+      </section>
+
+      {/* How Remi works */}
+      <section className="bg-paper">
+        <div className="mx-auto max-w-5xl px-5 py-20 sm:px-8">
+          <SectionLabel>How it works</SectionLabel>
+          <h2 className="mt-5 font-serif text-3xl font-semibold leading-tight text-deep-teal text-balance sm:text-4xl">
+            Three simple steps, any time of day.
+          </h2>
+          <div className="mt-12 grid gap-6 sm:grid-cols-3">
+            {howItWorks.map((step, i) => (
+              <div key={step.title} className="rounded-xl border border-stone bg-card p-7">
+                <span className="flex size-9 items-center justify-center rounded-full bg-deep-teal font-sans text-sm font-semibold text-off-white">
+                  {i + 1}
+                </span>
+                <h3 className="mt-5 font-serif text-xl font-semibold text-deep-teal">
+                  {step.title}
+                </h3>
+                <p className="mt-2 font-serif text-[15px] leading-relaxed text-charcoal/80">
+                  {step.body}
+                </p>
+              </div>
+            ))}
           </div>
         </div>
       </section>
@@ -91,13 +133,13 @@ export default function ConciergePage() {
       {/* Early access CTA */}
       <section className="bg-deep-teal text-off-white">
         <div className="mx-auto max-w-3xl px-5 py-20 text-center sm:px-8 md:py-24">
-          <p className="section-label section-label-center !text-sage-light">Be first in line</p>
+          <p className="section-label section-label-center !text-sage-light">Start a conversation</p>
           <h2 className="mt-6 font-serif text-3xl font-semibold leading-tight text-balance sm:text-4xl">
-            The concierge launches to clients first.
+            Remi is ready whenever you are.
           </h2>
           <p className="mx-auto mt-5 max-w-xl font-serif text-lg leading-relaxed text-off-white/85">
-            Rooted Rhythm clients with library access will be among the first to use the concierge
-            the day it goes live, at no extra cost.
+            Members get Remi included with library access, at no extra cost. Sign in to start
+            chatting, or request access to join.
           </p>
           <div className="mt-8 flex flex-col justify-center gap-3 sm:flex-row">
             <Button
