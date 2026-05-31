@@ -8,7 +8,6 @@ import {
   useState,
   type ReactNode,
 } from 'react'
-import Image from 'next/image'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { Loader2, Lock, Sparkles } from 'lucide-react'
@@ -162,14 +161,9 @@ function RemiPanel({
         className="flex w-full flex-col gap-0 p-0 sm:max-w-lg lg:max-w-xl"
       >
         <SheetHeader className="flex-row items-center gap-3 border-b border-stone bg-card px-5 py-4">
-          <span className="flex size-9 shrink-0 items-center justify-center overflow-hidden rounded-full border border-stone bg-off-white">
-            <Image
-              src="/logos/remi-avatar.png"
-              alt="Remi"
-              width={36}
-              height={36}
-              className="size-full object-cover"
-            />
+          <span className="flex size-9 shrink-0 items-center justify-center rounded-full bg-deep-teal">
+            <Sparkles className="size-5 text-off-white" aria-hidden="true" />
+            <span className="sr-only">Remi</span>
           </span>
           <div className="flex flex-col">
             <SheetTitle className="font-serif text-[16px] font-semibold text-deep-teal">

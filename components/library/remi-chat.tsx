@@ -1,7 +1,6 @@
 'use client'
 
 import { useEffect, useRef, useState } from 'react'
-import Image from 'next/image'
 import Link from 'next/link'
 import { useChat } from '@ai-sdk/react'
 import { DefaultChatTransport } from 'ai'
@@ -12,6 +11,7 @@ import {
   LifeBuoy,
   Loader2,
   PlayCircle,
+  Sparkles,
 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { cn } from '@/lib/utils'
@@ -63,14 +63,9 @@ function KindIcon({ kind }: { kind: string }) {
 
 function RemiAvatar() {
   return (
-    <span className="flex size-8 shrink-0 items-center justify-center overflow-hidden rounded-full border border-stone bg-card">
-      <Image
-        src="/logos/remi-avatar.png"
-        alt="Remi"
-        width={32}
-        height={32}
-        className="size-full object-cover"
-      />
+    <span className="flex size-8 shrink-0 items-center justify-center rounded-full bg-deep-teal">
+      <Sparkles className="size-4 text-off-white" aria-hidden="true" />
+      <span className="sr-only">Remi</span>
     </span>
   )
 }

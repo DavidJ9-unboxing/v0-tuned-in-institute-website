@@ -84,8 +84,8 @@ export default function HomePage() {
           </div>
           <div className="overflow-hidden rounded-2xl border border-stone">
             <Image
-              src="/images/two-women-coffee-v4.png"
-              alt="Two women having a warm, supportive conversation over coffee at a cafe table"
+              src="/images/supportive-conversation-v5.png"
+              alt="Two women in a quiet, attentive conversation over tea at a sunlit kitchen table"
               width={720}
               height={820}
               className="h-auto w-full object-cover"
@@ -282,8 +282,8 @@ export default function HomePage() {
           </div>
           <figure className="overflow-hidden rounded-xl border border-stone shadow-[0_24px_50px_-30px_rgba(27,80,90,0.6)]">
             <Image
-              src="/images/father-child-back-to-back-v3.png"
-              alt="A father and his young child standing back to back in soft natural light"
+              src="/images/parent-child-moment-v5.png"
+              alt="A parent crouched down sharing a tender, attentive moment with their young child in soft natural light"
               width={720}
               height={900}
               className="aspect-[4/5] h-auto w-full object-cover"
