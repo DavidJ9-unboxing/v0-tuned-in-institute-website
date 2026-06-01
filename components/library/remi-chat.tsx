@@ -16,6 +16,7 @@ import {
   Mic,
   PlayCircle,
   Sparkles,
+  X,
 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { cn } from '@/lib/utils'
@@ -127,6 +128,9 @@ export function RemiChat({
   // reads it and dismisses it, it's hidden for the rest of the session (not persisted).
   const [privacyOpen, setPrivacyOpen] = useState(false)
   const [privacyDismissed, setPrivacyDismissed] = useState(false)
+  // The crisis/safety note can be collapsed to a single tappable line so the privacy note and
+  // input have room on small screens. It stays collapsed for the session but can reopen anytime.
+  const [safetyCollapsed, setSafetyCollapsed] = useState(false)
   const scrollRef = useRef<HTMLDivElement>(null)
   const lastUserRef = useRef<HTMLDivElement>(null)
   const didAutoSend = useRef(false)
@@ -346,7 +350,24 @@ export function RemiChat({
     </section>
   )
 
-  const safetyNote = (
+  const safetyNote = safetyCollapsed ? (
+    // Collapsed: a single quiet line that still surfaces the crisis link and can reopen the full note.
+    <div
+      className={cn(
+        'flex items-center gap-2.5 border-stone bg-card',
+        isPanel ? 'shrink-0 border-t px-5 py-2.5' : 'rounded-xl border px-4 py-2.5',
+      )}
+    >
+      <LifeBuoy className="size-4 shrink-0 text-deep-teal" aria-hidden="true" />
+      <button
+        type="button"
+        onClick={() => setSafetyCollapsed(false)}
+        className="font-sans text-xs leading-relaxed text-charcoal/65 underline underline-offset-2 transition-colors hover:text-deep-teal"
+      >
+        If you&apos;re in immediate danger
+      </button>
+    </div>
+  ) : (
     <div
       className={cn(
         'flex items-start gap-2.5 border-stone bg-card',
@@ -354,7 +375,7 @@ export function RemiChat({
       )}
     >
       <LifeBuoy className="mt-0.5 size-4 shrink-0 text-deep-teal" aria-hidden="true" />
-      <p className="font-sans text-xs leading-relaxed text-charcoal/65">
+      <p className="flex-1 font-sans text-xs leading-relaxed text-charcoal/65">
         Remi is a guide, not a therapist or crisis service. If you&apos;re in immediate danger, call
         your local emergency number (911 in the US) or call or text 988. You can also find a{' '}
         <a
@@ -367,6 +388,15 @@ export function RemiChat({
         </a>
         .
       </p>
+      <button
+        type="button"
+        onClick={() => setSafetyCollapsed(true)}
+        className="-mr-1 -mt-0.5 flex shrink-0 items-center gap-1 rounded-md px-1.5 py-0.5 font-sans text-xs font-medium text-charcoal/55 transition-colors hover:bg-paper hover:text-charcoal/80"
+        aria-label="Collapse safety notice"
+      >
+        <X className="size-3.5" aria-hidden="true" />
+        Close
+      </button>
     </div>
   )
 
