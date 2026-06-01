@@ -120,9 +120,10 @@ export function RemiChat({
   // In the slide-over the resource list is collapsed by default so it doesn't eat the small
   // mobile screen; members still see a labelled, tappable header telling them links are there.
   const [resourcesOpen, setResourcesOpen] = useState(false)
-  // Privacy note is collapsed by default; the header always shows a short summary so the
-  // important "not HIPAA-compliant / don't share identifying details" point stays visible.
+  // Privacy note is collapsed by default; the header shows a one-line summary. Once a member
+  // reads it and dismisses it, it's hidden for the rest of the session (not persisted).
   const [privacyOpen, setPrivacyOpen] = useState(false)
+  const [privacyDismissed, setPrivacyDismissed] = useState(false)
   const scrollRef = useRef<HTMLDivElement>(null)
   const lastUserRef = useRef<HTMLDivElement>(null)
   const didAutoSend = useRef(false)
@@ -264,7 +265,7 @@ export function RemiChat({
       </section>
     ))
 
-  const privacyNote = (
+  const privacyNote = privacyDismissed ? null : (
     <section
       aria-label="Privacy and confidentiality"
       className={cn(
@@ -277,23 +278,21 @@ export function RemiChat({
         onClick={() => setPrivacyOpen((v) => !v)}
         aria-expanded={privacyOpen}
         className={cn(
-          'flex w-full items-start justify-between gap-2 text-left transition-colors hover:bg-card/60',
+          'flex w-full items-center justify-between gap-2 text-left transition-colors hover:bg-card/60',
           isPanel ? 'px-5 py-3' : 'rounded-xl px-4 py-3',
         )}
       >
-        <span className="flex items-start gap-2.5">
-          <Lock className="mt-0.5 size-4 shrink-0 text-deep-teal" aria-hidden="true" />
+        <span className="flex items-center gap-2.5">
+          <Lock className="size-4 shrink-0 text-deep-teal" aria-hidden="true" />
           <span className="font-sans text-xs leading-relaxed text-charcoal/65">
-            <span className="font-semibold text-charcoal">Privacy &amp; Confidentiality</span> — chats
-            aren&apos;t saved and Remi is{' '}
-            <span className="font-medium text-charcoal/80">not HIPAA-compliant</span>, so please avoid
-            sharing identifying details.{' '}
+            <span className="font-semibold text-charcoal">Privacy &amp; Confidentiality:</span> Remi is
+            powered by OpenAI.{' '}
             <span className="text-deep-teal">{privacyOpen ? 'Show less' : 'Read more'}</span>
           </span>
         </span>
         <ChevronDown
           className={cn(
-            'mt-0.5 size-4 shrink-0 text-charcoal/55 transition-transform',
+            'size-4 shrink-0 text-charcoal/55 transition-transform',
             privacyOpen && 'rotate-180',
           )}
           aria-hidden="true"
@@ -302,30 +301,23 @@ export function RemiChat({
       {privacyOpen && (
         <div
           className={cn(
-            'flex flex-col gap-2 font-sans text-xs leading-relaxed text-charcoal/65',
+            'flex flex-col gap-3 font-sans text-xs leading-relaxed text-charcoal/65',
             isPanel ? 'px-5 pb-4 pl-[2.65rem]' : 'px-4 pb-4 pl-[2.4rem]',
           )}
         >
           <p>
-            Your conversations with Remi are private and are not saved between chats. Remi
-            won&apos;t remember your conversation the next time you return unless you choose to save a
-            summary and bring it back with you.
+            Chats aren&apos;t saved and Remi is{' '}
+            <span className="font-medium text-charcoal/80">not HIPAA-compliant</span>, so please skip
+            full names, addresses, and other identifying details. Ask Remi for a summary if you&apos;d
+            like to continue later.
           </p>
-          <p>
-            Please note that Remi is{' '}
-            <span className="font-medium text-charcoal/80">not HIPAA-compliant</span> because it is
-            powered by OpenAI technology. To protect your privacy, please avoid sharing full names,
-            addresses, dates of birth, insurance information, or other identifying details.
-          </p>
-          <p>
-            Remi is trained to draw from educational content created by the Tuned In Institute and
-            Rooted Rhythm Therapy to offer guidance, resources, and support. Think of Remi as a
-            private educational guide rather than a clinical record.
-          </p>
-          <p>
-            Want to continue later? Simply ask Remi for a summary before you leave, save it somewhere
-            secure, and paste it into a new chat when you return.
-          </p>
+          <button
+            type="button"
+            onClick={() => setPrivacyDismissed(true)}
+            className="self-start rounded-lg border border-stone bg-card px-3 py-1.5 font-sans text-xs font-medium text-deep-teal transition-colors hover:border-deep-teal/40"
+          >
+            Got it
+          </button>
         </div>
       )}
     </section>
@@ -394,13 +386,10 @@ export function RemiChat({
                 <p className="font-serif text-[15px] leading-relaxed text-charcoal/85">
                   Hi, I&apos;m Remi. I&apos;m here to talk things through with you — a hard moment
                   with your child, or something you&apos;re carrying yourself. Share whatever&apos;s
-                  on your mind.
-                </p>
-                <p className="mt-2.5 font-sans text-xs leading-relaxed text-charcoal/60">
-                  A quick note: our chat is private and isn&apos;t saved. When we&apos;re done, just
-                  ask and I&apos;ll write a short summary you can save and bring back next time.
-                  However, please skip full names or identifying details (see the privacy note
-                  below).
+                  on your mind.{' '}
+                  <span className="text-charcoal/60">
+                    (Chat is private and not saved but avoid full names and identifying details.)
+                  </span>
                 </p>
               </div>
             </div>
@@ -556,14 +545,14 @@ export function RemiChat({
 
         {/* In the slide-over panel, resources + safety stay attached to the chat card. */}
         {isPanel && resourcesPanel}
-        {isPanel && privacyNote}
         {isPanel && safetyNote}
+        {isPanel && privacyNote}
       </div>
 
       {/* On the page, resources + safety sit below the dialogue. */}
       {!isPanel && resourcesPanel}
-      {!isPanel && privacyNote}
       {!isPanel && safetyNote}
+      {!isPanel && privacyNote}
     </div>
   )
 }
