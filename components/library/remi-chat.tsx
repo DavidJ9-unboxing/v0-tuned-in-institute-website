@@ -7,6 +7,7 @@ import { DefaultChatTransport } from 'ai'
 import {
   ArrowUp,
   ChevronDown,
+  Download,
   ExternalLink,
   FileText,
   LifeBuoy,
@@ -60,6 +61,9 @@ function KindIcon({ kind }: { kind: string }) {
   }
   if (kind === 'link') {
     return <ExternalLink className="size-4 shrink-0 text-sage-deep" aria-hidden="true" />
+  }
+  if (kind === 'document') {
+    return <Download className="size-4 shrink-0 text-sage-deep" aria-hidden="true" />
   }
   return <PlayCircle className="size-4 shrink-0 text-deep-teal" aria-hidden="true" />
 }
@@ -329,9 +333,10 @@ export function RemiChat({
                 <RemiAvatar />
                 <div className="max-w-[85%] rounded-2xl rounded-tl-sm border border-stone bg-card px-4 py-3">
                   <p className="font-serif text-[15px] leading-relaxed text-charcoal/85">
-                    Hi, I&apos;m Remi. Tell me what&apos;s on your mind — a hard moment with your
-                    child, or something you&apos;re carrying yourself — and I&apos;ll point you to
-                    the Institute resources that can help.
+                    Hi, I&apos;m Remi. I&apos;m here to talk things through with you — a hard moment
+                    with your child, or something you&apos;re carrying yourself. Share whatever&apos;s
+                    on your mind, and if it ever feels useful, I can point you to Institute resources
+                    too.
                   </p>
                 </div>
               </div>

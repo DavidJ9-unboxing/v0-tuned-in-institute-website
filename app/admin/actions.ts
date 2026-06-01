@@ -152,7 +152,10 @@ export async function deleteSection(sectionId: number) {
   // Remove blobs for any videos in this section first.
   const lessons = await db.select().from(lesson).where(eq(lesson.sectionId, sectionId))
   await Promise.allSettled(
-    lessons.filter((l) => l.videoUrl).map((l) => del(l.videoUrl as string)),
+    lessons
+      .flatMap((l) => [l.videoUrl, l.fileUrl])
+      .filter((url): url is string => Boolean(url))
+      .map((url) => del(url)),
   )
   await db.delete(lesson).where(eq(lesson.sectionId, sectionId))
   await db.delete(section).where(eq(section.id, sectionId))
@@ -174,6 +177,8 @@ export async function createLesson(
   const videoUrl = String(formData.get('videoUrl') ?? '').trim()
   const externalUrl = String(formData.get('externalUrl') ?? '').trim()
   const body = String(formData.get('body') ?? '').trim()
+  const fileUrl = String(formData.get('fileUrl') ?? '').trim()
+  const fileName = String(formData.get('fileName') ?? '').trim()
 
   if (!sectionId || !title) {
     return { status: 'error', message: 'A collection and title are required.' }
@@ -187,18 +192,32 @@ export async function createLesson(
   if (kind === 'link' && !isValidUrl(externalUrl)) {
     return { status: 'error', message: 'Please enter a valid link starting with https://' }
   }
+  if (kind === 'document' && !fileUrl) {
+    return { status: 'error', message: 'Please upload a document before saving.' }
+  }
+
+  const normalizedKind =
+    kind === 'article'
+      ? 'article'
+      : kind === 'link'
+        ? 'link'
+        : kind === 'document'
+          ? 'document'
+          : 'video'
 
   try {
     const existing = await db.select().from(lesson).where(eq(lesson.sectionId, sectionId))
     const position = existing.length + 1
     await db.insert(lesson).values({
       sectionId,
-      kind: kind === 'article' ? 'article' : kind === 'link' ? 'link' : 'video',
+      kind: normalizedKind,
       title,
       description: description || null,
       videoUrl: kind === 'video' ? videoUrl : null,
       body: kind === 'article' ? body : null,
       externalUrl: kind === 'link' ? externalUrl : null,
+      fileUrl: kind === 'document' ? fileUrl : null,
+      fileName: kind === 'document' ? fileName || null : null,
       position,
     })
     revalidatePath('/admin/content')
@@ -333,6 +352,9 @@ export async function deleteLesson(lessonId: number) {
   const [row] = await db.select().from(lesson).where(eq(lesson.id, lessonId)).limit(1)
   if (row?.videoUrl) {
     await del(row.videoUrl).catch(() => {})
+  }
+  if (row?.fileUrl) {
+    await del(row.fileUrl).catch(() => {})
   }
   await db.delete(lesson).where(eq(lesson.id, lessonId))
   revalidatePath('/admin/content')

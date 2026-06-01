@@ -77,7 +77,7 @@ export const section = pgTable('section', {
 export const lesson = pgTable('lesson', {
   id: serial('id').primaryKey(),
   sectionId: integer('sectionId').notNull(),
-  // "video" | "article" | "link"
+  // "video" | "article" | "link" | "document"
   kind: text('kind').notNull().default('video'),
   title: text('title').notNull(),
   description: text('description'),
@@ -87,6 +87,9 @@ export const lesson = pgTable('lesson', {
   body: text('body'),
   // For links: an external URL (e.g. a course transcript or blog post).
   externalUrl: text('externalUrl'),
+  // For documents: the Blob URL of the uploaded file and its original name.
+  fileUrl: text('fileUrl'),
+  fileName: text('fileName'),
   position: integer('position').notNull().default(0),
   createdAt: timestamp('createdAt').notNull().defaultNow(),
   updatedAt: timestamp('updatedAt').notNull().defaultNow(),

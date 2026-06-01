@@ -40,8 +40,8 @@ export function Hero() {
             <p className="mx-auto max-w-2xl font-sans text-lg leading-relaxed text-off-white/85 md:mx-0">
               <span className="font-semibold text-off-white">The Tuned In Institute</span> is the
               research and education arm of{' '}
-              <span className="font-semibold text-off-white">Rooted Rhythm Therapy</span>. Get all
-              our research and self-help tools, plus{' '}
+              <span className="font-semibold text-off-white">Rooted Rhythm Therapy</span>. This is
+              where you can access our research and self-help tools, plus{' '}
               <span className="font-semibold text-off-white">Remi</span>, your AI concierge who helps
               you navigate the content and get real answers to your real questions.
             </p>

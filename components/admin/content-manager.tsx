@@ -357,10 +357,11 @@ function BulkImport({ sections, onDone }: { sections: Section[]; onDone: () => v
 }
 
 function AddLessonForm({ sectionId, onDone }: { sectionId: number; onDone: () => void }) {
-  const [kind, setKind] = useState<'video' | 'article' | 'link'>('video')
+  const [kind, setKind] = useState<'video' | 'article' | 'link' | 'document'>('video')
   const [uploading, setUploading] = useState(false)
+  const [progress, setProgress] = useState(0)
   const [uploadError, setUploadError] = useState('')
-  const [videoUrl, setVideoUrl] = useState('')
+  const [uploadedUrl, setUploadedUrl] = useState('')
   const [fileName, setFileName] = useState('')
   const [state, formAction, pending] = useActionState(createLesson, initial)
   const formRef = useRef<HTMLFormElement>(null)
@@ -369,7 +370,7 @@ function AddLessonForm({ sectionId, onDone }: { sectionId: number; onDone: () =>
   // Reset on successful save.
   if (state.status === 'success' && lastStatus.current !== 'success') {
     lastStatus.current = 'success'
-    setVideoUrl('')
+    setUploadedUrl('')
     setFileName('')
     formRef.current?.reset()
     onDone()
@@ -377,17 +378,31 @@ function AddLessonForm({ sectionId, onDone }: { sectionId: number; onDone: () =>
     lastStatus.current = state.status
   }
 
+  function selectKind(k: 'video' | 'article' | 'link' | 'document') {
+    // Uploaded files are kind-specific, so clear them when switching modes.
+    setKind(k)
+    setUploadedUrl('')
+    setFileName('')
+    setUploadError('')
+  }
+
   async function handleFile(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0]
     if (!file) return
     setUploadError('')
     setUploading(true)
+    setProgress(0)
     try {
       const blob = await upload(file.name, file, {
         access: 'public',
         handleUploadUrl: '/api/admin/upload',
+        // Split large files into chunks uploaded in parallel — faster and far
+        // more resilient for big video files (a hiccup retries one chunk
+        // instead of restarting the whole upload).
+        multipart: true,
+        onUploadProgress: ({ percentage }) => setProgress(Math.round(percentage)),
       })
-      setVideoUrl(blob.url)
+      setUploadedUrl(blob.url)
       setFileName(file.name)
     } catch (err) {
       setUploadError(err instanceof Error ? err.message : 'Upload failed.')
@@ -405,14 +420,16 @@ function AddLessonForm({ sectionId, onDone }: { sectionId: number; onDone: () =>
       <p className="font-sans text-sm font-semibold text-foreground">Add a lesson</p>
       <input type="hidden" name="sectionId" value={sectionId} />
       <input type="hidden" name="kind" value={kind} />
-      <input type="hidden" name="videoUrl" value={videoUrl} />
+      <input type="hidden" name="videoUrl" value={kind === 'video' ? uploadedUrl : ''} />
+      <input type="hidden" name="fileUrl" value={kind === 'document' ? uploadedUrl : ''} />
+      <input type="hidden" name="fileName" value={kind === 'document' ? fileName : ''} />
 
-      <div className="flex gap-2">
-        {(['video', 'article', 'link'] as const).map((k) => (
+      <div className="flex flex-wrap gap-2">
+        {(['video', 'document', 'article', 'link'] as const).map((k) => (
           <button
             type="button"
             key={k}
-            onClick={() => setKind(k)}
+            onClick={() => selectKind(k)}
             className={`rounded-md px-3 py-1.5 font-sans text-sm font-medium capitalize transition-colors ${
               kind === k
                 ? 'bg-deep-teal text-off-white'
@@ -431,15 +448,40 @@ function AddLessonForm({ sectionId, onDone }: { sectionId: number; onDone: () =>
         className={inputClass}
       />
 
-      {kind === 'video' ? (
+      {kind === 'video' || kind === 'document' ? (
         <div className="flex flex-col gap-2">
           <input
             type="file"
-            accept="video/*"
+            accept={
+              kind === 'video'
+                ? 'video/*'
+                : '.pdf,.doc,.docx,.ppt,.pptx,.xls,.xlsx,.txt,.csv'
+            }
             onChange={handleFile}
             className="block w-full font-sans text-sm text-muted-foreground file:mr-3 file:rounded-md file:border-0 file:bg-sage-light file:px-3 file:py-2 file:font-sans file:text-sm file:font-semibold file:text-deep-teal"
           />
-          {uploading && <p className="font-sans text-xs text-muted-foreground">Uploading…</p>}
+          {kind === 'document' && (
+            <p className="font-sans text-xs text-muted-foreground">
+              PDF, Word, PowerPoint, Excel, or text files.
+            </p>
+          )}
+          {uploading && (
+            <div className="flex flex-col gap-1.5">
+              <div className="flex items-center justify-between font-sans text-xs text-muted-foreground">
+                <span>{progress < 100 ? 'Uploading…' : 'Finishing up…'}</span>
+                <span className="tabular-nums">{progress}%</span>
+              </div>
+              <div className="h-1.5 w-full overflow-hidden rounded-full bg-muted">
+                <div
+                  className="h-full rounded-full bg-deep-teal transition-[width] duration-200"
+                  style={{ width: `${progress}%` }}
+                />
+              </div>
+              <p className="font-sans text-[11px] text-muted-foreground">
+                Large videos can take several minutes — you can leave this tab open.
+              </p>
+            </div>
+          )}
           {fileName && !uploading && (
             <p className="font-sans text-xs text-deep-teal">Uploaded: {fileName}</p>
           )}
@@ -464,7 +506,11 @@ function AddLessonForm({ sectionId, onDone }: { sectionId: number; onDone: () =>
       <div className="flex items-center gap-3">
         <Button
           type="submit"
-          disabled={pending || uploading || (kind === 'video' && !videoUrl)}
+          disabled={
+            pending ||
+            uploading ||
+            ((kind === 'video' || kind === 'document') && !uploadedUrl)
+          }
           className="font-sans font-semibold"
         >
           {pending ? 'Saving…' : 'Add lesson'}
