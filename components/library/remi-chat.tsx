@@ -109,9 +109,12 @@ function ResourceCards({ resources }: { resources: RemiResource[] }) {
 export function RemiChat({
   initialQuery = '',
   variant = 'page',
+  onTranscriptChange,
 }: {
   initialQuery?: string
   variant?: 'page' | 'panel'
+  /** Emits a plain-text transcript of the conversation whenever it changes. */
+  onTranscriptChange?: (transcript: string) => void
 }) {
   const { messages, sendMessage, status, error } = useChat({
     transport: new DefaultChatTransport({ api: '/api/library/remi' }),
@@ -189,6 +192,25 @@ export function RemiChat({
   }
 
   const hasConversation = messages.length > 0
+
+  // Publish a plain-text transcript upward so the close dialog can offer "copy & paste to keep it".
+  useEffect(() => {
+    if (!onTranscriptChange) return
+    const transcript = messages
+      .map((m) => {
+        const text = m.parts
+          .filter((p) => p.type === 'text')
+          .map((p) => (p as { text: string }).text)
+          .join('')
+          .trim()
+        if (!text) return ''
+        return `${m.role === 'user' ? 'You' : 'Remi'}: ${text}`
+      })
+      .filter(Boolean)
+      .join('\n\n')
+    onTranscriptChange(transcript)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [messages])
 
   // The most recent thing the member said, so the error note can offer a one-tap retry.
   const lastUserText = [...messages]

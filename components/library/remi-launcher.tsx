@@ -5,13 +5,14 @@ import {
   useCallback,
   useContext,
   useMemo,
+  useRef,
   useState,
   type ReactNode,
 } from 'react'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
-import { Loader2, Lock, Sparkles, X } from 'lucide-react'
-import { Sheet, SheetClose, SheetContent, SheetHeader, SheetTitle } from '@/components/ui/sheet'
+import { Check, Copy, Lock, Sparkles, X } from 'lucide-react'
+import { Sheet, SheetContent, SheetHeader, SheetTitle } from '@/components/ui/sheet'
 import {
   Dialog,
   DialogContent,
@@ -144,6 +145,14 @@ function RemiPanel({
   const { data: session, isPending } = useSession()
   const user = session?.user
 
+  // The close confirmation reminds members the chat isn't saved before it disappears.
+  const [confirmOpen, setConfirmOpen] = useState(false)
+  // Once a member checks "don't show again", we skip the reminder for the rest of the session.
+  const [skipConfirm, setSkipConfirm] = useState(false)
+  const [copied, setCopied] = useState(false)
+  // Latest plain-text transcript, kept in a ref so copying doesn't depend on re-renders.
+  const transcriptRef = useRef('')
+
   // While the session is resolving, hold off rendering either surface so we
   // never flash the members-only popup at someone who is actually signed in.
   if (isPending) return null
@@ -153,9 +162,44 @@ function RemiPanel({
     return <RemiGate open={open} onOpenChange={onOpenChange} />
   }
 
+  // A close was requested: show the reminder first unless the member opted out.
+  function requestClose() {
+    if (skipConfirm) {
+      onOpenChange(false)
+    } else {
+      setConfirmOpen(true)
+    }
+  }
+
+  // Intercept the sheet's own close triggers (Esc, overlay click) so they also route
+  // through the reminder.
+  function handleSheetOpenChange(next: boolean) {
+    if (!next) {
+      requestClose()
+      return
+    }
+    onOpenChange(true)
+  }
+
+  async function copyTranscript() {
+    try {
+      await navigator.clipboard.writeText(transcriptRef.current.trim())
+      setCopied(true)
+      setTimeout(() => setCopied(false), 2000)
+    } catch {
+      // Clipboard can be blocked (e.g. insecure context); fail quietly.
+    }
+  }
+
+  function confirmClose() {
+    setConfirmOpen(false)
+    onOpenChange(false)
+  }
+
   // Members get the full slide-over concierge chat.
   return (
-    <Sheet open={open} onOpenChange={onOpenChange}>
+    <>
+    <Sheet open={open} onOpenChange={handleSheetOpenChange}>
       <SheetContent
         side="right"
         // Hide the faint default close (the bare `>button` child); we provide a
@@ -177,20 +221,97 @@ function RemiPanel({
               Your Tuned In Institute AI concierge
             </span>
           </div>
-          <SheetClose
+          <button
+            type="button"
+            onClick={requestClose}
             className="flex shrink-0 items-center gap-1.5 rounded-full border border-stone bg-off-white px-3 py-2 font-sans text-sm font-semibold text-deep-teal transition-colors hover:border-deep-teal/40 hover:bg-sage-light focus:outline-none focus-visible:ring-2 focus-visible:ring-deep-teal/40"
           >
             <X className="size-4" aria-hidden="true" />
             <span>Close</span>
             <span className="sr-only">chat and return to the site</span>
-          </SheetClose>
+          </button>
         </SheetHeader>
 
         <div className="min-h-0 flex-1">
-          <RemiChat key={initialQuery || 'blank'} variant="panel" initialQuery={initialQuery} />
+          <RemiChat
+            key={initialQuery || 'blank'}
+            variant="panel"
+            initialQuery={initialQuery}
+            onTranscriptChange={(t) => {
+              transcriptRef.current = t
+            }}
+          />
         </div>
       </SheetContent>
     </Sheet>
+
+    <Dialog open={confirmOpen} onOpenChange={setConfirmOpen}>
+      <DialogContent className="max-w-sm gap-0 p-0">
+        <div className="flex flex-col gap-5 px-7 py-7">
+          <DialogHeader className="gap-2">
+            <DialogTitle className="font-serif text-xl font-semibold text-deep-teal text-balance">
+              Your chat will not be saved
+            </DialogTitle>
+            <DialogDescription className="font-serif text-[15px] leading-relaxed text-charcoal/75">
+              Once you close this chat, it&apos;s gone for good. If you&apos;d like to keep it, copy
+              the conversation and paste it somewhere safe before you go.
+            </DialogDescription>
+          </DialogHeader>
+
+          <button
+            type="button"
+            onClick={copyTranscript}
+            className="flex items-center justify-center gap-2 rounded-xl border border-deep-teal/30 bg-card px-4 py-3 font-sans text-sm font-semibold text-deep-teal transition-colors hover:bg-sage-light focus:outline-none focus-visible:ring-2 focus-visible:ring-deep-teal/40"
+          >
+            {copied ? (
+              <Check className="size-4" aria-hidden="true" />
+            ) : (
+              <Copy className="size-4" aria-hidden="true" />
+            )}
+            <span>{copied ? 'Copied to clipboard' : 'Copy and paste to preserve the chat for yourself'}</span>
+          </button>
+
+          <label className="flex cursor-pointer items-center gap-2.5 font-sans text-xs text-charcoal/65">
+            <button
+              type="button"
+              role="checkbox"
+              aria-checked={skipConfirm}
+              onClick={() => setSkipConfirm((v) => !v)}
+              className={cn(
+                'flex size-4 shrink-0 items-center justify-center rounded border transition-colors',
+                skipConfirm
+                  ? 'border-deep-teal bg-deep-teal text-off-white'
+                  : 'border-stone bg-off-white',
+              )}
+            >
+              {skipConfirm && <Check className="size-3" aria-hidden="true" />}
+            </button>
+            <span onClick={() => setSkipConfirm((v) => !v)}>Do not show me this again</span>
+          </label>
+
+          <div className="flex flex-col gap-2.5">
+            <Button
+              type="button"
+              size="lg"
+              onClick={confirmClose}
+              className="font-sans font-semibold"
+            >
+              Close chat
+            </Button>
+            <Button
+              type="button"
+              size="lg"
+              variant="ghost"
+              onClick={() => setConfirmOpen(false)}
+              className="font-sans font-semibold text-charcoal/70 hover:text-charcoal"
+            >
+              Keep chatting
+            </Button>
+          </div>
+        </div>
+      </DialogContent>
+    </Dialog>
+    </>
   )
 }
 
