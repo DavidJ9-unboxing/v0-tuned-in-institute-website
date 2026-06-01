@@ -359,6 +359,7 @@ function BulkImport({ sections, onDone }: { sections: Section[]; onDone: () => v
 function AddLessonForm({ sectionId, onDone }: { sectionId: number; onDone: () => void }) {
   const [kind, setKind] = useState<'video' | 'article' | 'link' | 'document'>('video')
   const [uploading, setUploading] = useState(false)
+  const [progress, setProgress] = useState(0)
   const [uploadError, setUploadError] = useState('')
   const [uploadedUrl, setUploadedUrl] = useState('')
   const [fileName, setFileName] = useState('')
@@ -390,10 +391,16 @@ function AddLessonForm({ sectionId, onDone }: { sectionId: number; onDone: () =>
     if (!file) return
     setUploadError('')
     setUploading(true)
+    setProgress(0)
     try {
       const blob = await upload(file.name, file, {
         access: 'public',
         handleUploadUrl: '/api/admin/upload',
+        // Split large files into chunks uploaded in parallel — faster and far
+        // more resilient for big video files (a hiccup retries one chunk
+        // instead of restarting the whole upload).
+        multipart: true,
+        onUploadProgress: ({ percentage }) => setProgress(Math.round(percentage)),
       })
       setUploadedUrl(blob.url)
       setFileName(file.name)
@@ -458,7 +465,23 @@ function AddLessonForm({ sectionId, onDone }: { sectionId: number; onDone: () =>
               PDF, Word, PowerPoint, Excel, or text files.
             </p>
           )}
-          {uploading && <p className="font-sans text-xs text-muted-foreground">Uploading…</p>}
+          {uploading && (
+            <div className="flex flex-col gap-1.5">
+              <div className="flex items-center justify-between font-sans text-xs text-muted-foreground">
+                <span>{progress < 100 ? 'Uploading…' : 'Finishing up…'}</span>
+                <span className="tabular-nums">{progress}%</span>
+              </div>
+              <div className="h-1.5 w-full overflow-hidden rounded-full bg-muted">
+                <div
+                  className="h-full rounded-full bg-deep-teal transition-[width] duration-200"
+                  style={{ width: `${progress}%` }}
+                />
+              </div>
+              <p className="font-sans text-[11px] text-muted-foreground">
+                Large videos can take several minutes — you can leave this tab open.
+              </p>
+            </div>
+          )}
           {fileName && !uploading && (
             <p className="font-sans text-xs text-deep-teal">Uploaded: {fileName}</p>
           )}
