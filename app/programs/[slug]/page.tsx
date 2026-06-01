@@ -2,8 +2,8 @@ import type { Metadata } from 'next'
 import Link from 'next/link'
 import { notFound } from 'next/navigation'
 import { ArrowLeft, Check } from 'lucide-react'
-import { Button } from '@/components/ui/button'
 import { SectionLabel } from '@/components/site/section-label'
+import { MembershipCta } from '@/components/site/access-cta'
 import { programs } from '@/lib/site'
 
 export function generateStaticParams() {
@@ -134,18 +134,7 @@ export default async function ProgramDetailPage({
                   </li>
                 ))}
               </ul>
-              <Button
-                asChild
-                size="lg"
-                className="mt-7 w-full bg-deep-teal font-sans font-semibold text-off-white hover:bg-teal-deep"
-              >
-                <Link href="/membership">
-                  {comingSoon ? 'Join to get early access' : 'Become a Member'}
-                </Link>
-              </Button>
-              <p className="mt-3 text-center font-sans text-xs text-charcoal/55">
-                One membership unlocks all four programs.
-              </p>
+              <MembershipCta comingSoon={comingSoon} />
             </div>
           </aside>
         </div>
