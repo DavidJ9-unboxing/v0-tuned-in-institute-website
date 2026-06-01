@@ -264,18 +264,36 @@ export function RemiChat({
   const privacyNote = (
     <div
       className={cn(
-        'flex items-start gap-2.5 border-stone bg-paper',
-        isPanel ? 'shrink-0 border-t px-5 py-3' : 'rounded-xl border px-4 py-3',
+        'border-stone bg-paper',
+        isPanel ? 'shrink-0 border-t px-5 py-4' : 'rounded-xl border px-4 py-4',
       )}
     >
-      <Lock className="mt-0.5 size-4 shrink-0 text-deep-teal" aria-hidden="true" />
-      <p className="font-sans text-xs leading-relaxed text-charcoal/65">
-        This chat is private and isn&apos;t saved, but it is{' '}
-        <span className="font-medium text-charcoal/80">not a HIPAA-protected medical record</span> —
-        please avoid full names or other identifying details. Because nothing is stored, Remi
-        won&apos;t remember this chat next time. Want to pick up later? Ask Remi for a summary to save
-        and paste back at the start of your next conversation.
-      </p>
+      <div className="flex items-center gap-2">
+        <Lock className="size-4 shrink-0 text-deep-teal" aria-hidden="true" />
+        <h3 className="font-sans text-sm font-semibold text-charcoal">Privacy &amp; Confidentiality</h3>
+      </div>
+      <div className="mt-2 flex flex-col gap-2 font-sans text-xs leading-relaxed text-charcoal/65">
+        <p>
+          Your conversations with Remi are private and are not saved between chats. Remi won&apos;t
+          remember your conversation the next time you return unless you choose to save a summary and
+          bring it back with you.
+        </p>
+        <p>
+          Please note that Remi is{' '}
+          <span className="font-medium text-charcoal/80">not HIPAA-compliant</span> because it is
+          powered by OpenAI technology. To protect your privacy, please avoid sharing full names,
+          addresses, dates of birth, insurance information, or other identifying details.
+        </p>
+        <p>
+          Remi is trained to draw from educational content created by the Tuned In Institute and
+          Rooted Rhythm Therapy to offer guidance, resources, and support. Think of Remi as a private
+          educational guide rather than a clinical record.
+        </p>
+        <p>
+          Want to continue later? Simply ask Remi for a summary before you leave, save it somewhere
+          secure, and paste it into a new chat when you return.
+        </p>
+      </div>
     </div>
   )
 
