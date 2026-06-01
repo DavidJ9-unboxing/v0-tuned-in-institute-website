@@ -132,12 +132,12 @@ export default function HomePage() {
       {/* What we are / are not */}
       <section className="bg-off-white">
         <div className="mx-auto max-w-6xl px-5 py-16 sm:px-8">
-          <div className="max-w-3xl">
-            <SectionLabel>Where we stand</SectionLabel>
+          <div className="mx-auto max-w-3xl text-center">
+            <SectionLabel center>Where we stand</SectionLabel>
             <h2 className="mt-5 font-serif text-3xl font-semibold leading-tight text-deep-teal text-balance sm:text-4xl">
               Real research and practice, in a world full of quick fixes.
             </h2>
-            <p className="mt-5 font-serif text-lg leading-relaxed text-charcoal/85 text-pretty">
+            <p className="mx-auto mt-5 max-w-2xl font-serif text-lg leading-relaxed text-charcoal/85 text-pretty">
               Mental health is in crisis, and the response has been a flood of pop-up solutions,
               influencer advice, and one-size-fits-all hacks. We are practicing, credentialed
               therapists. Everything we publish is grounded in clinical experience and the research
