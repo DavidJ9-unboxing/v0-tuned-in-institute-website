@@ -409,12 +409,16 @@ export function RemiChat({
         {/* Suggested prompts (only before a conversation starts) */}
         {!hasConversation && (
           <div className="flex flex-wrap gap-2 px-5 pb-4">
-            {EXAMPLES.map((ex) => (
+            {EXAMPLES.map((ex, i) => (
               <button
                 key={ex}
                 type="button"
                 onClick={() => submit(ex)}
-                className="rounded-full border border-stone bg-card px-3 py-1.5 font-sans text-xs text-charcoal/75 transition-colors hover:border-deep-teal/40 hover:text-deep-teal"
+                className={cn(
+                  'rounded-full border border-stone bg-card px-3 py-1.5 font-sans text-xs text-charcoal/75 transition-colors hover:border-deep-teal/40 hover:text-deep-teal',
+                  // Keep the chat compact on mobile by showing only the first two prompts.
+                  i >= 2 && 'hidden sm:inline-flex',
+                )}
               >
                 {ex}
               </button>
