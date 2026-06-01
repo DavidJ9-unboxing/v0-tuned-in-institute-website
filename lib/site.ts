@@ -206,7 +206,7 @@ export const programs = [
 export const clinicalFoundations = [
   {
     title: 'A Clinical Philosophy of Sensitivity',
-    body: "Sophie Schauermann's framework for understanding and honoring the sensitive nervous system, drawn from her experience, studies, and extensive body of published work.",
+    body: "Sophie Schauermann's framework for understanding and honoring the sensitive nervous system, drawn from her over a decade of clinical experience and her extensive body of published work.",
   },
   {
     title: 'The Relationship Comes First',
