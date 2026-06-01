@@ -131,7 +131,20 @@ export default function HomePage() {
 
       {/* What we are / are not */}
       <section className="bg-off-white">
-        <div className="mx-auto grid max-w-6xl gap-10 px-5 py-16 sm:px-8 md:grid-cols-2 md:gap-12">
+        <div className="mx-auto max-w-6xl px-5 py-16 sm:px-8">
+          <div className="max-w-3xl">
+            <SectionLabel>Where we stand</SectionLabel>
+            <h2 className="mt-5 font-serif text-3xl font-semibold leading-tight text-deep-teal text-balance sm:text-4xl">
+              Real research and practice, in a world full of quick fixes.
+            </h2>
+            <p className="mt-5 font-serif text-lg leading-relaxed text-charcoal/85 text-pretty">
+              Mental health is in crisis, and the response has been a flood of pop-up solutions,
+              influencer advice, and one-size-fits-all hacks. We are practicing, credentialed
+              therapists. Everything we publish is grounded in clinical experience and the research
+              behind it, not trends.
+            </p>
+          </div>
+          <div className="mt-12 grid gap-10 md:grid-cols-2 md:gap-12">
           <div>
             <SectionLabel>What we are</SectionLabel>
             <ul className="mt-6 space-y-3.5">
@@ -159,6 +172,7 @@ export default function HomePage() {
                 </li>
               ))}
             </ul>
+          </div>
           </div>
         </div>
       </section>
