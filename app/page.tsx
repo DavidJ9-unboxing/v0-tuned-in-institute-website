@@ -55,7 +55,13 @@ export default function HomePage() {
             Meet Remi, our AI concierge. She draws on everything across the Tuned In Institute and
             Rooted Rhythm to point you to the right resources.
           </p>
-          <p className="mx-auto mt-2 max-w-xl font-sans text-xs leading-relaxed text-charcoal/55">
+          <p className="mx-auto mt-3 max-w-2xl font-serif text-[15px] leading-relaxed text-charcoal/75">
+            Derived from a French name meaning &ldquo;oarsman&rdquo; or &ldquo;guide,&rdquo; Remi
+            embodies our belief that no one should have to navigate growth, healing, or life&apos;s
+            challenges alone. Whether you&apos;re a parent, teen, adult, or sensitive soul seeking
+            deeper understanding, Remi is here to help guide the way.
+          </p>
+          <p className="mx-auto mt-3 max-w-xl font-sans text-xs leading-relaxed text-charcoal/55">
             Remi is an educational guide, not a therapist — she doesn&apos;t diagnose or provide
             treatment. For clinical care, she&apos;ll help you connect with a Rooted Rhythm therapist.
           </p>

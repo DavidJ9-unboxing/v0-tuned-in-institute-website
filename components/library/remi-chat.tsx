@@ -317,30 +317,16 @@ export function RemiChat({
           aria-live="polite"
         >
           {!hasConversation && (
-            <>
-              <div className="rounded-2xl border border-deep-teal/15 bg-sage-light px-4 py-4">
-                <h3 className="font-serif text-base font-semibold text-deep-teal">Meet Remi</h3>
-                <p className="mt-1.5 font-serif text-[14px] leading-relaxed text-charcoal/80">
-                  Remi is your Tuned In AI Concierge, here to help you quickly find answers,
-                  resources, and support whenever you need it. Derived from a French name meaning
-                  &ldquo;oarsman&rdquo; or &ldquo;guide,&rdquo; Remi embodies our belief that no one
-                  should have to navigate growth, healing, or life&apos;s challenges alone. Whether
-                  you&apos;re a parent, teen, adult, or sensitive soul seeking deeper understanding,
-                  Remi is here to help guide the way.
+            <div className="flex items-start gap-3">
+              <RemiAvatar />
+              <div className="max-w-[85%] rounded-2xl rounded-tl-sm border border-stone bg-card px-4 py-3">
+                <p className="font-serif text-[15px] leading-relaxed text-charcoal/85">
+                  Hi, I&apos;m Remi. I&apos;m here to talk things through with you — a hard moment
+                  with your child, or something you&apos;re carrying yourself. Share whatever&apos;s
+                  on your mind.
                 </p>
               </div>
-              <div className="flex items-start gap-3">
-                <RemiAvatar />
-                <div className="max-w-[85%] rounded-2xl rounded-tl-sm border border-stone bg-card px-4 py-3">
-                  <p className="font-serif text-[15px] leading-relaxed text-charcoal/85">
-                    Hi, I&apos;m Remi. I&apos;m here to talk things through with you — a hard moment
-                    with your child, or something you&apos;re carrying yourself. Share whatever&apos;s
-                    on your mind, and if it ever feels useful, I can point you to Institute resources
-                    too.
-                  </p>
-                </div>
-              </div>
-            </>
+            </div>
           )}
 
           {messages.map((message, index) => {
@@ -449,8 +435,8 @@ export function RemiChat({
                 }
               }}
               rows={1}
-              placeholder="Message Remi…"
-              aria-label="Message Remi"
+              placeholder="Ask Remi…"
+              aria-label="Ask Remi"
               className="max-h-32 min-h-[2.75rem] flex-1 resize-none rounded-xl border border-stone bg-off-white px-4 py-2.5 font-sans text-[15px] text-charcoal placeholder:text-charcoal/45 focus:border-deep-teal focus:outline-none focus:ring-2 focus:ring-deep-teal/20"
             />
             {isSupported && (
