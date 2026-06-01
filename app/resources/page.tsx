@@ -1,7 +1,6 @@
 import type { Metadata } from 'next'
-import Link from 'next/link'
 import { FileText, Headphones, Video, BookOpen, Download, ListChecks } from 'lucide-react'
-import { Button } from '@/components/ui/button'
+import { AccessCta, SignInCta } from '@/components/site/access-cta'
 import { PageHero } from '@/components/site/page-hero'
 import { SectionLabel } from '@/components/site/section-label'
 import { SearchBar } from '@/components/site/search-bar'
@@ -58,7 +57,7 @@ export default async function ResourcesPage() {
       {/* Search */}
       <section className="border-b border-stone bg-sage-light">
         <div className="mx-auto max-w-4xl px-5 py-12 text-center sm:px-8">
-          <SearchBar placeholder="Try: my 4 year old melts down at pickup" isMember={!!user} />
+          <SearchBar placeholder="Try: my 4 year old melts down at pickup" />
           <p className="mt-4 font-sans text-sm text-deep-teal/80">
             {user
               ? 'Ask a real question — the concierge searches your full library for what fits.'
@@ -134,21 +133,12 @@ export default async function ResourcesPage() {
             Rooted Rhythm clients.
           </p>
           <div className="mt-8 flex flex-col justify-center gap-3 sm:flex-row">
-            <Button
-              asChild
-              size="lg"
+            <AccessCta
               className="bg-off-white font-sans font-semibold text-deep-teal hover:bg-off-white/90"
-            >
-              <Link href="/request-access">Request Access</Link>
-            </Button>
-            <Button
-              asChild
-              size="lg"
-              variant="outline"
+            />
+            <SignInCta
               className="border-off-white/40 bg-transparent font-sans font-semibold text-off-white hover:bg-off-white hover:text-deep-teal"
-            >
-              <Link href="/sign-in">Sign In</Link>
-            </Button>
+            />
           </div>
         </div>
       </section>
