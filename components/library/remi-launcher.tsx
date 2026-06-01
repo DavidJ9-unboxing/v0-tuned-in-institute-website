@@ -10,8 +10,8 @@ import {
 } from 'react'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
-import { Loader2, Lock, Sparkles } from 'lucide-react'
-import { Sheet, SheetContent, SheetHeader, SheetTitle } from '@/components/ui/sheet'
+import { Loader2, Lock, Sparkles, X } from 'lucide-react'
+import { Sheet, SheetClose, SheetContent, SheetHeader, SheetTitle } from '@/components/ui/sheet'
 import {
   Dialog,
   DialogContent,
@@ -158,7 +158,9 @@ function RemiPanel({
     <Sheet open={open} onOpenChange={onOpenChange}>
       <SheetContent
         side="right"
-        className="flex w-full flex-col gap-0 p-0 sm:max-w-lg lg:max-w-xl"
+        // Hide the faint default close (the bare `>button` child); we provide a
+        // clearer, larger one in the header that's easy to tap on mobile.
+        className="flex w-full flex-col gap-0 p-0 sm:max-w-lg lg:max-w-xl [&>button:last-of-type]:hidden"
       >
         <SheetHeader className="flex-row items-center gap-3 border-b border-stone bg-card px-5 py-4">
           <span className="flex size-9 shrink-0 items-center justify-center rounded-full bg-deep-teal">
@@ -173,6 +175,12 @@ function RemiPanel({
               Your Tuned In Institute AI concierge
             </span>
           </div>
+          <SheetClose
+            className="ml-auto flex size-9 shrink-0 items-center justify-center rounded-full text-charcoal/60 transition-colors hover:bg-sage-light hover:text-deep-teal focus:outline-none focus-visible:ring-2 focus-visible:ring-deep-teal/40"
+          >
+            <X className="size-5" aria-hidden="true" />
+            <span className="sr-only">Close chat</span>
+          </SheetClose>
         </SheetHeader>
 
         <div className="min-h-0 flex-1">
