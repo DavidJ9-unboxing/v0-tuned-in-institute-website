@@ -285,7 +285,8 @@ export function RemiChat({
         <span className="flex items-center gap-2.5">
           <Lock className="size-4 shrink-0 text-deep-teal" aria-hidden="true" />
           <span className="font-sans text-xs leading-relaxed text-charcoal/65">
-            Remi is powered by OpenAI.{' '}
+            <span className="font-semibold text-charcoal">Privacy &amp; Confidentiality:</span> Remi is
+            powered by OpenAI.{' '}
             <span className="text-deep-teal">{privacyOpen ? 'Show less' : 'Read more'}</span>
           </span>
         </span>
