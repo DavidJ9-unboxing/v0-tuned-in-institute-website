@@ -9,7 +9,7 @@ import { ProgramCard } from '@/components/site/program-card'
 import { ConciergeExchange, conciergeExamples } from '@/components/site/concierge-exchange'
 import { AskRemiButton } from '@/components/library/remi-launcher'
 import { Hero } from '@/components/home/hero'
-import { programs, clinicalFoundations } from '@/lib/site'
+import { programs, clinicalFoundations, whatWeAre, whatWeAreNot } from '@/lib/site'
 
 const pillars = [
   {
@@ -125,6 +125,54 @@ export default function HomePage() {
                 href={`/programs/${program.slug}`}
               />
             ))}
+          </div>
+        </div>
+      </section>
+
+      {/* What we are / are not */}
+      <section className="bg-off-white">
+        <div className="mx-auto max-w-6xl px-5 py-16 sm:px-8">
+          <div className="mx-auto max-w-3xl text-center">
+            <SectionLabel center>Where we stand</SectionLabel>
+            <h2 className="mt-5 font-serif text-3xl font-semibold leading-tight text-deep-teal text-balance sm:text-4xl">
+              Real research and practice, in a world full of quick fixes.
+            </h2>
+            <p className="mx-auto mt-5 max-w-2xl font-serif text-lg leading-relaxed text-charcoal/85 text-pretty">
+              Mental health is in crisis, and the response has been a flood of pop-up solutions,
+              influencer advice, and one-size-fits-all hacks. We are practicing, credentialed
+              therapists. Everything we publish is grounded in clinical experience and the research
+              behind it, not trends.
+            </p>
+          </div>
+          <div className="mt-12 grid gap-10 md:grid-cols-2 md:gap-12">
+          <div>
+            <SectionLabel>What we are</SectionLabel>
+            <ul className="mt-6 space-y-3.5">
+              {whatWeAre.map((item) => (
+                <li
+                  key={item}
+                  className="flex gap-3 font-serif text-[15px] leading-relaxed text-charcoal/85"
+                >
+                  <span className="mt-2 h-1.5 w-1.5 shrink-0 rounded-full bg-sage" />
+                  {item}
+                </li>
+              ))}
+            </ul>
+          </div>
+          <div>
+            <SectionLabel>What we are not</SectionLabel>
+            <ul className="mt-6 space-y-3.5">
+              {whatWeAreNot.map((item) => (
+                <li
+                  key={item}
+                  className="flex gap-3 font-serif text-[15px] leading-relaxed text-charcoal/85"
+                >
+                  <span className="mt-2 h-1.5 w-1.5 shrink-0 rounded-full bg-amber" />
+                  {item}
+                </li>
+              ))}
+            </ul>
+          </div>
           </div>
         </div>
       </section>

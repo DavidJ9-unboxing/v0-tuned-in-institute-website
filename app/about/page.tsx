@@ -10,20 +10,6 @@ export const metadata: Metadata = {
     'The Tuned In Institute is the research and education arm of Rooted Rhythm, led by Sophie Schauermann, MSW, LCSW, Founder and CEO.',
 }
 
-const whatWeAre = [
-  'A research and education organization grounded in attachment science, polyvagal theory, and Sophie Schauermann\u2019s clinical philosophy of sensitivity.',
-  'A publisher of long-form books, course curricula, downloadable resources, and an AI concierge trained on the full body of work.',
-  'A sibling to Rooted Rhythm Therapy, which provides clinical care in Dallas, Atlanta, and Colorado, and virtual coaching worldwide.',
-  'A future home for primary research on sensitivity and nervous-system regulation across the lifespan.',
-]
-
-const whatWeAreNot = [
-  'Not a diagnostic service, a therapy practice, or a substitute for clinical care.',
-  'Not a generic wellness brand or a self-help imprint.',
-  'Not a parenting influencer brand. There are clinical credentials and clinical hours behind every claim.',
-  'Not a tech company. The AI concierge is a delivery vehicle for the curriculum, not the product.',
-]
-
 export default function AboutPage() {
   return (
     <>
@@ -168,34 +154,6 @@ export default function AboutPage() {
               </p>
             </div>
           ))}
-        </div>
-      </section>
-
-      {/* What we are / are not */}
-      <section className="bg-off-white">
-        <div className="mx-auto grid max-w-6xl gap-12 px-5 py-20 sm:px-8 md:grid-cols-2">
-          <div>
-            <SectionLabel>What we are</SectionLabel>
-            <ul className="mt-6 space-y-4">
-              {whatWeAre.map((item) => (
-                <li key={item} className="flex gap-3 font-serif text-[17px] leading-relaxed text-charcoal/85">
-                  <span className="mt-2 h-1.5 w-1.5 shrink-0 rounded-full bg-sage" />
-                  {item}
-                </li>
-              ))}
-            </ul>
-          </div>
-          <div>
-            <SectionLabel>What we are not</SectionLabel>
-            <ul className="mt-6 space-y-4">
-              {whatWeAreNot.map((item) => (
-                <li key={item} className="flex gap-3 font-serif text-[17px] leading-relaxed text-charcoal/85">
-                  <span className="mt-2 h-1.5 w-1.5 shrink-0 rounded-full bg-amber" />
-                  {item}
-                </li>
-              ))}
-            </ul>
-          </div>
         </div>
       </section>
 
