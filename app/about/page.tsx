@@ -106,6 +106,44 @@ export default function AboutPage() {
         </div>
       </section>
 
+      {/* Clinical Director */}
+      <section className="border-t border-stone bg-off-white">
+        <div className="mx-auto grid max-w-6xl items-start gap-12 px-5 py-20 sm:px-8 md:grid-cols-[0.8fr_1.2fr]">
+          <figure className="overflow-hidden rounded-xl border border-stone shadow-[0_24px_50px_-30px_rgba(27,80,90,0.6)]">
+            <Image
+              src="/team/kate.png"
+              alt="Kate Schramm, MSW, LCSW, Clinical Director and Therapist, smiling in a green dress"
+              width={900}
+              height={900}
+              className="aspect-[4/5] h-auto w-full object-cover object-top"
+            />
+          </figure>
+          <div>
+            <SectionLabel>Leadership</SectionLabel>
+            <h2 className="mt-5 font-serif text-3xl font-semibold leading-tight text-deep-teal text-balance sm:text-4xl">
+              Kate Schramm, MSW, LCSW
+            </h2>
+            <p className="mt-2 font-sans text-sm font-medium uppercase tracking-[0.12em] text-teal-mid">
+              Clinical Director &amp; Therapist, Denver, CO
+            </p>
+            <p className="mt-6 font-serif text-lg leading-relaxed text-charcoal/85">
+              Kate is an attuned, empathetic therapist with over a decade of experience supporting
+              children, bringing creativity, curiosity, and playfulness into her work. She
+              specializes in early childhood, primarily children ages 2 through 10 navigating ADHD,
+              anxiety, trauma, and the caregiver-child relationship, building a therapeutic
+              relationship rooted in mutual trust, respect, and safety.
+            </p>
+            <p className="mt-4 font-serif text-lg leading-relaxed text-charcoal/85">
+              As Clinical Director, she provides clinical leadership, supports program development,
+              and mentors clinicians as they grow their own practices. Kate earned her degree in
+              psychology from Elon University and her MSW from New York University, and integrates
+              Child-Centered Play Therapy, Synergetic Play Therapy, and CBT into her relational,
+              developmentally attuned approach.
+            </p>
+          </div>
+        </div>
+      </section>
+
       {/* Mission, vision, promise */}
       <section className="border-y border-stone bg-paper">
         <div className="mx-auto grid max-w-6xl gap-10 px-5 py-20 sm:px-8 md:grid-cols-3">
