@@ -1,6 +1,7 @@
 import Link from 'next/link'
 import Image from 'next/image'
 import { navLinks } from '@/lib/site'
+import { FooterAccessLinks } from '@/components/site/access-cta'
 
 export function SiteFooter() {
   return (
@@ -41,22 +42,7 @@ export function SiteFooter() {
                 </Link>
               </li>
             ))}
-            <li>
-              <Link
-                href="/request-access"
-                className="font-serif text-sm text-off-white/85 transition-colors hover:text-sage-light"
-              >
-                Request Access
-              </Link>
-            </li>
-            <li>
-              <Link
-                href="/sign-in"
-                className="font-serif text-sm text-off-white/85 transition-colors hover:text-sage-light"
-              >
-                Sign In
-              </Link>
-            </li>
+            <FooterAccessLinks />
           </ul>
         </div>
 

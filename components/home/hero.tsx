@@ -1,6 +1,6 @@
 import Link from 'next/link'
 import { ArrowRight, BookOpen, GraduationCap, MessageCircle } from 'lucide-react'
-import { Button } from '@/components/ui/button'
+import { AccessCta, SignInCta } from '@/components/site/access-cta'
 
 const accessPoints = [
   {
@@ -48,21 +48,17 @@ export function Hero() {
 
             <div className="mt-6 flex flex-col items-center gap-2 md:items-start">
               <div className="flex flex-col items-center justify-center gap-3 sm:flex-row md:justify-start">
-                <Button
-                  asChild
-                  size="lg"
+                <SignInCta
+                  label="Sign In to the Library"
+                  variant="default"
                   className="h-12 w-full px-8 text-base font-semibold bg-sage font-sans text-deep-teal shadow-sm transition-shadow hover:bg-sage/90 hover:shadow-md sm:w-auto"
-                >
-                  <Link href="/sign-in">Sign In to the Library</Link>
-                </Button>
-                <Button
-                  asChild
-                  size="lg"
+                />
+                <AccessCta
                   variant="outline"
                   className="h-12 w-full border-2 border-off-white/50 bg-transparent px-8 text-base font-semibold text-off-white font-sans transition-colors hover:bg-off-white hover:text-deep-teal sm:w-auto"
-                >
-                  <Link href="/request-access">Request Access</Link>
-                </Button>
+                  libraryVariant="default"
+                  libraryClassName="h-12 w-full px-8 text-base font-semibold bg-sage font-sans text-deep-teal shadow-sm transition-shadow hover:bg-sage/90 hover:shadow-md sm:w-auto"
+                />
               </div>
               <span className="w-full text-center font-sans text-xs text-off-white/60 md:text-left">
                 Full access requires membership

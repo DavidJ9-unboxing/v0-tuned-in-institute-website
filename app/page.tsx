@@ -2,6 +2,7 @@ import Link from 'next/link'
 import Image from 'next/image'
 import { ArrowRight } from 'lucide-react'
 import { Button } from '@/components/ui/button'
+import { AccessCta } from '@/components/site/access-cta'
 import { SectionLabel } from '@/components/site/section-label'
 import { SearchBar } from '@/components/site/search-bar'
 import { ProgramCard } from '@/components/site/program-card'
@@ -188,13 +189,7 @@ export default function HomePage() {
               </li>
             ))}
           </ul>
-          <Button
-            asChild
-            size="lg"
-            className="mt-10 bg-off-white font-sans font-semibold text-deep-teal hover:bg-off-white/90"
-          >
-            <Link href="/request-access">Request Access</Link>
-          </Button>
+          <AccessCta className="mt-10 bg-off-white font-sans font-semibold text-deep-teal hover:bg-off-white/90" />
         </div>
       </section>
 

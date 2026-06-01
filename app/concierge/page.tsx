@@ -1,7 +1,6 @@
 import type { Metadata } from 'next'
-import Link from 'next/link'
 import { Clock, BrainCircuit, Baby, ShieldCheck } from 'lucide-react'
-import { Button } from '@/components/ui/button'
+import { AccessCta, SignInCta } from '@/components/site/access-cta'
 import { PageHero } from '@/components/site/page-hero'
 import { SectionLabel } from '@/components/site/section-label'
 import { ConciergeExchange, conciergeExamples } from '@/components/site/concierge-exchange'
@@ -156,21 +155,12 @@ export default function ConciergePage() {
             chatting, or request access to join.
           </p>
           <div className="mt-8 flex flex-col justify-center gap-3 sm:flex-row">
-            <Button
-              asChild
-              size="lg"
+            <AccessCta
               className="bg-off-white font-sans font-semibold text-deep-teal hover:bg-off-white/90"
-            >
-              <Link href="/request-access">Request Access</Link>
-            </Button>
-            <Button
-              asChild
-              size="lg"
-              variant="outline"
+            />
+            <SignInCta
               className="border-off-white/40 bg-transparent font-sans font-semibold text-off-white hover:bg-off-white hover:text-deep-teal"
-            >
-              <Link href="/sign-in">Sign In</Link>
-            </Button>
+            />
           </div>
         </div>
       </section>
