@@ -33,7 +33,7 @@ export const programs = [
   {
     slug: 'parenting-teens',
     name: 'Tuned In Parenting for Teens',
-    modules: 9,
+    modules: 10,
     status: 'Available now',
     age: 'Parents of sensitive adolescents, ages 12 to 18',
     description:
