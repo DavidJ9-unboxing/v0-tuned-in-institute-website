@@ -446,13 +446,15 @@ function AddLessonForm({ sectionId, onDone }: { sectionId: number; onDone: () =>
     setUploading(true)
     setProgress(0)
     try {
+      // Only use multipart for large files (e.g. videos). It splits the upload
+      // into parallel chunks, which is faster and more resilient for big files,
+      // but adds extra round trips that slow down small files like PDFs — so a
+      // single-shot upload is faster there.
+      const useMultipart = file.size > 50 * 1024 * 1024 // 50 MB
       const blob = await upload(file.name, file, {
         access: 'public',
         handleUploadUrl: '/api/admin/upload',
-        // Split large files into chunks uploaded in parallel — faster and far
-        // more resilient for big video files (a hiccup retries one chunk
-        // instead of restarting the whole upload).
-        multipart: true,
+        multipart: useMultipart,
         onUploadProgress: ({ percentage }) => setProgress(Math.round(percentage)),
       })
       setUploadedUrl(blob.url)
