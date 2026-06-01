@@ -11,7 +11,7 @@ export const navLinks = [
 export const programs = [
   {
     slug: 'parenting',
-    name: 'Tuned In Parenting',
+    name: 'Tuned In Parenting for Kids',
     modules: 10,
     status: 'Available now',
     age: 'Parents of sensitive children, ages 2 to 12',
@@ -53,7 +53,7 @@ export const programs = [
   },
   {
     slug: 'sensitive-teens',
-    name: 'Tuned In for Sensitive Teens',
+    name: 'Tuned In Tools for Teens',
     modules: 8,
     status: 'Launching July 4',
     age: 'Sensitive teenagers, ages 12 to 18',
@@ -128,7 +128,7 @@ export const programs = [
   },
   {
     slug: 'adults',
-    name: 'Tuned In for Adults',
+    name: 'Tuned In Tools for Adults',
     modules: 8,
     status: 'Launching July 4',
     age: 'Sensitive adults',
