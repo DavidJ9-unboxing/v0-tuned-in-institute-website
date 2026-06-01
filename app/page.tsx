@@ -40,7 +40,7 @@ const membershipFeatures = [
 const stats = [
   { number: 'All of us', label: 'carry sensitivities in a fast, overstimulating world' },
   { number: '12+', label: 'years of clinical practice behind every module' },
-  { number: '4', label: 'program tracks: children, teens, adults' },
+  { number: '4', label: 'program tracks: children, teens, adults, parenting' },
 ]
 
 export default function HomePage() {
