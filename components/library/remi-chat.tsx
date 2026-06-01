@@ -270,9 +270,11 @@ export function RemiChat({
     >
       <Lock className="mt-0.5 size-4 shrink-0 text-deep-teal" aria-hidden="true" />
       <p className="font-sans text-xs leading-relaxed text-charcoal/65">
-        Your chat is private and isn&apos;t saved — so Remi won&apos;t remember it next time. Please
-        avoid full names or identifying details. Want to continue later? Ask Remi for a summary to
-        save and paste back at the start of your next chat.
+        This chat is private and isn&apos;t saved, but it is{' '}
+        <span className="font-medium text-charcoal/80">not a HIPAA-protected medical record</span> —
+        please avoid full names or other identifying details. Because nothing is stored, Remi
+        won&apos;t remember this chat next time. Want to pick up later? Ask Remi for a summary to save
+        and paste back at the start of your next conversation.
       </p>
     </div>
   )
@@ -341,6 +343,12 @@ export function RemiChat({
                   Hi, I&apos;m Remi. I&apos;m here to talk things through with you — a hard moment
                   with your child, or something you&apos;re carrying yourself. Share whatever&apos;s
                   on your mind.
+                </p>
+                <p className="mt-2.5 font-sans text-xs leading-relaxed text-charcoal/60">
+                  A quick note: our chat is private and isn&apos;t saved, so I won&apos;t remember it
+                  next time — and it isn&apos;t a HIPAA-protected medical record, so please skip full
+                  names or identifying details. When we&apos;re done, just ask and I&apos;ll write a
+                  short summary you can save and paste back next time to pick up where we left off.
                 </p>
               </div>
             </div>
