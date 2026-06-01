@@ -330,8 +330,9 @@ export function RemiChat({
           <p>
             Chats aren&apos;t saved and Remi is{' '}
             <span className="font-medium text-charcoal/80">not HIPAA-compliant</span>, so please skip
-            full names, addresses, and other identifying details. To continue later, ask Remi for a
-            summary, copy and save it somewhere safe, and repost it in the chat next time to continue.
+            full names, addresses, and other identifying details, but we don&apos;t have access to
+            your chat and we don&apos;t store it anywhere. To continue later, ask Remi for a summary,
+            copy and save it somewhere safe, and repost it in the chat next time to continue.
           </p>
           <button
             type="button"
