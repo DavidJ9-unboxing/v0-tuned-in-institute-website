@@ -1,6 +1,7 @@
 import type { Metadata } from 'next'
 import Link from 'next/link'
 import { Button } from '@/components/ui/button'
+import { AccessCta } from '@/components/site/access-cta'
 import { PageHero } from '@/components/site/page-hero'
 import { SectionLabel } from '@/components/site/section-label'
 import { clinicalFoundations } from '@/lib/site'
@@ -166,14 +167,10 @@ export default function WhatIsSensitivityPage() {
             >
               <Link href="/programs">Explore the Programs</Link>
             </Button>
-            <Button
-              asChild
-              size="lg"
+            <AccessCta
               variant="outline"
               className="border-deep-teal font-sans font-semibold text-deep-teal hover:bg-deep-teal hover:text-off-white"
-            >
-              <Link href="/request-access">Request Access</Link>
-            </Button>
+            />
           </div>
         </div>
       </section>

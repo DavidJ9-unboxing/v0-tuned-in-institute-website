@@ -1,7 +1,6 @@
 import type { Metadata } from 'next'
 import Image from 'next/image'
-import Link from 'next/link'
-import { Button } from '@/components/ui/button'
+import { AccessCta } from '@/components/site/access-cta'
 import { PageHero } from '@/components/site/page-hero'
 import { SectionLabel } from '@/components/site/section-label'
 
@@ -170,13 +169,7 @@ export default function AboutPage() {
             &ldquo;Sensitivity is not a flaw. It is a different operating system. The work is to
             understand it, not to fix it.&rdquo;
           </blockquote>
-          <Button
-            asChild
-            size="lg"
-            className="mt-10 bg-off-white font-sans font-semibold text-deep-teal hover:bg-off-white/90"
-          >
-            <Link href="/request-access">Request Access</Link>
-          </Button>
+          <AccessCta className="mt-10 bg-off-white font-sans font-semibold text-deep-teal hover:bg-off-white/90" />
         </div>
       </section>
     </>

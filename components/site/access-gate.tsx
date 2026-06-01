@@ -1,7 +1,6 @@
-import Link from 'next/link'
 import { Lock } from 'lucide-react'
-import { Button } from '@/components/ui/button'
 import { cn } from '@/lib/utils'
+import { AccessCta, SignInCta } from '@/components/site/access-cta'
 
 export function AccessGate({
   title = 'Members-only content',
@@ -27,17 +26,8 @@ export function AccessGate({
         {description}
       </p>
       <div className="flex flex-col gap-3 sm:flex-row">
-        <Button asChild size="lg" className="font-sans font-semibold">
-          <Link href="/request-access">Request Access</Link>
-        </Button>
-        <Button
-          asChild
-          size="lg"
-          variant="outline"
-          className="border-deep-teal/30 bg-transparent font-sans font-semibold text-deep-teal hover:bg-deep-teal hover:text-off-white"
-        >
-          <Link href="/sign-in">Sign In</Link>
-        </Button>
+        <AccessCta className="font-sans font-semibold" />
+        <SignInCta className="border-deep-teal/30 bg-transparent font-sans font-semibold text-deep-teal hover:bg-deep-teal hover:text-off-white" />
       </div>
     </div>
   )
