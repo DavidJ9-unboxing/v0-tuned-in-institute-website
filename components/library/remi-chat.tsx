@@ -129,8 +129,9 @@ export function RemiChat({
   const [privacyOpen, setPrivacyOpen] = useState(false)
   const [privacyDismissed, setPrivacyDismissed] = useState(false)
   // The crisis/safety note can be collapsed to a single tappable line so the privacy note and
-  // input have room on small screens. It stays collapsed for the session but can reopen anytime.
-  const [safetyCollapsed, setSafetyCollapsed] = useState(false)
+  // input have room on small screens. In the slide-over panel (mobile) it starts collapsed so the
+  // privacy footer below it stays fully visible; it can be reopened anytime.
+  const [safetyCollapsed, setSafetyCollapsed] = useState(variant === 'panel')
   const scrollRef = useRef<HTMLDivElement>(null)
   const lastUserRef = useRef<HTMLDivElement>(null)
   const didAutoSend = useRef(false)
@@ -401,7 +402,13 @@ export function RemiChat({
   )
 
   return (
-    <div className={cn(isPanel ? 'flex h-full min-h-0 flex-col' : 'flex flex-col gap-4')}>
+    <div
+      className={cn(
+        isPanel
+          ? 'flex h-full min-h-0 flex-col pb-[env(safe-area-inset-bottom)]'
+          : 'flex flex-col gap-4',
+      )}
+    >
       <div
         className={cn(
           'bg-paper',
