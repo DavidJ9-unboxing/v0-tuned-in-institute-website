@@ -11,6 +11,7 @@ import {
   deleteSection,
   deleteLesson,
   updateSection,
+  updateLesson,
   moveLesson,
   bulkImportLinks,
   type ActionState,
@@ -21,6 +22,8 @@ type Lesson = {
   kind: string
   title: string
   description: string | null
+  externalUrl: string | null
+  body: string | null
   hidden: boolean
   position: number
 }
@@ -244,60 +247,200 @@ function SectionCard({
         {section.lessons.length > 0 && (
           <ul className="flex flex-col gap-2">
             {section.lessons.map((l) => (
-              <li
+              <LessonRow
                 key={l.id}
-                className="flex flex-col gap-2 rounded-md border border-border bg-muted/40 px-3 py-2 sm:flex-row sm:items-center sm:justify-between sm:gap-4"
-              >
-                <div className="flex flex-wrap items-center gap-2">
-                  <span className="rounded bg-sage-light px-2 py-0.5 font-sans text-xs font-medium text-deep-teal">
-                    {l.kind}
-                  </span>
-                  <span className="font-sans text-sm text-foreground">{l.title}</span>
-                  {l.hidden && <HiddenBadge />}
-                </div>
-                <div className="flex items-center gap-3 sm:shrink-0">
-                  <label className="sr-only" htmlFor={`move-${l.id}`}>
-                    Move {l.title} to another collection
-                  </label>
-                  <select
-                    id={`move-${l.id}`}
-                    defaultValue=""
-                    onChange={async (e) => {
-                      const target = Number(e.target.value)
-                      if (!target) return
-                      await moveLesson(l.id, target)
-                      onDone()
-                    }}
-                    className="rounded-md border border-input bg-background px-2 py-1 font-sans text-xs text-foreground outline-none focus:border-deep-teal focus:ring-2 focus:ring-deep-teal/20"
-                  >
-                    <option value="">Move to…</option>
-                    {sections
-                      .filter((other) => other.id !== section.id)
-                      .map((other) => (
-                        <option key={other.id} value={other.id}>
-                          {other.title}
-                        </option>
-                      ))}
-                  </select>
-                  <button
-                    onClick={async () => {
-                      if (confirm(`Delete lesson "${l.title}"?`)) {
-                        await deleteLesson(l.id)
-                        onDone()
-                      }
-                    }}
-                    className="font-sans text-xs font-medium text-destructive hover:underline"
-                  >
-                    Remove
-                  </button>
-                </div>
-              </li>
+                lesson={l}
+                section={section}
+                sections={sections}
+                onDone={onDone}
+              />
             ))}
           </ul>
         )}
         <AddLessonForm sectionId={section.id} onDone={onDone} />
       </CardContent>
     </Card>
+  )
+}
+
+/** A single lesson row in the admin index, with inline edit + move + remove. */
+function LessonRow({
+  lesson,
+  section,
+  sections,
+  onDone,
+}: {
+  lesson: Lesson
+  section: Section
+  sections: Section[]
+  onDone: () => void
+}) {
+  const [editing, setEditing] = useState(false)
+  const [state, formAction, pending] = useActionState(updateLesson, initial)
+  const lastStatus = useRef(state.status)
+
+  if (state.status === 'success' && lastStatus.current !== 'success') {
+    lastStatus.current = 'success'
+    setEditing(false)
+    onDone()
+  } else if (state.status !== 'success') {
+    lastStatus.current = state.status
+  }
+
+  // Only embed/link/article lessons have a content field that can be edited
+  // here. Uploaded videos and documents can't be re-uploaded inline — remove
+  // and re-add those if the file needs to change.
+  const editableContent =
+    lesson.kind === 'embed' || lesson.kind === 'link' || lesson.kind === 'article'
+
+  if (editing) {
+    return (
+      <li className="rounded-md border border-deep-teal/40 bg-background px-3 py-3">
+        <form action={formAction} className="flex flex-col gap-3">
+          <input type="hidden" name="lessonId" value={lesson.id} />
+          <div className="flex flex-col gap-1">
+            <label className="font-sans text-xs font-medium text-muted-foreground">Title</label>
+            <input name="title" defaultValue={lesson.title} className={inputClass} required />
+          </div>
+          <div className="flex flex-col gap-1">
+            <label className="font-sans text-xs font-medium text-muted-foreground">
+              Description (optional)
+            </label>
+            <input
+              name="description"
+              defaultValue={lesson.description ?? ''}
+              placeholder="Short description (shown in the index)"
+              className={inputClass}
+            />
+          </div>
+
+          {lesson.kind === 'embed' && (
+            <div className="flex flex-col gap-1">
+              <label className="font-sans text-xs font-medium text-muted-foreground">
+                Video link (YouTube or Vimeo)
+              </label>
+              <input
+                name="externalUrl"
+                type="url"
+                defaultValue={lesson.externalUrl ?? ''}
+                placeholder="https://vimeo.com/123456789/abcdef or https://youtu.be/…"
+                className={inputClass}
+              />
+              <p className="font-sans text-xs leading-relaxed text-muted-foreground">
+                Paste the share link and the video plays right inside the lesson. Leave blank to keep
+                this a placeholder until the video is ready.
+              </p>
+            </div>
+          )}
+          {lesson.kind === 'link' && (
+            <div className="flex flex-col gap-1">
+              <label className="font-sans text-xs font-medium text-muted-foreground">Link URL</label>
+              <input
+                name="externalUrl"
+                type="url"
+                defaultValue={lesson.externalUrl ?? ''}
+                placeholder="https://example.com/transcript"
+                className={inputClass}
+              />
+            </div>
+          )}
+          {lesson.kind === 'article' && (
+            <div className="flex flex-col gap-1">
+              <label className="font-sans text-xs font-medium text-muted-foreground">
+                Article body
+              </label>
+              <textarea
+                name="body"
+                rows={5}
+                defaultValue={lesson.body ?? ''}
+                className={inputClass}
+              />
+            </div>
+          )}
+
+          <HiddenToggle defaultChecked={lesson.hidden} />
+
+          <div className="flex items-center gap-3">
+            <Button type="submit" disabled={pending} className="font-sans font-semibold">
+              {pending ? 'Saving…' : 'Save'}
+            </Button>
+            <button
+              type="button"
+              onClick={() => setEditing(false)}
+              className="font-sans text-sm font-medium text-muted-foreground hover:underline"
+            >
+              Cancel
+            </button>
+            {state.status === 'error' && (
+              <span className="font-sans text-sm text-destructive">{state.message}</span>
+            )}
+          </div>
+        </form>
+      </li>
+    )
+  }
+
+  const isEmptyPlaceholder = lesson.kind === 'embed' && !lesson.externalUrl
+
+  return (
+    <li className="flex flex-col gap-2 rounded-md border border-border bg-muted/40 px-3 py-2 sm:flex-row sm:items-center sm:justify-between sm:gap-4">
+      <div className="flex flex-wrap items-center gap-2">
+        <span className="rounded bg-sage-light px-2 py-0.5 font-sans text-xs font-medium text-deep-teal">
+          {lesson.kind}
+        </span>
+        <span className="font-sans text-sm text-foreground">{lesson.title}</span>
+        {isEmptyPlaceholder && (
+          <span className="rounded bg-amber-100 px-2 py-0.5 font-sans text-xs font-medium text-amber-800">
+            Needs video link
+          </span>
+        )}
+        {lesson.hidden && <HiddenBadge />}
+      </div>
+      <div className="flex items-center gap-3 sm:shrink-0">
+        {editableContent && (
+          <button
+            onClick={() => setEditing(true)}
+            className="font-sans text-xs font-medium text-deep-teal hover:underline"
+          >
+            Edit
+          </button>
+        )}
+        <label className="sr-only" htmlFor={`move-${lesson.id}`}>
+          Move {lesson.title} to another collection
+        </label>
+        <select
+          id={`move-${lesson.id}`}
+          defaultValue=""
+          onChange={async (e) => {
+            const target = Number(e.target.value)
+            if (!target) return
+            await moveLesson(lesson.id, target)
+            onDone()
+          }}
+          className="rounded-md border border-input bg-background px-2 py-1 font-sans text-xs text-foreground outline-none focus:border-deep-teal focus:ring-2 focus:ring-deep-teal/20"
+        >
+          <option value="">Move to…</option>
+          {sections
+            .filter((other) => other.id !== section.id)
+            .map((other) => (
+              <option key={other.id} value={other.id}>
+                {other.title}
+              </option>
+            ))}
+        </select>
+        <button
+          onClick={async () => {
+            if (confirm(`Delete lesson "${lesson.title}"?`)) {
+              await deleteLesson(lesson.id)
+              onDone()
+            }
+          }}
+          className="font-sans text-xs font-medium text-destructive hover:underline"
+        >
+          Remove
+        </button>
+      </div>
+    </li>
   )
 }
 
