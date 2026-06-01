@@ -27,7 +27,7 @@ export const metadata: Metadata = {
     template: '%s · The Tuned In Institute',
   },
   description:
-    'Research-backed education and support for sensitive children, teens, and adults, and the people who love them. Built by clinicians, grounded in attachment science and HSP research.',
+    'Research-backed education and support for sensitive children, teens, and adults, and the people who love them. Built by clinicians, grounded in attachment science and nervous-system research.',
   generator: 'v0.app',
   icons: {
     icon: '/logos/tii-logo-mark.png',

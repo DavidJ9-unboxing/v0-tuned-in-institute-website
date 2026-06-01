@@ -24,7 +24,7 @@ export const programs = [
       'Knowing your sensitive child',
       'Reducing shame and understanding developmental stages',
       'Parent self-healing, self-regulation and self-care',
-      'The highly sensitive parent',
+      'The sensitive parent',
       'Loving boundaries',
       'Conscious co-parenting',
       'Future planning',
@@ -39,10 +39,10 @@ export const programs = [
     description:
       'The Tuned In framework adapted for parents of sensitive adolescents ages 12 to 18.',
     moduleList: [
-      'Understanding Your Highly Sensitive Teen',
+      'Understanding Your Sensitive Teen',
       'The Adolescent Brain & Nervous System',
       'Who You Are as the Parent of a Teenager',
-      'Knowing Your Sensitive Teen: The DOES Framework',
+      'Knowing Your Sensitive Teen',
       'Shame, Identity & the Teen Years',
       'Loving Boundaries with a Teenager',
       'Connection Across the Disconnection',
@@ -205,8 +205,8 @@ export const programs = [
 
 export const clinicalFoundations = [
   {
-    title: "Dr. Elaine Aron's HSP Research",
-    body: 'Four decades of research establishing Sensory Processing Sensitivity as a measurable, inherited trait.',
+    title: 'A Clinical Philosophy of Sensitivity',
+    body: "Sophie Schauermann's framework, drawn from her book and over a decade of clinical practice, for understanding and honoring the sensitive nervous system.",
   },
   {
     title: 'Polyvagal Theory',

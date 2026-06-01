@@ -39,7 +39,7 @@ const featured = [
   },
   {
     tag: 'Article',
-    title: 'Highly sensitive adults at work: designing an environment that fits',
+    title: 'Sensitive adults at work: designing an environment that fits',
     body: 'Practical adjustments and language for managers, open offices, and back-to-back meetings.',
   },
 ]

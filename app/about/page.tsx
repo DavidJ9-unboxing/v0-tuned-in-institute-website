@@ -11,10 +11,10 @@ export const metadata: Metadata = {
 }
 
 const whatWeAre = [
-  'A research and education organization grounded in attachment science, polyvagal theory, and Dr. Elaine Aron\u2019s work on Sensory Processing Sensitivity.',
+  'A research and education organization grounded in attachment science, polyvagal theory, and Sophie Schauermann\u2019s clinical philosophy of sensitivity.',
   'A publisher of long-form books, course curricula, downloadable resources, and an AI concierge trained on the full body of work.',
   'A sibling to Rooted Rhythm Therapy, which provides clinical care in Dallas, Atlanta, and Colorado, and virtual coaching worldwide.',
-  'A future home for primary research on high sensitivity across the lifespan.',
+  'A future home for primary research on sensitivity and nervous-system regulation across the lifespan.',
 ]
 
 const whatWeAreNot = [
@@ -30,7 +30,7 @@ export default function AboutPage() {
       <PageHero
         label="About"
         title="The research, education, and support home for sensitive humans."
-        intro="The Tuned In Institute makes the science of high sensitivity practical, accessible, and lifelong, so sensitive children, teens, and adults grow up understood, regulated, and free of the belief that they are too much."
+        intro="The Tuned In Institute makes the science of sensitivity and self-regulation practical, accessible, and lifelong, so children, teens, and adults can feel understood, regulated, and free of the belief that they are too much."
       />
 
       {/* Founder */}
@@ -64,8 +64,8 @@ export default function AboutPage() {
               Across more than a decade of clinical work, she watched the same pattern repeat:
               parents who felt confused and defeated, children who were treated as a problem to
               manage, and a body of research that never reached the kitchen table. The Institute
-              exists to close that gap, turning the science of high sensitivity into tools a family
-              can use tonight.
+              exists to close that gap, turning her clinical philosophy of sensitivity into tools a
+              family can use tonight.
             </p>
           </div>
         </div>
@@ -84,7 +84,7 @@ export default function AboutPage() {
             </p>
             <p className="mt-6 font-serif text-lg leading-relaxed text-charcoal/85">
               Joel Schauermann is a board-certified physician who brings the rigor of clinical
-              medicine to the Institute&apos;s work on high sensitivity. As Chief Medical Officer, he
+              medicine to the Institute&apos;s work on sensitivity and regulation. As Chief Medical Officer, he
               ensures that everything we teach is grounded in current research and sound medical
               practice.
             </p>
@@ -112,7 +112,7 @@ export default function AboutPage() {
           {[
             {
               label: 'Mission',
-              body: 'To make the science of high sensitivity practical, accessible, and lifelong, so sensitive humans grow up understood, regulated, and free of the belief that they are too much.',
+              body: 'To make the science of sensitivity and self-regulation practical, accessible, and lifelong, so people of every age grow up understood, regulated, and free of the belief that they are too much.',
             },
             {
               label: 'Vision',

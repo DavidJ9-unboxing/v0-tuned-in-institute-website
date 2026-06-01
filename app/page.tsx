@@ -14,7 +14,7 @@ import { programs, clinicalFoundations } from '@/lib/site'
 const pillars = [
   {
     title: 'Research-grounded.',
-    body: "Every module is rooted in neuroscience, polyvagal theory, and Dr. Elaine Aron's decades of HSP research, translated into real-life practice.",
+    body: 'Every module is rooted in neuroscience, polyvagal theory, attachment science, and over a decade of clinical practice, translated into real-life practice.',
   },
   {
     title: 'For every stage of life.',
@@ -38,7 +38,7 @@ const membershipFeatures = [
 ]
 
 const stats = [
-  { number: '15–20%', label: 'of people are born highly sensitive' },
+  { number: 'All of us', label: 'carry sensitivities in a fast, overstimulating world' },
   { number: '12+', label: 'years of clinical practice behind every module' },
   { number: '4', label: 'program tracks: children, teens, adults' },
 ]
@@ -77,9 +77,9 @@ export default function HomePage() {
             Sensitivity is not a flaw. It&apos;s a different operating system.
           </h2>
           <p className="mt-6 font-serif text-lg leading-relaxed text-charcoal/85">
-            About fifteen to twenty percent of people are born highly sensitive, wired to notice
-            more, process more deeply, and feel more intensely. The problem is not the sensitivity.
-            It is the lack of understanding around it.
+            The world can be overwhelming. We all have sensitivities, stressors, and moments when we
+            feel disconnected from ourselves or the people we love. The problem is not your
+            sensitivity. It is how little we are taught to understand and work with it.
           </p>
           <Link
             href="/what-is-sensitivity"
