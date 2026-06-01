@@ -153,6 +153,10 @@ function RemiPanel({
   const [copyState, setCopyState] = useState<'idle' | 'copied' | 'empty' | 'error'>('idle')
   // Latest plain-text transcript, kept in a ref so copying doesn't depend on re-renders.
   const transcriptRef = useRef('')
+  // A hidden textarea rendered *inside* the dialog. Selecting an element inside the
+  // focus-trapped dialog is reliable; a textarea appended to document.body gets its
+  // selection cleared by Radix's focus guard before execCommand can run.
+  const copySourceRef = useRef<HTMLTextAreaElement>(null)
 
   // While the session is resolving, hold off rendering either surface so we
   // never flash the members-only popup at someone who is actually signed in.
@@ -184,40 +188,43 @@ function RemiPanel({
 
   async function copyTranscript() {
     const text = transcriptRef.current.trim()
+    console.log('[v0] copyTranscript: transcript length =', text.length)
     if (!text) {
       setCopyState('empty')
       setTimeout(() => setCopyState('idle'), 2500)
       return
     }
 
-    // Try the modern clipboard API first, then fall back to the legacy textarea +
-    // execCommand approach, which works in iframes/insecure contexts where the
-    // async clipboard API is blocked (such as the embedded preview).
+    // The legacy textarea-select + execCommand path is the most reliable inside an
+    // iframe/preview where the async clipboard API is often blocked. We select the
+    // hidden textarea that lives inside this dialog so the focus trap doesn't clear it.
     let ok = false
-    try {
-      if (navigator.clipboard?.writeText) {
-        await navigator.clipboard.writeText(text)
-        ok = true
+    const ta = copySourceRef.current
+    if (ta) {
+      try {
+        ta.value = text
+        ta.removeAttribute('hidden')
+        ta.focus()
+        ta.select()
+        ta.setSelectionRange(0, text.length)
+        ok = document.execCommand('copy')
+        console.log('[v0] copyTranscript: execCommand copy result =', ok)
+      } catch (err) {
+        console.log('[v0] copyTranscript: execCommand threw', err)
+        ok = false
       }
-    } catch {
-      ok = false
     }
 
+    // If execCommand failed or is unavailable, try the modern async clipboard API.
     if (!ok) {
       try {
-        const textarea = document.createElement('textarea')
-        textarea.value = text
-        textarea.setAttribute('readonly', '')
-        textarea.style.position = 'fixed'
-        textarea.style.top = '0'
-        textarea.style.left = '0'
-        textarea.style.opacity = '0'
-        document.body.appendChild(textarea)
-        textarea.focus()
-        textarea.select()
-        ok = document.execCommand('copy')
-        document.body.removeChild(textarea)
-      } catch {
+        if (navigator.clipboard?.writeText) {
+          await navigator.clipboard.writeText(text)
+          ok = true
+          console.log('[v0] copyTranscript: clipboard API succeeded')
+        }
+      } catch (err) {
+        console.log('[v0] copyTranscript: clipboard API threw', err)
         ok = false
       }
     }
@@ -313,6 +320,16 @@ function RemiPanel({
                     : 'Copy and paste to preserve the chat for yourself'}
             </span>
           </button>
+
+          {/* Off-screen source for the execCommand copy fallback. Kept rendered (not
+              display:none) so it can hold a live text selection. */}
+          <textarea
+            ref={copySourceRef}
+            readOnly
+            tabIndex={-1}
+            aria-hidden="true"
+            className="pointer-events-none absolute -left-[9999px] top-0 size-px opacity-0"
+          />
 
           <label className="flex cursor-pointer items-center gap-2.5 font-sans text-xs text-charcoal/65">
             <button
