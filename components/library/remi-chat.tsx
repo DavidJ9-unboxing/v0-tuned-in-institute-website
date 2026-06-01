@@ -264,16 +264,36 @@ export function RemiChat({
   const privacyNote = (
     <div
       className={cn(
-        'flex items-start gap-2.5 border-stone bg-paper',
-        isPanel ? 'shrink-0 border-t px-5 py-3' : 'rounded-xl border px-4 py-3',
+        'border-stone bg-paper',
+        isPanel ? 'shrink-0 border-t px-5 py-4' : 'rounded-xl border px-4 py-4',
       )}
     >
-      <Lock className="mt-0.5 size-4 shrink-0 text-deep-teal" aria-hidden="true" />
-      <p className="font-sans text-xs leading-relaxed text-charcoal/65">
-        Your chat is private and isn&apos;t saved — so Remi won&apos;t remember it next time. Please
-        avoid full names or identifying details. Want to continue later? Ask Remi for a summary to
-        save and paste back at the start of your next chat.
-      </p>
+      <div className="flex items-center gap-2">
+        <Lock className="size-4 shrink-0 text-deep-teal" aria-hidden="true" />
+        <h3 className="font-sans text-sm font-semibold text-charcoal">Privacy &amp; Confidentiality</h3>
+      </div>
+      <div className="mt-2 flex flex-col gap-2 font-sans text-xs leading-relaxed text-charcoal/65">
+        <p>
+          Your conversations with Remi are private and are not saved between chats. Remi won&apos;t
+          remember your conversation the next time you return unless you choose to save a summary and
+          bring it back with you.
+        </p>
+        <p>
+          Please note that Remi is{' '}
+          <span className="font-medium text-charcoal/80">not HIPAA-compliant</span> because it is
+          powered by OpenAI technology. To protect your privacy, please avoid sharing full names,
+          addresses, dates of birth, insurance information, or other identifying details.
+        </p>
+        <p>
+          Remi is trained to draw from educational content created by the Tuned In Institute and
+          Rooted Rhythm Therapy to offer guidance, resources, and support. Think of Remi as a private
+          educational guide rather than a clinical record.
+        </p>
+        <p>
+          Want to continue later? Simply ask Remi for a summary before you leave, save it somewhere
+          secure, and paste it into a new chat when you return.
+        </p>
+      </div>
     </div>
   )
 
@@ -341,6 +361,11 @@ export function RemiChat({
                   Hi, I&apos;m Remi. I&apos;m here to talk things through with you — a hard moment
                   with your child, or something you&apos;re carrying yourself. Share whatever&apos;s
                   on your mind.
+                </p>
+                <p className="mt-2.5 font-sans text-xs leading-relaxed text-charcoal/60">
+                  A quick note: our chat is private and isn&apos;t saved, so please skip full names or
+                  identifying details (see the privacy note below). When we&apos;re done, just ask and
+                  I&apos;ll write a short summary you can save and bring back next time.
                 </p>
               </div>
             </div>
