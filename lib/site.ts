@@ -209,19 +209,19 @@ export const clinicalFoundations = [
     body: "Sophie Schauermann's framework, drawn from her book and over a decade of clinical practice, for understanding and honoring the sensitive nervous system.",
   },
   {
-    title: 'Polyvagal Theory',
-    body: 'A map of the nervous system that explains why a sensitive body reaches shutdown or alarm more readily.',
+    title: 'The Relationship Comes First',
+    body: 'Real change happens inside a relationship built on trust, safety, and respect. We meet each person at their own pace, not a protocol.',
   },
   {
-    title: 'Attachment Science',
-    body: 'How early relationships shape the way a sensitive child learns to regulate and reconnect.',
+    title: 'Regulation Before Strategy',
+    body: 'Drawing on polyvagal-informed practice, we help calm the nervous system first, because no skill or conversation lands when a body feels unsafe.',
   },
   {
-    title: "Dan Siegel's Interpersonal Neurobiology",
-    body: 'The science of how relationships literally shape the developing brain, moment to moment.',
+    title: 'Play as a Natural Language',
+    body: 'With children especially, we work through play and developmentally attuned approaches that let processing, growth, and healing unfold.',
   },
   {
-    title: 'Epigenetics',
-    body: 'How environment and experience switch genes on and off, and why context matters as much as wiring.',
+    title: 'The Whole Person in Context',
+    body: 'Grounded in attachment and developmental science, we look at the family, environment, and relationships around a person, not just symptoms.',
   },
 ]

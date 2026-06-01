@@ -35,25 +35,6 @@ const traits = [
   },
 ]
 
-const myths = [
-  {
-    myth: 'Sensitivity is a weakness to outgrow.',
-    truth: 'Sensitivity is part of who you are. The goal is to understand and work with it, not to correct it.',
-  },
-  {
-    myth: 'Sensitive kids are just being dramatic.',
-    truth: 'Their nervous system genuinely registers and processes more. The intensity is real, not performed.',
-  },
-  {
-    myth: 'They will be fragile and struggle in life.',
-    truth: 'With understanding and the right support, sensitive people are among the most creative, empathic, and conscientious.',
-  },
-  {
-    myth: 'Sensitivity is the same as anxiety or a disorder.',
-    truth: 'Sensitivity is a normal temperament trait. It can coexist with anxiety, but it is not a diagnosis.',
-  },
-]
-
 export default function WhatIsSensitivityPage() {
   return (
     <>
@@ -90,48 +71,17 @@ export default function WhatIsSensitivityPage() {
         </div>
       </section>
 
-      {/* Myths vs truth */}
-      <section className="border-y border-stone bg-paper">
-        <div className="mx-auto max-w-5xl px-5 py-20 sm:px-8 md:py-24">
-          <SectionLabel>Myths and truths</SectionLabel>
-          <h2 className="mt-5 font-serif text-3xl font-semibold leading-tight text-deep-teal text-balance sm:text-4xl">
-            What sensitivity is, and is not.
-          </h2>
-          <div className="mt-12 space-y-4">
-            {myths.map((m) => (
-              <div
-                key={m.myth}
-                className="grid gap-4 rounded-xl border border-stone bg-card p-6 sm:grid-cols-2 sm:gap-8"
-              >
-                <div>
-                  <span className="font-sans text-xs font-semibold uppercase tracking-wider text-amber">
-                    Myth
-                  </span>
-                  <p className="mt-2 font-serif text-[17px] leading-relaxed text-charcoal/70 line-through decoration-amber/50">
-                    {m.myth}
-                  </p>
-                </div>
-                <div>
-                  <span className="font-sans text-xs font-semibold uppercase tracking-wider text-teal-mid">
-                    Truth
-                  </span>
-                  <p className="mt-2 font-serif text-[17px] leading-relaxed text-charcoal/85">
-                    {m.truth}
-                  </p>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* Research foundations */}
-      <section className="bg-deep-teal text-off-white">
+      {/* Clinical foundations */}
+      <section className="border-t border-stone bg-deep-teal text-off-white">
         <div className="mx-auto max-w-6xl px-5 py-20 sm:px-8 md:py-24">
-          <p className="section-label !text-sage-light">Clinical practice, informed by research</p>
+          <p className="section-label !text-sage-light">How we practice</p>
           <h2 className="mt-5 max-w-2xl font-serif text-3xl font-semibold leading-tight text-balance sm:text-4xl">
             The foundations behind our work.
           </h2>
+          <p className="mt-5 max-w-2xl font-serif text-lg leading-relaxed text-off-white/80">
+            Our approach is clinical first, informed by research. These are the principles our
+            therapists and educators return to in every session and every program.
+          </p>
           <div className="mt-12 grid gap-5 sm:grid-cols-2 lg:grid-cols-5">
             {clinicalFoundations.map((f) => (
               <div
