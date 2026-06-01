@@ -149,7 +149,8 @@ function RemiPanel({
   const [confirmOpen, setConfirmOpen] = useState(false)
   // Once a member checks "don't show again", we skip the reminder for the rest of the session.
   const [skipConfirm, setSkipConfirm] = useState(false)
-  const [copied, setCopied] = useState(false)
+  // 'idle' | 'copied' | 'empty' | 'error' — drives the copy button's label/feedback.
+  const [copyState, setCopyState] = useState<'idle' | 'copied' | 'empty' | 'error'>('idle')
   // Latest plain-text transcript, kept in a ref so copying doesn't depend on re-renders.
   const transcriptRef = useRef('')
 
@@ -182,13 +183,47 @@ function RemiPanel({
   }
 
   async function copyTranscript() {
-    try {
-      await navigator.clipboard.writeText(transcriptRef.current.trim())
-      setCopied(true)
-      setTimeout(() => setCopied(false), 2000)
-    } catch {
-      // Clipboard can be blocked (e.g. insecure context); fail quietly.
+    const text = transcriptRef.current.trim()
+    if (!text) {
+      setCopyState('empty')
+      setTimeout(() => setCopyState('idle'), 2500)
+      return
     }
+
+    // Try the modern clipboard API first, then fall back to the legacy textarea +
+    // execCommand approach, which works in iframes/insecure contexts where the
+    // async clipboard API is blocked (such as the embedded preview).
+    let ok = false
+    try {
+      if (navigator.clipboard?.writeText) {
+        await navigator.clipboard.writeText(text)
+        ok = true
+      }
+    } catch {
+      ok = false
+    }
+
+    if (!ok) {
+      try {
+        const textarea = document.createElement('textarea')
+        textarea.value = text
+        textarea.setAttribute('readonly', '')
+        textarea.style.position = 'fixed'
+        textarea.style.top = '0'
+        textarea.style.left = '0'
+        textarea.style.opacity = '0'
+        document.body.appendChild(textarea)
+        textarea.focus()
+        textarea.select()
+        ok = document.execCommand('copy')
+        document.body.removeChild(textarea)
+      } catch {
+        ok = false
+      }
+    }
+
+    setCopyState(ok ? 'copied' : 'error')
+    setTimeout(() => setCopyState('idle'), ok ? 2000 : 3500)
   }
 
   function confirmClose() {
@@ -261,14 +296,22 @@ function RemiPanel({
           <button
             type="button"
             onClick={copyTranscript}
-            className="flex items-center justify-center gap-2 rounded-xl border border-deep-teal/30 bg-card px-4 py-3 font-sans text-sm font-semibold text-deep-teal transition-colors hover:bg-sage-light focus:outline-none focus-visible:ring-2 focus-visible:ring-deep-teal/40"
+            className="flex items-center justify-center gap-2 rounded-xl border border-deep-teal/30 bg-card px-4 py-3 text-center font-sans text-sm font-semibold text-deep-teal transition-colors hover:bg-sage-light focus:outline-none focus-visible:ring-2 focus-visible:ring-deep-teal/40"
           >
-            {copied ? (
-              <Check className="size-4" aria-hidden="true" />
+            {copyState === 'copied' ? (
+              <Check className="size-4 shrink-0" aria-hidden="true" />
             ) : (
-              <Copy className="size-4" aria-hidden="true" />
+              <Copy className="size-4 shrink-0" aria-hidden="true" />
             )}
-            <span>{copied ? 'Copied to clipboard' : 'Copy and paste to preserve the chat for yourself'}</span>
+            <span>
+              {copyState === 'copied'
+                ? 'Copied to clipboard'
+                : copyState === 'empty'
+                  ? 'Nothing to copy yet'
+                  : copyState === 'error'
+                    ? "Couldn't copy — select the chat and copy manually"
+                    : 'Copy and paste to preserve the chat for yourself'}
+            </span>
           </button>
 
           <label className="flex cursor-pointer items-center gap-2.5 font-sans text-xs text-charcoal/65">
