@@ -7,6 +7,7 @@ import { DefaultChatTransport } from 'ai'
 import {
   ArrowUp,
   ChevronDown,
+  Download,
   ExternalLink,
   FileText,
   LifeBuoy,
@@ -60,6 +61,9 @@ function KindIcon({ kind }: { kind: string }) {
   }
   if (kind === 'link') {
     return <ExternalLink className="size-4 shrink-0 text-sage-deep" aria-hidden="true" />
+  }
+  if (kind === 'document') {
+    return <Download className="size-4 shrink-0 text-sage-deep" aria-hidden="true" />
   }
   return <PlayCircle className="size-4 shrink-0 text-deep-teal" aria-hidden="true" />
 }

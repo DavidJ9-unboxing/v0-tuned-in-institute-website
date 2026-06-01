@@ -19,10 +19,21 @@ export async function POST(request: Request): Promise<NextResponse> {
         }
         return {
           allowedContentTypes: [
+            // Video
             'video/mp4',
             'video/quicktime',
             'video/webm',
             'video/x-m4v',
+            // Documents
+            'application/pdf',
+            'application/msword',
+            'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+            'application/vnd.ms-powerpoint',
+            'application/vnd.openxmlformats-officedocument.presentationml.presentation',
+            'application/vnd.ms-excel',
+            'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+            'text/plain',
+            'text/csv',
           ],
           maximumSizeInBytes: 2 * 1024 * 1024 * 1024, // 2 GB
           addRandomSuffix: true,

@@ -1,9 +1,15 @@
 'use client'
 
 import { useState } from 'react'
-import { ExternalLink, FileText, PlayCircle } from 'lucide-react'
+import { Download, ExternalLink, FileText, PlayCircle } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import type { Lesson } from '@/lib/content'
+
+/** PDFs can be previewed inline; other document types only offer a download. */
+function isPdf(url: string, fileName?: string | null) {
+  const target = (fileName || url).split('?')[0].toLowerCase()
+  return target.endsWith('.pdf')
+}
 
 export function LessonViewer({
   lessons,
@@ -67,6 +73,30 @@ export function LessonViewer({
               </div>
             )}
 
+            {active.kind === 'document' && active.fileUrl && (
+              <div className="flex flex-col gap-4">
+                {isPdf(active.fileUrl, active.fileName) && (
+                  <div className="overflow-hidden rounded-2xl border border-stone bg-card">
+                    <iframe
+                      key={active.id}
+                      src={active.fileUrl}
+                      title={active.title}
+                      className="h-[70vh] w-full"
+                    />
+                  </div>
+                )}
+                <a
+                  href={active.fileUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex w-fit items-center gap-2 rounded-full bg-deep-teal px-5 py-2.5 font-sans text-sm font-semibold text-off-white transition-colors hover:bg-deep-teal/90"
+                >
+                  {isPdf(active.fileUrl, active.fileName) ? 'Download' : 'Open document'}
+                  <Download className="size-4" aria-hidden="true" />
+                </a>
+              </div>
+            )}
+
             <div className="flex flex-col gap-3">
               <h2 className="font-serif text-2xl font-semibold text-deep-teal text-balance">
                 {active.title}
@@ -111,6 +141,8 @@ export function LessonViewer({
                       <FileText className="size-4 text-sage-deep" aria-hidden="true" />
                     ) : l.kind === 'link' ? (
                       <ExternalLink className="size-4 text-sage-deep" aria-hidden="true" />
+                    ) : l.kind === 'document' ? (
+                      <Download className="size-4 text-sage-deep" aria-hidden="true" />
                     ) : (
                       <PlayCircle className="size-4 text-deep-teal" aria-hidden="true" />
                     )}
@@ -120,7 +152,13 @@ export function LessonViewer({
                       {i + 1}. {l.title}
                     </span>
                     <span className="font-sans text-[11px] uppercase tracking-wide text-charcoal/45">
-                      {l.kind === 'article' ? 'Article' : l.kind === 'link' ? 'Link' : 'Video'}
+                      {l.kind === 'article'
+                        ? 'Article'
+                        : l.kind === 'link'
+                          ? 'Link'
+                          : l.kind === 'document'
+                            ? 'Document'
+                            : 'Video'}
                     </span>
                   </span>
                 </button>
