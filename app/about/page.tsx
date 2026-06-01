@@ -124,7 +124,7 @@ export default function AboutPage() {
               Kate Schramm, MSW, LCSW
             </h2>
             <p className="mt-2 font-sans text-sm font-medium uppercase tracking-[0.12em] text-teal-mid">
-              Clinical Director &amp; Therapist, Denver, CO
+              Clinical Director &amp; Therapist, Rooted Rhythm
             </p>
             <p className="mt-6 font-serif text-lg leading-relaxed text-charcoal/85">
               Kate is an attuned, empathetic therapist with over a decade of experience supporting
