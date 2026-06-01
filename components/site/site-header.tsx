@@ -42,13 +42,13 @@ export function SiteHeader() {
           : 'shadow-none',
       )}
     >
-      <div className="mx-auto flex max-w-6xl items-center justify-between gap-4 px-5 py-1 sm:px-8 sm:py-1.5">
+      <div className="mx-auto flex max-w-6xl items-center justify-between gap-3 overflow-x-clip px-4 py-1 sm:gap-4 sm:px-8 sm:py-1.5">
         <Link
           href="/"
-          className="flex items-center gap-3"
+          className="flex min-w-0 items-center gap-3"
           aria-label="The Tuned In Institute, home"
         >
-          <span className="relative block h-[64px] w-[202px] overflow-hidden sm:h-[98px] sm:w-[400px]">
+          <span className="relative block h-[52px] w-[164px] shrink-0 overflow-hidden sm:h-[98px] sm:w-[400px]">
             <Image
               src="/logos/tii-logo-horizontal.png"
               alt="The Tuned In Institute"
