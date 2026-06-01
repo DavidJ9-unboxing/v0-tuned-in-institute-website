@@ -46,8 +46,12 @@ export async function createClientAccount(
     })
     // Admin-created accounts are trusted, so mark the email as verified.
     // The client can sign in immediately with the password you set — no
-    // verification email required.
-    await db.update(user).set({ emailVerified: true }).where(eq(user.email, email))
+    // verification email required. They'll be required to choose their own
+    // password on first sign-in (the password set here is temporary).
+    await db
+      .update(user)
+      .set({ emailVerified: true, mustChangePassword: true })
+      .where(eq(user.email, email))
     revalidatePath('/admin/accounts')
     return {
       status: 'success',

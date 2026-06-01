@@ -11,6 +11,9 @@ export const user = pgTable('user', {
   image: text('image'),
   // Added by the admin plugin:
   role: text('role').notNull().default('client'),
+  // When true, the user is forced to set a new password before accessing the
+  // library (used for admin-created accounts with a shared temporary password).
+  mustChangePassword: boolean('mustChangePassword').notNull().default(false),
   banned: boolean('banned').notNull().default(false),
   banReason: text('banReason'),
   banExpires: timestamp('banExpires'),
