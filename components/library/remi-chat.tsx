@@ -12,6 +12,7 @@ import {
   FileText,
   LifeBuoy,
   Loader2,
+  Lock,
   Mic,
   PlayCircle,
   Sparkles,
@@ -260,6 +261,22 @@ export function RemiChat({
       </section>
     ))
 
+  const privacyNote = (
+    <div
+      className={cn(
+        'flex items-start gap-2.5 border-stone bg-paper',
+        isPanel ? 'shrink-0 border-t px-5 py-3' : 'rounded-xl border px-4 py-3',
+      )}
+    >
+      <Lock className="mt-0.5 size-4 shrink-0 text-deep-teal" aria-hidden="true" />
+      <p className="font-sans text-xs leading-relaxed text-charcoal/65">
+        Your chat is private and isn&apos;t saved — so Remi won&apos;t remember it next time. Please
+        avoid full names or identifying details. Want to continue later? Ask Remi for a summary to
+        save and paste back at the start of your next chat.
+      </p>
+    </div>
+  )
+
   const safetyNote = (
     <div
       className={cn(
@@ -479,11 +496,13 @@ export function RemiChat({
 
         {/* In the slide-over panel, resources + safety stay attached to the chat card. */}
         {isPanel && resourcesPanel}
+        {isPanel && privacyNote}
         {isPanel && safetyNote}
       </div>
 
       {/* On the page, resources + safety sit below the dialogue. */}
       {!isPanel && resourcesPanel}
+      {!isPanel && privacyNote}
       {!isPanel && safetyNote}
     </div>
   )
