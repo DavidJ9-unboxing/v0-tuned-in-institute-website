@@ -16,6 +16,10 @@ import { user } from '@/lib/db/schema'
 
 const PASSWORD = 'ROOTED2026'
 
+// Safe by default: only writes when explicitly run with APPLY=1.
+// Dry run reports what WOULD be created and which emails already exist, writing nothing.
+const DRY_RUN = process.env.APPLY !== '1'
+
 // name, email
 const PEOPLE: [string, string][] = [
   ['Jamie Lee Ward', 'jamie@rootedrhythm.com'],
@@ -70,6 +74,13 @@ const PEOPLE: [string, string][] = [
 ]
 
 async function main() {
+  console.log(
+    DRY_RUN
+      ? '=== DRY RUN (no changes will be written). Re-run with APPLY=1 to create accounts. ===\n'
+      : '=== APPLY MODE: creating accounts in the database ===\n',
+  )
+
+  let toCreate = 0
   let created = 0
   let skipped = 0
   let failed = 0
@@ -78,25 +89,42 @@ async function main() {
     const email = rawEmail.trim().toLowerCase()
     const existing = await db.select({ id: user.id }).from(user).where(eq(user.email, email)).limit(1)
     if (existing.length) {
-      console.log(`[skip] ${email} already exists`)
+      console.log(`[skip]   ${email} already exists`)
       skipped++
       continue
     }
+
+    if (DRY_RUN) {
+      console.log(`[would create] ${email} (${name})`)
+      toCreate++
+      continue
+    }
+
     try {
       await auth.api.createUser({
         body: { name, email, password: PASSWORD, role: 'client' },
       })
       await db.update(user).set({ emailVerified: true }).where(eq(user.email, email))
-      console.log(`[ok]   ${email} (${name})`)
+      console.log(`[ok]     ${email} (${name})`)
       created++
     } catch (err) {
       const message = err instanceof Error ? err.message : String(err)
-      console.error(`[fail] ${email} - ${message}`)
+      console.error(`[fail]   ${email} - ${message}`)
       failed++
     }
   }
 
-  console.log(`\nDone. created=${created} skipped=${skipped} failed=${failed} total=${PEOPLE.length}`)
+  if (DRY_RUN) {
+    console.log(
+      `\nDry run complete. would_create=${toCreate} already_exist=${skipped} total=${PEOPLE.length}`,
+    )
+    console.log('No changes were written. Re-run with APPLY=1 to create these accounts.')
+  } else {
+    console.log(
+      `\nDone. created=${created} skipped=${skipped} failed=${failed} total=${PEOPLE.length}`,
+    )
+  }
+
   await pool.end()
   process.exit(failed > 0 ? 1 : 0)
 }
