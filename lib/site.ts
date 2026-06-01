@@ -33,58 +33,171 @@ export const programs = [
   {
     slug: 'parenting-teens',
     name: 'Tuned In Parenting for Teens',
-    modules: 8,
+    modules: 9,
     status: 'Available now',
     age: 'Parents of sensitive adolescents, ages 12 to 18',
     description:
       'The Tuned In framework adapted for parents of sensitive adolescents ages 12 to 18.',
     moduleList: [
-      'The adolescent brain renovation',
-      'What changes, and what stays the same',
-      'Identity, peers, and the social world',
-      'Low-agenda connection',
-      'Rupture and repair in the teen years',
-      'Shutdown, withdrawal, and the silent dinner',
-      'Staying an advocate without taking over',
-      'Planning for the years ahead',
+      'Understanding Your Highly Sensitive Teen',
+      'The Adolescent Brain & Nervous System',
+      'Who You Are as the Parent of a Teenager',
+      'Knowing Your Sensitive Teen: The DOES Framework',
+      'Shame, Identity & the Teen Years',
+      'Loving Boundaries with a Teenager',
+      'Connection Across the Disconnection',
+      'The Sensitive Teen at School & in the World',
+      'Building Your Village & Raising a Thriving Sensitive Teen',
     ],
   },
   {
     slug: 'sensitive-teens',
     name: 'Tuned In for Sensitive Teens',
     modules: 8,
-    status: 'Coming soon',
+    status: 'Launching July 4',
     age: 'Sensitive teenagers, ages 12 to 18',
     description:
       'For sensitive teenagers navigating identity, relationships, school, and a world that moves too fast.',
     moduleList: [
-      'What sensitivity actually is',
-      'Your nervous system, explained',
-      'Friendships and the social load',
-      'School, focus, and overstimulation',
-      'Big feelings and how to ride them',
-      'Talking to the adults in your life',
-      'Rest, recovery, and your own rhythm',
-      'Designing a life that fits you',
+      {
+        title: "Understanding How You're Wired",
+        points: [
+          'Learn how your brain and nervous system work',
+          'Understand sensitivity, emotions, and regulation',
+          'Replace self-judgment with self-understanding',
+        ],
+      },
+      {
+        title: 'Your Brain & Nervous System',
+        points: [
+          'Green, red, and blue states',
+          'The window of tolerance',
+          'Recognizing signs of overwhelm before you hit your limit',
+        ],
+      },
+      {
+        title: 'Emotions Are Information',
+        points: [
+          'Understanding big feelings',
+          'Emotional awareness and expression',
+          'Tools for processing instead of suppressing',
+        ],
+      },
+      {
+        title: 'Your Regulation Toolkit',
+        points: [
+          'Practical strategies for calming and resetting',
+          'Body, mind, and relationship-based tools',
+          'Creating your personal regulation plan',
+        ],
+      },
+      {
+        title: 'Shame, Self-Worth & Confidence',
+        points: [
+          'Understanding shame and perfectionism',
+          'Building self-compassion',
+          'Separating your worth from performance',
+        ],
+      },
+      {
+        title: 'Healthy Boundaries',
+        points: [
+          'Learning to say no',
+          'Protecting your energy',
+          'Creating boundaries with people and technology',
+        ],
+      },
+      {
+        title: 'Connection & Relationships',
+        points: [
+          'Friendships, family, and belonging',
+          'Co-regulation and repair',
+          'Building a supportive community',
+        ],
+      },
+      {
+        title: "Who You're Becoming",
+        points: [
+          'Discovering your strengths and gifts',
+          'Self-advocacy and independence',
+          'Creating a vision for your future and a life that works for you',
+        ],
+      },
     ],
   },
   {
     slug: 'adults',
     name: 'Tuned In for Adults',
     modules: 8,
-    status: 'Available now',
+    status: 'Launching July 4',
     age: 'Sensitive adults',
     description:
       'Regulation tools for sensitive adults navigating work, relationships, and a world not built for them.',
     moduleList: [
-      'Late discovery and accurate recognition',
-      'The science behind the trait',
-      'Nervous system load and depletion',
-      'Regulation tools for daily life',
-      'Designing your environment',
-      'Language for partners and managers',
-      'Boundaries without guilt',
-      'A sustainable, sensitive life',
+      {
+        title: "Understanding How You're Wired",
+        points: [
+          'The brain, nervous system, and sensitivity spectrum',
+          'Why your reactions make sense',
+          'The five Tuned In principles',
+        ],
+      },
+      {
+        title: 'Understanding Your Nervous System',
+        points: [
+          'Red zone, blue zone, and regulation',
+          'Window of tolerance',
+          'Recognizing early signs of dysregulation',
+        ],
+      },
+      {
+        title: 'Your Story Lives in Your Body',
+        points: [
+          'Triggers, past experiences, and emotional patterns',
+          'Where emotions live in the body',
+          'Building awareness before reacting',
+        ],
+      },
+      {
+        title: 'Your Regulation Toolkit',
+        points: [
+          'Practical regulation tools for everyday life',
+          'Self-regulation and co-regulation',
+          'Creating a sustainable regulation practice',
+        ],
+      },
+      {
+        title: 'Shame, Self-Compassion & Boundaries',
+        points: [
+          'Understanding shame and perfectionism',
+          'Developing self-compassion',
+          'Learning loving boundaries',
+        ],
+      },
+      {
+        title: 'Authenticity & Self-Trust',
+        points: [
+          'Reconnecting with your needs and values',
+          'Building confidence in your decisions',
+          'Showing up authentically without overexplaining',
+        ],
+      },
+      {
+        title: 'Relationships, Connection & Repair',
+        points: [
+          'Healthy relationships and co-regulation',
+          'Communication and conflict repair',
+          'Building a supportive community',
+        ],
+      },
+      {
+        title: 'Creating a Tuned In Life',
+        points: [
+          'Designing a life that supports your nervous system',
+          'Rhythms, routines, and sustainable well-being',
+          'Identifying your gifts, purpose, and future vision',
+        ],
+      },
     ],
   },
 ] as const
