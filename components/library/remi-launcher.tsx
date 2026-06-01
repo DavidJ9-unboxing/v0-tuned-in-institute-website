@@ -162,21 +162,21 @@ function RemiPanel({
         // clearer, larger one in the header that's easy to tap on mobile.
         className="flex w-full flex-col gap-0 p-0 sm:max-w-lg lg:max-w-xl [&>button:last-of-type]:hidden"
       >
-        <SheetHeader className="flex-row items-center gap-3 border-b border-stone bg-card px-5 py-4">
+        <SheetHeader className="flex-row items-center gap-3 border-b border-stone bg-card px-4 py-4 sm:px-5">
           <span className="flex size-9 shrink-0 items-center justify-center rounded-full bg-deep-teal">
             <Sparkles className="size-5 text-off-white" aria-hidden="true" />
             <span className="sr-only">Remi</span>
           </span>
-          <div className="flex flex-col">
+          <div className="flex min-w-0 flex-1 flex-col">
             <SheetTitle className="font-serif text-[16px] font-semibold text-deep-teal">
               Remi
             </SheetTitle>
-            <span className="font-sans text-xs text-charcoal/55">
+            <span className="truncate font-sans text-xs text-charcoal/55">
               Your Tuned In Institute AI concierge
             </span>
           </div>
           <SheetClose
-            className="ml-auto flex shrink-0 items-center gap-1.5 rounded-full border border-stone bg-off-white px-3 py-2 font-sans text-sm font-semibold text-deep-teal transition-colors hover:border-deep-teal/40 hover:bg-sage-light focus:outline-none focus-visible:ring-2 focus-visible:ring-deep-teal/40"
+            className="flex shrink-0 items-center gap-1.5 rounded-full border border-stone bg-off-white px-3 py-2 font-sans text-sm font-semibold text-deep-teal transition-colors hover:border-deep-teal/40 hover:bg-sage-light focus:outline-none focus-visible:ring-2 focus-visible:ring-deep-teal/40"
           >
             <X className="size-4" aria-hidden="true" />
             <span>Close</span>
