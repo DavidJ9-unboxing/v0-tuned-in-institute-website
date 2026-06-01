@@ -43,7 +43,7 @@ export function LessonViewer({
                 {/* eslint-disable-next-line jsx-a11y/media-has-caption */}
                 <video
                   key={active.id}
-                  src={active.videoUrl}
+                  src={`/api/library/file/${active.id}`}
                   controls
                   controlsList="nodownload"
                   className="aspect-video w-full bg-charcoal"
@@ -100,14 +100,14 @@ export function LessonViewer({
                   <div className="overflow-hidden rounded-2xl border border-stone bg-card">
                     <iframe
                       key={active.id}
-                      src={active.fileUrl}
+                      src={`/api/library/file/${active.id}`}
                       title={active.title}
                       className="h-[70vh] w-full"
                     />
                   </div>
                 )}
                 <a
-                  href={active.fileUrl}
+                  href={`/api/library/file/${active.id}?download=1`}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="inline-flex w-fit items-center gap-2 rounded-full bg-deep-teal px-5 py-2.5 font-sans text-sm font-semibold text-off-white transition-colors hover:bg-deep-teal/90"

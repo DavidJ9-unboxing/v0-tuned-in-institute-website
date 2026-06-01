@@ -248,6 +248,77 @@ export async function createLesson(
   }
 }
 
+/**
+ * Edit an existing lesson's title, description, hidden flag, and the one
+ * content field that matches its kind (the embed/link URL, or the article
+ * body). The lesson kind itself isn't changed here. This is what lets an admin
+ * paste a Vimeo/YouTube link into a video placeholder after the fact.
+ */
+export async function updateLesson(
+  _prev: ActionState,
+  formData: FormData,
+): Promise<ActionState> {
+  await requireAdmin()
+  const lessonId = Number(formData.get('lessonId'))
+  const title = String(formData.get('title') ?? '').trim()
+  const description = String(formData.get('description') ?? '').trim()
+  const externalUrl = String(formData.get('externalUrl') ?? '').trim()
+  const body = String(formData.get('body') ?? '').trim()
+  const hidden = formData.get('hidden') === 'true'
+
+  if (!lessonId || !title) {
+    return { status: 'error', message: 'A title is required.' }
+  }
+
+  const [row] = await db.select().from(lesson).where(eq(lesson.id, lessonId)).limit(1)
+  if (!row) {
+    return { status: 'error', message: 'That lesson no longer exists.' }
+  }
+
+  const updates: Partial<typeof lesson.$inferInsert> = {
+    title,
+    description: description || null,
+    hidden,
+  }
+
+  if (row.kind === 'embed') {
+    // Allow saving an empty URL so a placeholder can stay empty; only validate
+    // when a value is provided.
+    if (externalUrl) {
+      if (!isValidUrl(externalUrl)) {
+        return { status: 'error', message: 'Please enter a valid link starting with https://' }
+      }
+      if (!toEmbedUrl(externalUrl)) {
+        return {
+          status: 'error',
+          message: 'That doesn’t look like a YouTube or Vimeo link. Paste the video’s share URL.',
+        }
+      }
+    }
+    updates.externalUrl = externalUrl || null
+  } else if (row.kind === 'link') {
+    if (externalUrl && !isValidUrl(externalUrl)) {
+      return { status: 'error', message: 'Please enter a valid link starting with https://' }
+    }
+    updates.externalUrl = externalUrl || null
+  } else if (row.kind === 'article') {
+    if (!body) {
+      return { status: 'error', message: 'Article body cannot be empty.' }
+    }
+    updates.body = body
+  }
+
+  try {
+    await db.update(lesson).set(updates).where(eq(lesson.id, lessonId))
+    revalidatePath('/admin/content')
+    revalidatePath('/library')
+    return { status: 'success', message: `Lesson "${title}" updated.` }
+  } catch (err) {
+    const message = err instanceof Error ? err.message : 'Could not update the lesson.'
+    return { status: 'error', message }
+  }
+}
+
 function isValidUrl(value: string) {
   try {
     const u = new URL(value)
