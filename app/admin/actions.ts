@@ -7,6 +7,7 @@ import { auth } from '@/lib/auth'
 import { db } from '@/lib/db'
 import { lesson, section, user } from '@/lib/db/schema'
 import { requireAdmin } from '@/lib/session'
+import { toEmbedUrl } from '@/lib/video'
 
 export type ActionState = { status: 'idle' | 'success' | 'error'; message: string }
 
@@ -80,6 +81,7 @@ export async function createSection(
   await requireAdmin()
   const title = String(formData.get('title') ?? '').trim()
   const description = String(formData.get('description') ?? '').trim()
+  const hidden = formData.get('hidden') === 'true'
   if (!title) return { status: 'error', message: 'A title is required.' }
 
   let slug = slugify(title)
@@ -96,6 +98,7 @@ export async function createSection(
       slug,
       title,
       description: description || null,
+      hidden,
       position,
     })
     revalidatePath('/admin/content')
@@ -115,13 +118,14 @@ export async function updateSection(
   const sectionId = Number(formData.get('sectionId'))
   const title = String(formData.get('title') ?? '').trim()
   const description = String(formData.get('description') ?? '').trim()
+  const hidden = formData.get('hidden') === 'true'
   if (!sectionId || !title) {
     return { status: 'error', message: 'A title is required.' }
   }
   try {
     await db
       .update(section)
-      .set({ title, description: description || null })
+      .set({ title, description: description || null, hidden })
       .where(eq(section.id, sectionId))
     revalidatePath('/admin/content')
     revalidatePath('/library')
@@ -179,6 +183,7 @@ export async function createLesson(
   const body = String(formData.get('body') ?? '').trim()
   const fileUrl = String(formData.get('fileUrl') ?? '').trim()
   const fileName = String(formData.get('fileName') ?? '').trim()
+  const hidden = formData.get('hidden') === 'true'
 
   if (!sectionId || !title) {
     return { status: 'error', message: 'A collection and title are required.' }
@@ -192,6 +197,17 @@ export async function createLesson(
   if (kind === 'link' && !isValidUrl(externalUrl)) {
     return { status: 'error', message: 'Please enter a valid link starting with https://' }
   }
+  if (kind === 'embed') {
+    if (!isValidUrl(externalUrl)) {
+      return { status: 'error', message: 'Please enter a valid link starting with https://' }
+    }
+    if (!toEmbedUrl(externalUrl)) {
+      return {
+        status: 'error',
+        message: 'That doesn’t look like a YouTube or Vimeo link. Paste the video’s share URL.',
+      }
+    }
+  }
   if (kind === 'document' && !fileUrl) {
     return { status: 'error', message: 'Please upload a document before saving.' }
   }
@@ -201,9 +217,11 @@ export async function createLesson(
       ? 'article'
       : kind === 'link'
         ? 'link'
-        : kind === 'document'
-          ? 'document'
-          : 'video'
+        : kind === 'embed'
+          ? 'embed'
+          : kind === 'document'
+            ? 'document'
+            : 'video'
 
   try {
     const existing = await db.select().from(lesson).where(eq(lesson.sectionId, sectionId))
@@ -215,9 +233,10 @@ export async function createLesson(
       description: description || null,
       videoUrl: kind === 'video' ? videoUrl : null,
       body: kind === 'article' ? body : null,
-      externalUrl: kind === 'link' ? externalUrl : null,
+      externalUrl: kind === 'link' || kind === 'embed' ? externalUrl : null,
       fileUrl: kind === 'document' ? fileUrl : null,
       fileName: kind === 'document' ? fileName || null : null,
+      hidden,
       position,
     })
     revalidatePath('/admin/content')
@@ -255,6 +274,7 @@ export async function bulkImportLinks(
   const existingSectionId = Number(formData.get('sectionId') ?? 0)
   const newSectionTitle = String(formData.get('newSectionTitle') ?? '').trim()
   const newSectionDescription = String(formData.get('newSectionDescription') ?? '').trim()
+  const hidden = formData.get('hidden') === 'true'
 
   // Parse the pasted lines into { title, url } items.
   const items: { title: string; url: string }[] = []
@@ -298,6 +318,7 @@ export async function bulkImportLinks(
           slug,
           title: newSectionTitle,
           description: newSectionDescription || null,
+          hidden,
           position,
         })
         .returning({ id: section.id })
@@ -316,6 +337,7 @@ export async function bulkImportLinks(
         kind: 'link',
         title: it.title,
         externalUrl: it.url,
+        hidden,
         position: ++position,
       })),
     )

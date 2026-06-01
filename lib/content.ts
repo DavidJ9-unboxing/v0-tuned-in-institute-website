@@ -1,4 +1,4 @@
-import { asc, eq, ilike, or, sql } from 'drizzle-orm'
+import { and, asc, eq, ilike, or, sql } from 'drizzle-orm'
 import { db } from '@/lib/db'
 import { lesson, section } from '@/lib/db/schema'
 
@@ -7,7 +7,11 @@ export type Lesson = typeof lesson.$inferSelect
 
 export type SectionWithCount = Section & { lessonCount: number }
 
-/** All sections ordered by position, with a lesson count for each. */
+/**
+ * All visible sections ordered by position, with a count of their visible
+ * lessons. Hidden sections and hidden lessons are excluded — those exist only
+ * as background knowledge for Remi, never in the library UI.
+ */
 export async function getSections(): Promise<SectionWithCount[]> {
   const rows = await db
     .select({
@@ -15,13 +19,15 @@ export async function getSections(): Promise<SectionWithCount[]> {
       slug: section.slug,
       title: section.title,
       description: section.description,
+      hidden: section.hidden,
       position: section.position,
       createdAt: section.createdAt,
       updatedAt: section.updatedAt,
-      lessonCount: sql<number>`count(${lesson.id})::int`,
+      lessonCount: sql<number>`cast(count(${lesson.id}) filter (where ${lesson.hidden} = false) as int)`,
     })
     .from(section)
     .leftJoin(lesson, eq(lesson.sectionId, section.id))
+    .where(eq(section.hidden, false))
     .groupBy(section.id)
     .orderBy(asc(section.position), asc(section.id))
   return rows
@@ -45,16 +51,22 @@ export async function getSectionsWithLessons(): Promise<SectionWithLessons[]> {
   }))
 }
 
+/** Look up a visible section by slug. Hidden sections return null (library 404). */
 export async function getSectionBySlug(slug: string): Promise<Section | null> {
-  const [row] = await db.select().from(section).where(eq(section.slug, slug)).limit(1)
+  const [row] = await db
+    .select()
+    .from(section)
+    .where(and(eq(section.slug, slug), eq(section.hidden, false)))
+    .limit(1)
   return row ?? null
 }
 
+/** Visible lessons for a section, ordered. Hidden lessons are excluded. */
 export async function getLessonsForSection(sectionId: number): Promise<Lesson[]> {
   return db
     .select()
     .from(lesson)
-    .where(eq(lesson.sectionId, sectionId))
+    .where(and(eq(lesson.sectionId, sectionId), eq(lesson.hidden, false)))
     .orderBy(asc(lesson.position), asc(lesson.id))
 }
 
@@ -73,6 +85,7 @@ export async function searchLessons(query: string): Promise<(Lesson & { sectionS
       externalUrl: lesson.externalUrl,
       fileUrl: lesson.fileUrl,
       fileName: lesson.fileName,
+      hidden: lesson.hidden,
       position: lesson.position,
       createdAt: lesson.createdAt,
       updatedAt: lesson.updatedAt,
@@ -81,7 +94,13 @@ export async function searchLessons(query: string): Promise<(Lesson & { sectionS
     })
     .from(lesson)
     .innerJoin(section, eq(section.id, lesson.sectionId))
-    .where(or(ilike(lesson.title, q), ilike(lesson.description, q), ilike(section.title, q)))
+    .where(
+      and(
+        eq(lesson.hidden, false),
+        eq(section.hidden, false),
+        or(ilike(lesson.title, q), ilike(lesson.description, q), ilike(section.title, q)),
+      ),
+    )
     .orderBy(asc(section.position), asc(lesson.position))
     .limit(50)
   return rows
