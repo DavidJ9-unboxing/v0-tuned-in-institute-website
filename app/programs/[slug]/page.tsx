@@ -39,7 +39,8 @@ export default async function ProgramDetailPage({
   const program = programs.find((p) => p.slug === slug)
   if (!program) notFound()
 
-  const comingSoon = program.status.toLowerCase().includes('coming')
+  const status = program.status.toLowerCase()
+  const comingSoon = status.includes('coming') || status.includes('launching')
 
   return (
     <>
@@ -85,19 +86,38 @@ export default async function ProgramDetailPage({
               {program.modules} modules
             </h2>
             <ol className="mt-8 space-y-px overflow-hidden rounded-xl border border-stone">
-              {program.moduleList.map((module, i) => (
-                <li
-                  key={module}
-                  className="flex items-start gap-4 bg-card px-6 py-5 transition-colors hover:bg-paper"
-                >
-                  <span className="mt-0.5 flex size-7 shrink-0 items-center justify-center rounded-full bg-sage-light font-serif text-sm font-semibold text-deep-teal">
-                    {i + 1}
-                  </span>
-                  <span className="font-serif text-[17px] leading-snug text-charcoal/85">
-                    {module}
-                  </span>
-                </li>
-              ))}
+              {program.moduleList.map((module, i) => {
+                const title = typeof module === 'string' ? module : module.title
+                const points = typeof module === 'string' ? [] : module.points
+                return (
+                  <li
+                    key={title}
+                    className="flex items-start gap-4 bg-card px-6 py-5 transition-colors hover:bg-paper"
+                  >
+                    <span className="mt-0.5 flex size-7 shrink-0 items-center justify-center rounded-full bg-sage-light font-serif text-sm font-semibold text-deep-teal">
+                      {i + 1}
+                    </span>
+                    <div className="flex flex-col gap-2">
+                      <span className="font-serif text-[17px] leading-snug text-charcoal/85">
+                        {title}
+                      </span>
+                      {points.length > 0 && (
+                        <ul className="space-y-1.5">
+                          {points.map((point) => (
+                            <li
+                              key={point}
+                              className="flex gap-2.5 font-sans text-sm leading-relaxed text-charcoal/65"
+                            >
+                              <span className="mt-2 size-1 shrink-0 rounded-full bg-sage-deep" />
+                              {point}
+                            </li>
+                          ))}
+                        </ul>
+                      )}
+                    </div>
+                  </li>
+                )
+              })}
             </ol>
           </div>
 

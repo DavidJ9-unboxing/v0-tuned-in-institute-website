@@ -16,7 +16,8 @@ export function ProgramCard({
   href: string
   age?: string
 }) {
-  const comingSoon = status.toLowerCase().includes('coming')
+  const lowerStatus = status.toLowerCase()
+  const comingSoon = lowerStatus.includes('coming') || lowerStatus.includes('launching')
   return (
     <Link
       href={href}
