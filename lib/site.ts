@@ -225,3 +225,17 @@ export const clinicalFoundations = [
     body: 'Grounded in attachment and developmental science, we look at the family, environment, and relationships around a person, not just symptoms.',
   },
 ]
+
+export const whatWeAre = [
+  'A research and education organization grounded in attachment science, polyvagal theory, and Sophie Schauermann\u2019s clinical philosophy of sensitivity.',
+  'A publisher of long-form books, course curricula, downloadable resources, and an AI concierge trained on the full body of work.',
+  'A sibling to Rooted Rhythm Therapy, which provides clinical care in Dallas, Atlanta, and Colorado, and virtual coaching worldwide.',
+  'A future home for primary research on sensitivity and nervous-system regulation across the lifespan.',
+]
+
+export const whatWeAreNot = [
+  'Not a diagnostic service, a therapy practice, or a substitute for clinical care.',
+  'Not a generic wellness brand or a self-help imprint.',
+  'Not a parenting influencer brand. There are clinical credentials and clinical hours behind every claim.',
+  'Not a tech company. The AI concierge is a delivery vehicle for the curriculum, not the product.',
+]
