@@ -397,9 +397,10 @@ export function RemiChat({
                   on your mind.
                 </p>
                 <p className="mt-2.5 font-sans text-xs leading-relaxed text-charcoal/60">
-                  A quick note: our chat is private and isn&apos;t saved, so please skip full names or
-                  identifying details (see the privacy note below). When we&apos;re done, just ask and
-                  I&apos;ll write a short summary you can save and bring back next time.
+                  A quick note: our chat is private and isn&apos;t saved. When we&apos;re done, just
+                  ask and I&apos;ll write a short summary you can save and bring back next time.
+                  However, please skip full names or identifying details (see the privacy note
+                  below).
                 </p>
               </div>
             </div>
