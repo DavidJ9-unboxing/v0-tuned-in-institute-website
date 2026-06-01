@@ -15,12 +15,20 @@ import { useRemi } from '@/components/library/remi-launcher'
 export function SiteHeader() {
   const [scrolled, setScrolled] = useState(false)
   const [open, setOpen] = useState(false)
+  const [mounted, setMounted] = useState(false)
   const pathname = usePathname()
   const { open: openRemi } = useRemi()
   const { data: session } = useSession()
-  const user = session?.user as
-    | { name: string; email: string; role?: string }
-    | undefined
+  // Session is only known on the client. Until the component mounts we treat the user as
+  // signed-out so the server and initial client render match (prevents hydration mismatch).
+  const user =
+    mounted
+      ? (session?.user as { name: string; email: string; role?: string } | undefined)
+      : undefined
+
+  useEffect(() => {
+    setMounted(true)
+  }, [])
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 80)
