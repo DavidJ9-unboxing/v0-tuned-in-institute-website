@@ -160,9 +160,11 @@ function RemiPanel({
         side="right"
         // Hide the faint default close (the bare `>button` child); we provide a
         // clearer, larger one in the header that's easy to tap on mobile.
-        className="flex w-full flex-col gap-0 p-0 sm:max-w-lg lg:max-w-xl [&>button:last-of-type]:hidden"
+        // Size to the dynamic viewport (`dvh`) so the mobile browser's URL bar
+        // can't overlap and clip the header at the top.
+        className="flex w-full flex-col gap-0 p-0 !h-[100dvh] !max-h-[100dvh] sm:max-w-lg lg:max-w-xl [&>button:last-of-type]:hidden"
       >
-        <SheetHeader className="flex-row items-center gap-3 border-b border-stone bg-card px-4 py-4 sm:px-5">
+        <SheetHeader className="flex-row items-center gap-3 border-b border-stone bg-card px-4 pb-4 pt-[max(1rem,env(safe-area-inset-top))] sm:px-5">
           <span className="flex size-9 shrink-0 items-center justify-center rounded-full bg-deep-teal">
             <Sparkles className="size-5 text-off-white" aria-hidden="true" />
             <span className="sr-only">Remi</span>
