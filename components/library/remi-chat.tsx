@@ -394,13 +394,10 @@ export function RemiChat({
                 <p className="font-serif text-[15px] leading-relaxed text-charcoal/85">
                   Hi, I&apos;m Remi. I&apos;m here to talk things through with you — a hard moment
                   with your child, or something you&apos;re carrying yourself. Share whatever&apos;s
-                  on your mind.
-                </p>
-                <p className="mt-2.5 font-sans text-xs leading-relaxed text-charcoal/60">
-                  A quick note: our chat is private and isn&apos;t saved. When we&apos;re done, just
-                  ask and I&apos;ll write a short summary you can save and bring back next time.
-                  However, please skip full names or identifying details (see the privacy note
-                  below).
+                  on your mind.{' '}
+                  <span className="text-charcoal/60">
+                    (Chat is private and not saved but avoid full names and identifying details.)
+                  </span>
                 </p>
               </div>
             </div>
