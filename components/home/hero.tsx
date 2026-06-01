@@ -1,5 +1,10 @@
+'use client'
+
 import Link from 'next/link'
-import { ArrowRight, BookOpen, GraduationCap, MessageCircle } from 'lucide-react'
+import { ArrowRight, BookOpen, GraduationCap, MessageCircle, Sparkles } from 'lucide-react'
+import { Button } from '@/components/ui/button'
+import { useSession } from '@/lib/auth-client'
+import { useRemi } from '@/components/library/remi-launcher'
 import { AccessCta, SignInCta } from '@/components/site/access-cta'
 
 const accessPoints = [
@@ -24,6 +29,10 @@ const accessPoints = [
 ]
 
 export function Hero() {
+  const { data: session } = useSession()
+  const { open: openRemi } = useRemi()
+  const user = session?.user
+
   return (
     <section className="bg-deep-teal text-off-white">
       {/* Tagline band — sits in the gap between the header and the hero logo */}
@@ -54,15 +63,30 @@ export function Hero() {
                   className="h-12 w-full px-8 text-base font-semibold bg-sage font-sans text-deep-teal shadow-sm transition-shadow hover:bg-sage/90 hover:shadow-md sm:w-auto"
                 />
                 <AccessCta
+                  libraryLabel="Go to the Library"
                   variant="outline"
                   className="h-12 w-full border-2 border-off-white/50 bg-transparent px-8 text-base font-semibold text-off-white font-sans transition-colors hover:bg-off-white hover:text-deep-teal sm:w-auto"
                   libraryVariant="default"
                   libraryClassName="h-12 w-full px-8 text-base font-semibold bg-sage font-sans text-deep-teal shadow-sm transition-shadow hover:bg-sage/90 hover:shadow-md sm:w-auto"
                 />
+                {user && (
+                  <Button
+                    type="button"
+                    onClick={openRemi}
+                    size="lg"
+                    variant="outline"
+                    className="h-12 w-full gap-2 border-2 border-off-white/50 bg-transparent px-8 text-base font-semibold text-off-white font-sans transition-colors hover:bg-off-white hover:text-deep-teal sm:w-auto"
+                  >
+                    <Sparkles className="size-4" aria-hidden="true" />
+                    Ask Remi
+                  </Button>
+                )}
               </div>
-              <span className="w-full text-center font-sans text-xs text-off-white/60 md:text-left">
-                Full access requires membership
-              </span>
+              {!user && (
+                <span className="w-full text-center font-sans text-xs text-off-white/60 md:text-left">
+                  Full access requires membership
+                </span>
+              )}
             </div>
           </div>
         </div>
