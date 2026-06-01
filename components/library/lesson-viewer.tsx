@@ -4,6 +4,7 @@ import { useState } from 'react'
 import { Download, ExternalLink, FileText, PlayCircle } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import type { Lesson } from '@/lib/content'
+import { toEmbedUrl } from '@/lib/video'
 
 /** PDFs can be previewed inline; other document types only offer a download. */
 function isPdf(url: string, fileName?: string | null) {
@@ -55,6 +56,26 @@ export function LessonViewer({
                 </p>
               </div>
             ) : null}
+
+            {active.kind === 'embed' &&
+              (toEmbedUrl(active.externalUrl ?? '') ? (
+                <div className="overflow-hidden rounded-2xl border border-stone bg-charcoal">
+                  <iframe
+                    key={active.id}
+                    src={toEmbedUrl(active.externalUrl ?? '') as string}
+                    title={active.title}
+                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; fullscreen"
+                    allowFullScreen
+                    className="aspect-video w-full bg-charcoal"
+                  />
+                </div>
+              ) : (
+                <div className="flex aspect-video w-full items-center justify-center rounded-2xl border border-stone bg-sage-light">
+                  <p className="font-serif text-[15px] text-charcoal/60">
+                    This video is not available yet.
+                  </p>
+                </div>
+              ))}
 
             {active.kind === 'link' && active.externalUrl && (
               <div className="flex flex-col items-start gap-4 rounded-2xl border border-stone bg-sage-light px-6 py-8">
@@ -146,6 +167,7 @@ export function LessonViewer({
                     ) : (
                       <PlayCircle className="size-4 text-deep-teal" aria-hidden="true" />
                     )}
+                    {/* video + embed both use the play icon above */}
                   </span>
                   <span className="flex flex-col">
                     <span className="font-serif text-[15px] font-semibold leading-snug text-charcoal">
@@ -159,6 +181,7 @@ export function LessonViewer({
                           : l.kind === 'document'
                             ? 'Document'
                             : 'Video'}
+                      {/* "video" and "embed" both display as Video */}
                     </span>
                   </span>
                 </button>

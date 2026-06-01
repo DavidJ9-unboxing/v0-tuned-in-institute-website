@@ -356,8 +356,18 @@ function BulkImport({ sections, onDone }: { sections: Section[]; onDone: () => v
   )
 }
 
+type LessonKind = 'video' | 'embed' | 'document' | 'article' | 'link'
+
+const KIND_LABELS: Record<LessonKind, string> = {
+  video: 'Upload video',
+  embed: 'Video link',
+  document: 'Document',
+  article: 'Article',
+  link: 'Link',
+}
+
 function AddLessonForm({ sectionId, onDone }: { sectionId: number; onDone: () => void }) {
-  const [kind, setKind] = useState<'video' | 'article' | 'link' | 'document'>('video')
+  const [kind, setKind] = useState<LessonKind>('embed')
   const [uploading, setUploading] = useState(false)
   const [progress, setProgress] = useState(0)
   const [uploadError, setUploadError] = useState('')
@@ -378,7 +388,7 @@ function AddLessonForm({ sectionId, onDone }: { sectionId: number; onDone: () =>
     lastStatus.current = state.status
   }
 
-  function selectKind(k: 'video' | 'article' | 'link' | 'document') {
+  function selectKind(k: LessonKind) {
     // Uploaded files are kind-specific, so clear them when switching modes.
     setKind(k)
     setUploadedUrl('')
@@ -425,18 +435,18 @@ function AddLessonForm({ sectionId, onDone }: { sectionId: number; onDone: () =>
       <input type="hidden" name="fileName" value={kind === 'document' ? fileName : ''} />
 
       <div className="flex flex-wrap gap-2">
-        {(['video', 'document', 'article', 'link'] as const).map((k) => (
+        {(['embed', 'video', 'document', 'article', 'link'] as const).map((k) => (
           <button
             type="button"
             key={k}
             onClick={() => selectKind(k)}
-            className={`rounded-md px-3 py-1.5 font-sans text-sm font-medium capitalize transition-colors ${
+            className={`rounded-md px-3 py-1.5 font-sans text-sm font-medium transition-colors ${
               kind === k
                 ? 'bg-deep-teal text-off-white'
                 : 'bg-muted text-muted-foreground hover:bg-sage-light'
             }`}
           >
-            {k}
+            {KIND_LABELS[k]}
           </button>
         ))}
       </div>
@@ -486,6 +496,24 @@ function AddLessonForm({ sectionId, onDone }: { sectionId: number; onDone: () =>
             <p className="font-sans text-xs text-deep-teal">Uploaded: {fileName}</p>
           )}
           {uploadError && <p className="font-sans text-xs text-destructive">{uploadError}</p>}
+        </div>
+      ) : kind === 'embed' ? (
+        <div className="flex flex-col gap-2">
+          <input
+            name="externalUrl"
+            type="url"
+            placeholder="https://vimeo.com/123456789/abcdef or https://youtu.be/…"
+            className={inputClass}
+          />
+          <p className="font-sans text-xs leading-relaxed text-muted-foreground">
+            Paste a YouTube or Vimeo share link and the video plays right inside the lesson — ideal
+            for long lessons. To keep it private, set the video to{' '}
+            <span className="font-medium text-foreground">Unlisted</span> on YouTube, or{' '}
+            <span className="font-medium text-foreground">
+              Private with “hide from Vimeo” and link-only access
+            </span>{' '}
+            on Vimeo, then copy that share URL here.
+          </p>
         </div>
       ) : kind === 'link' ? (
         <input

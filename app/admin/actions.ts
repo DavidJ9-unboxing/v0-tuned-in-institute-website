@@ -7,6 +7,7 @@ import { auth } from '@/lib/auth'
 import { db } from '@/lib/db'
 import { lesson, section, user } from '@/lib/db/schema'
 import { requireAdmin } from '@/lib/session'
+import { toEmbedUrl } from '@/lib/video'
 
 export type ActionState = { status: 'idle' | 'success' | 'error'; message: string }
 
@@ -192,6 +193,17 @@ export async function createLesson(
   if (kind === 'link' && !isValidUrl(externalUrl)) {
     return { status: 'error', message: 'Please enter a valid link starting with https://' }
   }
+  if (kind === 'embed') {
+    if (!isValidUrl(externalUrl)) {
+      return { status: 'error', message: 'Please enter a valid link starting with https://' }
+    }
+    if (!toEmbedUrl(externalUrl)) {
+      return {
+        status: 'error',
+        message: 'That doesn’t look like a YouTube or Vimeo link. Paste the video’s share URL.',
+      }
+    }
+  }
   if (kind === 'document' && !fileUrl) {
     return { status: 'error', message: 'Please upload a document before saving.' }
   }
@@ -201,9 +213,11 @@ export async function createLesson(
       ? 'article'
       : kind === 'link'
         ? 'link'
-        : kind === 'document'
-          ? 'document'
-          : 'video'
+        : kind === 'embed'
+          ? 'embed'
+          : kind === 'document'
+            ? 'document'
+            : 'video'
 
   try {
     const existing = await db.select().from(lesson).where(eq(lesson.sectionId, sectionId))
@@ -215,7 +229,7 @@ export async function createLesson(
       description: description || null,
       videoUrl: kind === 'video' ? videoUrl : null,
       body: kind === 'article' ? body : null,
-      externalUrl: kind === 'link' ? externalUrl : null,
+      externalUrl: kind === 'link' || kind === 'embed' ? externalUrl : null,
       fileUrl: kind === 'document' ? fileUrl : null,
       fileName: kind === 'document' ? fileName || null : null,
       position,
