@@ -74,6 +74,39 @@ export function SignInCta({
 }
 
 /**
+ * Membership call-to-action used on program detail pages ("What's included").
+ * - Signed in (member): "Go to Library to access" -> /library
+ * - Signed out:         "Become a Member" / "Join to get early access" -> /membership
+ */
+export function MembershipCta({ comingSoon }: { comingSoon?: boolean }) {
+  const { data: session } = useSession()
+  const loggedIn = Boolean(session?.user)
+
+  const label = loggedIn
+    ? 'Go to Library to access'
+    : comingSoon
+      ? 'Join to get early access'
+      : 'Become a Member'
+
+  return (
+    <>
+      <Button
+        asChild
+        size="lg"
+        className="mt-7 w-full bg-deep-teal font-sans font-semibold text-off-white hover:bg-teal-deep"
+      >
+        <Link href={loggedIn ? '/library' : '/membership'}>{label}</Link>
+      </Button>
+      <p className="mt-3 text-center font-sans text-xs text-charcoal/55">
+        {loggedIn
+          ? 'Your membership unlocks all four programs.'
+          : 'One membership unlocks all four programs.'}
+      </p>
+    </>
+  )
+}
+
+/**
  * Footer site-map links.
  * - Signed out: "Request Access" + "Sign In"
  * - Signed in:  a single "Go to Library" link
