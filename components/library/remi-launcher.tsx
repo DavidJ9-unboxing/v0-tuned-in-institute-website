@@ -176,10 +176,11 @@ function RemiPanel({
             </span>
           </div>
           <SheetClose
-            className="ml-auto flex size-9 shrink-0 items-center justify-center rounded-full text-charcoal/60 transition-colors hover:bg-sage-light hover:text-deep-teal focus:outline-none focus-visible:ring-2 focus-visible:ring-deep-teal/40"
+            className="ml-auto flex shrink-0 items-center gap-1.5 rounded-full border border-stone bg-off-white px-3 py-2 font-sans text-sm font-semibold text-deep-teal transition-colors hover:border-deep-teal/40 hover:bg-sage-light focus:outline-none focus-visible:ring-2 focus-visible:ring-deep-teal/40"
           >
-            <X className="size-5" aria-hidden="true" />
-            <span className="sr-only">Close chat</span>
+            <X className="size-4" aria-hidden="true" />
+            <span>Close</span>
+            <span className="sr-only">chat and return to the site</span>
           </SheetClose>
         </SheetHeader>
 
