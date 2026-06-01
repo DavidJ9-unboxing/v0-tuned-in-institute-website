@@ -69,6 +69,9 @@ export const section = pgTable('section', {
   slug: text('slug').notNull().unique(),
   title: text('title').notNull(),
   description: text('description'),
+  // Hidden sections (and their lessons) never appear in the library, but their
+  // content is still fed to Remi as background knowledge for answering questions.
+  hidden: boolean('hidden').notNull().default(false),
   position: integer('position').notNull().default(0),
   createdAt: timestamp('createdAt').notNull().defaultNow(),
   updatedAt: timestamp('updatedAt').notNull().defaultNow(),
@@ -90,6 +93,9 @@ export const lesson = pgTable('lesson', {
   // For documents: the Blob URL of the uploaded file and its original name.
   fileUrl: text('fileUrl'),
   fileName: text('fileName'),
+  // Hidden lessons never appear in the library, but are still fed to Remi as
+  // background knowledge for answering questions.
+  hidden: boolean('hidden').notNull().default(false),
   position: integer('position').notNull().default(0),
   createdAt: timestamp('createdAt').notNull().defaultNow(),
   updatedAt: timestamp('updatedAt').notNull().defaultNow(),

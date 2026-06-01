@@ -1,5 +1,5 @@
 import 'server-only'
-import { asc, eq, inArray } from 'drizzle-orm'
+import { and, asc, eq, inArray, sql } from 'drizzle-orm'
 import { db } from '@/lib/db'
 import { lesson, section } from '@/lib/db/schema'
 
@@ -22,9 +22,16 @@ export type RemiResource = {
 type CatalogRow = RemiResource & {
   description: string | null
   body: string | null
+  // True when the lesson or its section is hidden from the library. Remi may
+  // use the knowledge, but there is no public page to link to, so it must not cite it.
+  hidden: boolean
 }
 
-/** Every lesson in the library with the collection it belongs to and its body. */
+/**
+ * Every lesson Remi can draw on, including hidden ones. Hidden lessons (or
+ * lessons in hidden sections) are background knowledge only — flagged so Remi
+ * uses the facts without offering a (nonexistent) library link.
+ */
 async function getCatalog(): Promise<CatalogRow[]> {
   return db
     .select({
@@ -36,6 +43,7 @@ async function getCatalog(): Promise<CatalogRow[]> {
       body: lesson.body,
       sectionSlug: section.slug,
       sectionTitle: section.title,
+      hidden: sql<boolean>`(${lesson.hidden} or ${section.hidden})`,
     })
     .from(lesson)
     .innerJoin(section, eq(section.id, lesson.sectionId))
@@ -57,7 +65,11 @@ export async function getResourcesByIds(ids: number[]): Promise<RemiResource[]> 
     })
     .from(lesson)
     .innerJoin(section, eq(section.id, lesson.sectionId))
-    .where(inArray(lesson.id, unique))
+    // Hidden lessons (and lessons in hidden sections) have no library page, so
+    // they can never be surfaced as a citation card even if Remi requests them.
+    .where(
+      and(inArray(lesson.id, unique), eq(lesson.hidden, false), eq(section.hidden, false)),
+    )
   // Preserve the order Remi requested them in.
   const byId = new Map(rows.map((r) => [r.id, r]))
   return unique.map((id) => byId.get(id)).filter((r): r is RemiResource => Boolean(r))
@@ -80,9 +92,17 @@ export async function buildRemiSystemPrompt(): Promise<{
 
   const catalogText = catalog
     .map((c) => {
-      const parts = [`#${c.id} — "${c.title}" (${c.kind}) · Collection: ${c.sectionTitle}`]
+      const header = c.hidden
+        ? `#${c.id} — "${c.title}" (${c.kind}) · Collection: ${c.sectionTitle} · [BACKGROUND KNOWLEDGE ONLY — do NOT cite, there is no link to share]`
+        : `#${c.id} — "${c.title}" (${c.kind}) · Collection: ${c.sectionTitle}`
+      const parts = [header]
       if (c.description) parts.push(`Summary: ${c.description}`)
-      if (c.body) parts.push(`Content: ${truncate(c.body)}`)
+      if (c.body) {
+        // Hidden "knowledge only" content (e.g. course transcripts) has no link
+        // to fall back on, so Remi needs the full text. Visible library bodies
+        // stay short — the member can open the lesson for the rest.
+        parts.push(`Content: ${c.hidden ? c.body.trim() : truncate(c.body)}`)
+      }
       return parts.join('\n')
     })
     .join('\n\n---\n\n')
@@ -128,6 +148,7 @@ GROUNDING — THIS IS A HARD RULE
 - For empathy, reflection, validation, and general companionship, just be present and human — you don't need a resource to talk with someone.
 - BUT for any specific factual claim, technique, strategy, or piece of "advice," you may ONLY draw on the Institute / Rooted Rhythm resources provided below. Do NOT use outside knowledge or invent techniques. If you state a fact or strategy, it must come from the content of the resources below, summarised in your own warm words.
 - Sharing a resource link is OPTIONAL and member-led. Only call the "citeResources" tool when you have genuinely drawn on a specific resource AND it would actually help the member — and ideally after you've offered and they seem interested. Do NOT attach a resource to every message. Many good replies will have no citation at all.
+- Some resources below are marked "[BACKGROUND KNOWLEDGE ONLY]". These are course materials you may freely draw on to inform your answers and talk things through, but they have NO shareable link — so you must NEVER cite them with the citeResources tool or imply the member can open them. Just weave the understanding into your own warm words.
 - When you do cite, the interface automatically displays the resources as tappable cards directly below your message. So do NOT list, name, or paste resource titles, links, URLs, or "#id" references in your reply text, and do NOT add a "Resources:" or "Here are some links" section. Just speak naturally and let the citeResources tool handle the links. You may refer to a resource conversationally (e.g. "the bedtime routine guide below"), but never reproduce the list yourself.
 - ANSWER EXACTLY ONCE. Write your complete reply as a single message, and (only if you're citing) call the citeResources tool as your final action. The citeResources tool is a silent action — after calling it, you are DONE. Do NOT write any more text, do NOT restate or re-greet, and do NOT produce a second version of your answer. Never repeat your opening line or rephrase what you already said.
 - If the resources below do not cover a factual question the member is asking, say so honestly and kindly — do not guess. You can still talk it through with them, and suggest they reach out to the Institute team or their Rooted Rhythm therapist.

@@ -21,6 +21,7 @@ type Lesson = {
   kind: string
   title: string
   description: string | null
+  hidden: boolean
   position: number
 }
 
@@ -29,12 +30,46 @@ type Section = {
   slug: string
   title: string
   description: string | null
+  hidden: boolean
   lessons: Lesson[]
 }
 
 const initial: ActionState = { status: 'idle', message: '' }
 const inputClass =
   'w-full rounded-md border border-input bg-background px-3 py-2 font-sans text-sm text-foreground outline-none focus:border-deep-teal focus:ring-2 focus:ring-deep-teal/20'
+
+/** A small "Hidden from library" badge shown in the admin index. */
+function HiddenBadge() {
+  return (
+    <span className="rounded bg-amber-100 px-2 py-0.5 font-sans text-xs font-medium text-amber-800">
+      Hidden · Remi only
+    </span>
+  )
+}
+
+/**
+ * Checkbox that flags content as hidden from the library (Remi knowledge only).
+ * Submitted as the `hidden` field with value "true" when checked.
+ */
+function HiddenToggle({ defaultChecked = false }: { defaultChecked?: boolean }) {
+  return (
+    <label className="flex items-start gap-2 font-sans text-sm text-foreground">
+      <input
+        type="checkbox"
+        name="hidden"
+        value="true"
+        defaultChecked={defaultChecked}
+        className="mt-0.5 size-4 rounded border-input accent-deep-teal"
+      />
+      <span>
+        Hide from library{' '}
+        <span className="text-muted-foreground">
+          — members won&apos;t see it, but Remi can use it to answer questions.
+        </span>
+      </span>
+    </label>
+  )
+}
 
 export function ContentManager({ sections }: { sections: Section[] }) {
   const router = useRouter()
@@ -48,26 +83,29 @@ export function ContentManager({ sections }: { sections: Section[] }) {
           <CardTitle className="font-serif text-xl text-deep-teal">New collection</CardTitle>
         </CardHeader>
         <CardContent>
-          <form action={sectionAction} className="flex flex-col gap-3 sm:flex-row sm:items-end">
-            <div className="flex-1">
-              <label className="mb-1 block font-sans text-sm font-medium text-foreground">
-                Title
-              </label>
-              <input name="title" placeholder="Tuned In Teens" className={inputClass} required />
+          <form action={sectionAction} className="flex flex-col gap-3">
+            <div className="flex flex-col gap-3 sm:flex-row sm:items-end">
+              <div className="flex-1">
+                <label className="mb-1 block font-sans text-sm font-medium text-foreground">
+                  Title
+                </label>
+                <input name="title" placeholder="Tuned In Teens" className={inputClass} required />
+              </div>
+              <div className="flex-1">
+                <label className="mb-1 block font-sans text-sm font-medium text-foreground">
+                  Description (optional)
+                </label>
+                <input
+                  name="description"
+                  placeholder="Short summary of this collection"
+                  className={inputClass}
+                />
+              </div>
+              <Button type="submit" disabled={sectionPending} className="font-sans font-semibold">
+                {sectionPending ? 'Creating…' : 'Create'}
+              </Button>
             </div>
-            <div className="flex-1">
-              <label className="mb-1 block font-sans text-sm font-medium text-foreground">
-                Description (optional)
-              </label>
-              <input
-                name="description"
-                placeholder="Short summary of this collection"
-                className={inputClass}
-              />
-            </div>
-            <Button type="submit" disabled={sectionPending} className="font-sans font-semibold">
-              {sectionPending ? 'Creating…' : 'Create'}
-            </Button>
+            <HiddenToggle />
           </form>
           {sectionState.status !== 'idle' && (
             <p
@@ -146,6 +184,7 @@ function SectionCard({
                 className={inputClass}
               />
             </div>
+            <HiddenToggle defaultChecked={section.hidden} />
             <div className="flex items-center gap-3">
               <Button type="submit" disabled={pending} className="font-sans font-semibold">
                 {pending ? 'Saving…' : 'Save'}
@@ -165,12 +204,13 @@ function SectionCard({
         ) : (
           <div className="flex flex-row items-start justify-between gap-4">
             <div>
-              <CardTitle className="font-serif text-xl text-deep-teal">
+              <CardTitle className="flex flex-wrap items-center gap-x-2 gap-y-1 font-serif text-xl text-deep-teal">
                 {section.title}
-                <span className="ml-2 font-sans text-sm font-normal text-muted-foreground">
+                <span className="font-sans text-sm font-normal text-muted-foreground">
                   {section.lessons.length}{' '}
                   {section.lessons.length === 1 ? 'item' : 'items'}
                 </span>
+                {section.hidden && <HiddenBadge />}
               </CardTitle>
               {section.description && (
                 <p className="mt-1 font-sans text-sm text-muted-foreground">
@@ -208,11 +248,12 @@ function SectionCard({
                 key={l.id}
                 className="flex flex-col gap-2 rounded-md border border-border bg-muted/40 px-3 py-2 sm:flex-row sm:items-center sm:justify-between sm:gap-4"
               >
-                <div className="flex items-center gap-3">
+                <div className="flex flex-wrap items-center gap-2">
                   <span className="rounded bg-sage-light px-2 py-0.5 font-sans text-xs font-medium text-deep-teal">
                     {l.kind}
                   </span>
                   <span className="font-sans text-sm text-foreground">{l.title}</span>
+                  {l.hidden && <HiddenBadge />}
                 </div>
                 <div className="flex items-center gap-3 sm:shrink-0">
                   <label className="sr-only" htmlFor={`move-${l.id}`}>
@@ -335,6 +376,8 @@ function BulkImport({ sections, onDone }: { sections: Section[]; onDone: () => v
               required
             />
           </div>
+
+          <HiddenToggle />
 
           <div className="flex items-center gap-3">
             <Button type="submit" disabled={pending} className="font-sans font-semibold">
@@ -530,6 +573,8 @@ function AddLessonForm({ sectionId, onDone }: { sectionId: number; onDone: () =>
           className={inputClass}
         />
       )}
+
+      <HiddenToggle />
 
       <div className="flex items-center gap-3">
         <Button
