@@ -120,6 +120,9 @@ export function RemiChat({
   // In the slide-over the resource list is collapsed by default so it doesn't eat the small
   // mobile screen; members still see a labelled, tappable header telling them links are there.
   const [resourcesOpen, setResourcesOpen] = useState(false)
+  // Privacy note is collapsed by default; the header always shows a short summary so the
+  // important "not HIPAA-compliant / don't share identifying details" point stays visible.
+  const [privacyOpen, setPrivacyOpen] = useState(false)
   const scrollRef = useRef<HTMLDivElement>(null)
   const lastUserRef = useRef<HTMLDivElement>(null)
   const didAutoSend = useRef(false)
@@ -262,39 +265,70 @@ export function RemiChat({
     ))
 
   const privacyNote = (
-    <div
+    <section
+      aria-label="Privacy and confidentiality"
       className={cn(
         'border-stone bg-paper',
-        isPanel ? 'shrink-0 border-t px-5 py-4' : 'rounded-xl border px-4 py-4',
+        isPanel ? 'shrink-0 border-t' : 'rounded-xl border',
       )}
     >
-      <div className="flex items-center gap-2">
-        <Lock className="size-4 shrink-0 text-deep-teal" aria-hidden="true" />
-        <h3 className="font-sans text-sm font-semibold text-charcoal">Privacy &amp; Confidentiality</h3>
-      </div>
-      <div className="mt-2 flex flex-col gap-2 font-sans text-xs leading-relaxed text-charcoal/65">
-        <p>
-          Your conversations with Remi are private and are not saved between chats. Remi won&apos;t
-          remember your conversation the next time you return unless you choose to save a summary and
-          bring it back with you.
-        </p>
-        <p>
-          Please note that Remi is{' '}
-          <span className="font-medium text-charcoal/80">not HIPAA-compliant</span> because it is
-          powered by OpenAI technology. To protect your privacy, please avoid sharing full names,
-          addresses, dates of birth, insurance information, or other identifying details.
-        </p>
-        <p>
-          Remi is trained to draw from educational content created by the Tuned In Institute and
-          Rooted Rhythm Therapy to offer guidance, resources, and support. Think of Remi as a private
-          educational guide rather than a clinical record.
-        </p>
-        <p>
-          Want to continue later? Simply ask Remi for a summary before you leave, save it somewhere
-          secure, and paste it into a new chat when you return.
-        </p>
-      </div>
-    </div>
+      <button
+        type="button"
+        onClick={() => setPrivacyOpen((v) => !v)}
+        aria-expanded={privacyOpen}
+        className={cn(
+          'flex w-full items-start justify-between gap-2 text-left transition-colors hover:bg-card/60',
+          isPanel ? 'px-5 py-3' : 'rounded-xl px-4 py-3',
+        )}
+      >
+        <span className="flex items-start gap-2.5">
+          <Lock className="mt-0.5 size-4 shrink-0 text-deep-teal" aria-hidden="true" />
+          <span className="font-sans text-xs leading-relaxed text-charcoal/65">
+            <span className="font-semibold text-charcoal">Privacy &amp; Confidentiality</span> — chats
+            aren&apos;t saved and Remi is{' '}
+            <span className="font-medium text-charcoal/80">not HIPAA-compliant</span>, so please avoid
+            sharing identifying details.{' '}
+            <span className="text-deep-teal">{privacyOpen ? 'Show less' : 'Read more'}</span>
+          </span>
+        </span>
+        <ChevronDown
+          className={cn(
+            'mt-0.5 size-4 shrink-0 text-charcoal/55 transition-transform',
+            privacyOpen && 'rotate-180',
+          )}
+          aria-hidden="true"
+        />
+      </button>
+      {privacyOpen && (
+        <div
+          className={cn(
+            'flex flex-col gap-2 font-sans text-xs leading-relaxed text-charcoal/65',
+            isPanel ? 'px-5 pb-4 pl-[2.65rem]' : 'px-4 pb-4 pl-[2.4rem]',
+          )}
+        >
+          <p>
+            Your conversations with Remi are private and are not saved between chats. Remi
+            won&apos;t remember your conversation the next time you return unless you choose to save a
+            summary and bring it back with you.
+          </p>
+          <p>
+            Please note that Remi is{' '}
+            <span className="font-medium text-charcoal/80">not HIPAA-compliant</span> because it is
+            powered by OpenAI technology. To protect your privacy, please avoid sharing full names,
+            addresses, dates of birth, insurance information, or other identifying details.
+          </p>
+          <p>
+            Remi is trained to draw from educational content created by the Tuned In Institute and
+            Rooted Rhythm Therapy to offer guidance, resources, and support. Think of Remi as a
+            private educational guide rather than a clinical record.
+          </p>
+          <p>
+            Want to continue later? Simply ask Remi for a summary before you leave, save it somewhere
+            secure, and paste it into a new chat when you return.
+          </p>
+        </div>
+      )}
+    </section>
   )
 
   const safetyNote = (
