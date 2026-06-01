@@ -57,7 +57,7 @@ export default async function ResourcesPage() {
       {/* Search */}
       <section className="border-b border-stone bg-sage-light">
         <div className="mx-auto max-w-4xl px-5 py-12 text-center sm:px-8">
-          <SearchBar placeholder="Try: my 4 year old melts down at pickup" isMember={!!user} />
+          <SearchBar placeholder="Try: my 4 year old melts down at pickup" />
           <p className="mt-4 font-sans text-sm text-deep-teal/80">
             {user
               ? 'Ask a real question — the concierge searches your full library for what fits.'
