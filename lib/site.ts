@@ -47,7 +47,8 @@ export const programs = [
       'Loving Boundaries with a Teenager',
       'Connection Across the Disconnection',
       'The Sensitive Teen at School & in the World',
-      'Building Your Village & Raising a Thriving Sensitive Teen',
+      'Building Your Village',
+      'Raising a Thriving Sensitive Teen',
     ],
   },
   {
