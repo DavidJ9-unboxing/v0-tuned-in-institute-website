@@ -120,7 +120,12 @@ export async function changeUserRole(userId: string, role: 'admin' | 'client') {
 export async function removeUser(userId: string) {
   const admin = await requireAdmin()
   if (admin.id === userId) return // never delete yourself
-  await auth.api.removeUser({ body: { userId } })
+  // The admin plugin authorizes this endpoint from the request session, so we
+  // must forward the headers — otherwise the deletion is silently rejected.
+  await auth.api.removeUser({
+    body: { userId },
+    headers: await headers(),
+  })
   revalidatePath('/admin/accounts')
 }
 
