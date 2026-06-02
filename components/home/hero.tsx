@@ -43,10 +43,10 @@ export function Hero() {
       </div>
 
       <div className="mx-auto max-w-6xl px-5 py-3 sm:px-8 md:py-5">
-        <div className="text-center md:text-left">
+        <div className="text-center">
           {/* Title block */}
           <div className="flex-1">
-            <p className="mx-auto max-w-2xl font-sans text-lg leading-relaxed text-off-white/85 md:mx-0">
+            <p className="mx-auto max-w-2xl font-sans text-lg leading-relaxed text-off-white/85">
               <span className="font-semibold text-off-white">The Tuned In Institute</span> is the
               research and education arm of{' '}
               <span className="font-semibold text-off-white">Rooted Rhythm Therapy</span>. This is
@@ -55,8 +55,8 @@ export function Hero() {
               you navigate the content and get real answers to your real questions.
             </p>
 
-            <div className="mt-6 flex flex-col items-center gap-2 md:items-start">
-              <div className="flex flex-col items-center justify-center gap-3 sm:flex-row md:justify-start">
+            <div className="mt-6 flex flex-col items-center gap-2">
+              <div className="flex flex-col items-center justify-center gap-3 sm:flex-row">
                 <SignInCta
                   label="Sign In to the Library"
                   variant="default"
@@ -83,7 +83,7 @@ export function Hero() {
                 )}
               </div>
               {!user && (
-                <span className="w-full text-center font-sans text-xs text-off-white/60 md:text-left">
+                <span className="w-full text-center font-sans text-xs text-off-white/60">
                   Full access requires membership
                 </span>
               )}
