@@ -189,7 +189,10 @@ export function AccountManager({
                     <button
                       onClick={async () => {
                         if (confirm(`Remove ${a.email}? This deletes their account.`)) {
-                          await removeUser(a.id)
+                          const result = await removeUser(a.id)
+                          if (result.status === 'error') {
+                            alert(result.message)
+                          }
                           router.refresh()
                         }
                       }}

@@ -117,16 +117,34 @@ export async function changeUserRole(userId: string, role: 'admin' | 'client') {
   revalidatePath('/admin/accounts')
 }
 
-export async function removeUser(userId: string) {
+export async function removeUser(userId: string): Promise<ActionState> {
   const admin = await requireAdmin()
-  if (admin.id === userId) return // never delete yourself
-  // The admin plugin authorizes this endpoint from the request session, so we
-  // must forward the headers — otherwise the deletion is silently rejected.
-  await auth.api.removeUser({
-    body: { userId },
-    headers: await headers(),
-  })
-  revalidatePath('/admin/accounts')
+  if (admin.id === userId) {
+    return { status: 'error', message: 'You cannot delete your own account.' }
+  }
+
+  try {
+    // Delete directly from the database. The Better Auth admin `removeUser`
+    // endpoint was leaving the row in place (its session-based authorization
+    // can silently reject the call), so we own the deletion here. The session
+    // and account tables both cascade on `user.id`, so those rows are removed
+    // automatically.
+    const deleted = await db
+      .delete(user)
+      .where(eq(user.id, userId))
+      .returning({ id: user.id })
+
+    if (deleted.length === 0) {
+      return { status: 'error', message: 'That account no longer exists.' }
+    }
+
+    revalidatePath('/admin/accounts')
+    return { status: 'success', message: 'Account removed.' }
+  } catch (err) {
+    const message = err instanceof Error ? err.message : 'Could not remove the account.'
+    console.error('[v0] removeUser failed:', message)
+    return { status: 'error', message }
+  }
 }
 
 // --- Sections --------------------------------------------------------------
