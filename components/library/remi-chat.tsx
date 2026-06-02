@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import Link from 'next/link'
 import { useChat } from '@ai-sdk/react'
 import {
@@ -9,6 +9,7 @@ import {
   Download,
   ExternalLink,
   FileText,
+  Info,
   LifeBuoy,
   Loader2,
   Lock,
@@ -206,6 +207,26 @@ export function RemiChat({
   }
 
   const hasConversation = messages.length > 0
+
+  // Guardrail: Remi re-sends the entire conversation to the model on every turn, so a very
+  // long thread can eventually crowd the model's context window and the earliest messages
+  // (e.g. "I have 5 grandchildren") start getting dropped. We estimate the conversation size
+  // from its character count (~4 chars per token is a rough industry heuristic) and gently warn
+  // before that happens. The threshold is intentionally conservative and easy to tune.
+  const WARN_AFTER_CHARS = 60_000 // ~15k tokens: a genuinely long conversation for this use case
+  const conversationChars = useMemo(() => {
+    let total = 0
+    for (const m of messages) {
+      for (const part of m.parts) {
+        if (part.type === 'text') total += part.text.length
+      }
+    }
+    return total
+  }, [messages])
+  const conversationGettingLong = conversationChars >= WARN_AFTER_CHARS
+  // Once dismissed, stay quiet for the rest of this session so it isn't nagging.
+  const [lengthNoticeDismissed, setLengthNoticeDismissed] = useState(false)
+  const showLengthNotice = conversationGettingLong && !lengthNoticeDismissed
 
   // Publish a plain-text transcript upward so the close dialog can offer "copy & paste to keep it".
   useEffect(() => {
@@ -601,6 +622,37 @@ export function RemiChat({
                 {ex}
               </button>
             ))}
+          </div>
+        )}
+
+        {/* Conversation-length guardrail: gentle heads-up before a very long thread risks
+            crowding the model's memory of earlier details. */}
+        {showLengthNotice && (
+          <div className="flex items-start gap-2.5 border-t border-amber/40 bg-amber/10 px-4 py-3">
+            <Info className="mt-0.5 size-4 shrink-0 text-amber" aria-hidden="true" />
+            <p className="flex-1 font-sans text-xs leading-relaxed text-charcoal/75">
+              This conversation is getting long. Remi may start to lose track of the earliest
+              details. For the sharpest help, consider asking Remi for a quick summary, then{' '}
+              <button
+                type="button"
+                onClick={() => {
+                  clearChat()
+                  setLengthNoticeDismissed(false)
+                }}
+                className="font-semibold text-deep-teal underline underline-offset-2 hover:text-teal-mid"
+              >
+                start a fresh chat
+              </button>
+              .
+            </p>
+            <button
+              type="button"
+              onClick={() => setLengthNoticeDismissed(true)}
+              className="-mr-1 -mt-0.5 flex shrink-0 items-center gap-1 rounded-md px-1.5 py-0.5 font-sans text-xs font-medium text-charcoal/55 transition-colors hover:bg-paper hover:text-charcoal/80"
+              aria-label="Dismiss length notice"
+            >
+              <X className="size-3.5" aria-hidden="true" />
+            </button>
           </div>
         )}
 
