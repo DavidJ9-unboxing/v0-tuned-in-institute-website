@@ -9,6 +9,7 @@ import {
   createClientAccount,
   changeUserRole,
   removeUser,
+  resetClientPassword,
   type ActionState,
 } from '@/app/admin/actions'
 
@@ -42,6 +43,7 @@ export function AccountManager({
   const formRef = useRef<HTMLFormElement>(null)
   const lastStatus = useRef(state.status)
   const [query, setQuery] = useState('')
+  const [resettingId, setResettingId] = useState<string | null>(null)
 
   // Sort alphabetically by last name (then first name), and filter by the
   // search term across name and email.
@@ -74,13 +76,13 @@ export function AccountManager({
         <CardContent>
           <form ref={formRef} action={formAction} className="flex flex-col gap-3">
             <div className="grid gap-3 sm:grid-cols-2">
-              <div>
+              <div suppressHydrationWarning>
                 <label className="mb-1 block font-sans text-sm font-medium text-foreground">
                   Name
                 </label>
                 <input name="name" placeholder="Jane Doe" className={inputClass} required />
               </div>
-              <div>
+              <div suppressHydrationWarning>
                 <label className="mb-1 block font-sans text-sm font-medium text-foreground">
                   Email
                 </label>
@@ -130,7 +132,7 @@ export function AccountManager({
           <CardTitle className="font-serif text-xl text-deep-teal">
             Members ({accounts.length})
           </CardTitle>
-          <div className="relative w-full sm:max-w-xs">
+          <div className="relative w-full sm:max-w-xs" suppressHydrationWarning>
             <Search
               className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground"
               aria-hidden="true"
@@ -185,11 +187,33 @@ export function AccountManager({
                     <option value="client">Client</option>
                     <option value="admin">Admin</option>
                   </select>
+                  <button
+                    disabled={resettingId === a.id}
+                    onClick={async () => {
+                      if (
+                        confirm(
+                          `Send ${a.email} a new temporary password? Their current password will stop working.`,
+                        )
+                      ) {
+                        setResettingId(a.id)
+                        const result = await resetClientPassword(a.id)
+                        setResettingId(null)
+                        alert(result.message)
+                        router.refresh()
+                      }
+                    }}
+                    className="font-sans text-xs font-medium text-deep-teal hover:underline disabled:opacity-50"
+                  >
+                    {resettingId === a.id ? 'Sending…' : 'Reset password'}
+                  </button>
                   {a.id !== currentUserId && (
                     <button
                       onClick={async () => {
                         if (confirm(`Remove ${a.email}? This deletes their account.`)) {
-                          await removeUser(a.id)
+                          const result = await removeUser(a.id)
+                          if (result.status === 'error') {
+                            alert(result.message)
+                          }
                           router.refresh()
                         }
                       }}

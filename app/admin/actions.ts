@@ -117,11 +117,88 @@ export async function changeUserRole(userId: string, role: 'admin' | 'client') {
   revalidatePath('/admin/accounts')
 }
 
-export async function removeUser(userId: string) {
+export async function removeUser(userId: string): Promise<ActionState> {
   const admin = await requireAdmin()
-  if (admin.id === userId) return // never delete yourself
-  await auth.api.removeUser({ body: { userId } })
-  revalidatePath('/admin/accounts')
+  if (admin.id === userId) {
+    return { status: 'error', message: 'You cannot delete your own account.' }
+  }
+
+  try {
+    // Delete directly from the database. The Better Auth admin `removeUser`
+    // endpoint was leaving the row in place (its session-based authorization
+    // can silently reject the call), so we own the deletion here. The session
+    // and account tables both cascade on `user.id`, so those rows are removed
+    // automatically.
+    const deleted = await db
+      .delete(user)
+      .where(eq(user.id, userId))
+      .returning({ id: user.id })
+
+    if (deleted.length === 0) {
+      return { status: 'error', message: 'That account no longer exists.' }
+    }
+
+    revalidatePath('/admin/accounts')
+    return { status: 'success', message: 'Account removed.' }
+  } catch (err) {
+    const message = err instanceof Error ? err.message : 'Could not remove the account.'
+    console.error('[v0] removeUser failed:', message)
+    return { status: 'error', message }
+  }
+}
+
+/**
+ * Issues a fresh temporary password for an existing member — used when a client
+ * contacts us because they've lost or forgotten their password. We generate a
+ * new temp password, set it on their account, re-flag the account so they're
+ * prompted to choose their own password on next sign-in, and email them the new
+ * credentials (the same welcome email used at account creation).
+ */
+export async function resetClientPassword(userId: string): Promise<ActionState> {
+  await requireAdmin()
+
+  const [member] = await db
+    .select({ name: user.name, email: user.email })
+    .from(user)
+    .where(eq(user.id, userId))
+    .limit(1)
+
+  if (!member) {
+    return { status: 'error', message: 'That account no longer exists.' }
+  }
+
+  const password = generateTempPassword(member.name)
+
+  try {
+    // The admin plugin authorizes from the request session, so forward headers.
+    await auth.api.setUserPassword({
+      body: { userId, newPassword: password },
+      headers: await headers(),
+    })
+
+    await db.update(user).set({ mustChangePassword: true }).where(eq(user.id, userId))
+
+    const signInUrl = `${appBaseUrl()}/sign-in`
+    const sent = await sendWelcomeEmail({
+      to: member.email,
+      name: member.name,
+      email: member.email,
+      tempPassword: password,
+      signInUrl,
+    })
+
+    revalidatePath('/admin/accounts')
+    return {
+      status: 'success',
+      message: sent.ok
+        ? `A new temporary password was emailed to ${member.email}.`
+        : `Password reset, but the email could not be sent (${sent.error}). Temporary password: ${password}`,
+    }
+  } catch (err) {
+    const message = err instanceof Error ? err.message : 'Could not reset the password.'
+    console.error('[v0] resetClientPassword failed:', message)
+    return { status: 'error', message }
+  }
 }
 
 // --- Sections --------------------------------------------------------------
