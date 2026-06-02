@@ -1,6 +1,7 @@
 'use server'
 
 import { revalidatePath } from 'next/cache'
+import { headers } from 'next/headers'
 import { eq } from 'drizzle-orm'
 import { del } from '@vercel/blob'
 import { auth } from '@/lib/auth'
@@ -109,7 +110,10 @@ export async function createClientAccount(
 
 export async function changeUserRole(userId: string, role: 'admin' | 'client') {
   await requireAdmin()
-  await auth.api.setRole({ body: { userId, role: role as 'admin' } })
+  await auth.api.setRole({
+    body: { userId, role: role as 'admin' },
+    headers: await headers(),
+  })
   revalidatePath('/admin/accounts')
 }
 
