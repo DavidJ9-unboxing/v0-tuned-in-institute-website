@@ -11,6 +11,7 @@ import {
 } from 'react'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
+import posthog from 'posthog-js'
 import { Check, Copy, Lock, Sparkles, X } from 'lucide-react'
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from '@/components/ui/sheet'
 import {
@@ -57,12 +58,24 @@ export function RemiProvider({ children }: { children: ReactNode }) {
   const [initialQuery, setInitialQuery] = useState('')
   const pathname = usePathname()
 
-  const open = useCallback((query?: string) => {
-    // Guard against being used directly as an event handler (e.g. onClick={open}),
-    // where the first argument would be a synthetic event rather than a string.
-    setInitialQuery(typeof query === 'string' ? query.trim() : '')
-    setIsOpen(true)
-  }, [])
+  const open = useCallback(
+    (query?: string) => {
+      // Guard against being used directly as an event handler (e.g. onClick={open}),
+      // where the first argument would be a synthetic event rather than a string.
+      const trimmed = typeof query === 'string' ? query.trim() : ''
+      setInitialQuery(trimmed)
+      setIsOpen(true)
+      // Product analytics: every "Ask Remi" entry point (FAB, CTA buttons, links)
+      // funnels through here, so this captures all opens with where it happened.
+      if (posthog.__loaded) {
+        posthog.capture('remi_opened', {
+          from_path: pathname,
+          has_prefilled_query: trimmed.length > 0,
+        })
+      }
+    },
+    [pathname],
+  )
   const close = useCallback(() => setIsOpen(false), [])
   const value = useMemo(() => ({ open, close }), [open, close])
 
