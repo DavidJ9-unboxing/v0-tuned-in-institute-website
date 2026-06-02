@@ -9,6 +9,7 @@ import { ProgramCard } from '@/components/site/program-card'
 import { AskRemiButton } from '@/components/library/remi-launcher'
 import { FeaturedGrid } from '@/components/site/featured-grid'
 import { Hero } from '@/components/home/hero'
+import { ScrollToTopOnLoad } from '@/components/home/scroll-to-top-on-load'
 import { programs, clinicalFoundations, whatWeAre, whatWeAreNot } from '@/lib/site'
 import { getFeaturedLessons } from '@/lib/content'
 import { getCurrentUser } from '@/lib/session'
@@ -49,6 +50,7 @@ export default async function HomePage() {
   const [featured, user] = await Promise.all([getFeaturedLessons(4), getCurrentUser()])
   return (
     <>
+      <ScrollToTopOnLoad />
       <Hero />
 
       {/* Ask Remi, the AI concierge */}
