@@ -72,7 +72,7 @@ export function Hero() {
                 {user && (
                   <Button
                     type="button"
-                    onClick={openRemi}
+                    onClick={() => openRemi()}
                     size="lg"
                     variant="outline"
                     className="h-12 w-full gap-2 border-2 border-off-white/50 bg-transparent px-8 text-base font-semibold text-off-white font-sans transition-colors hover:bg-off-white hover:text-deep-teal sm:w-auto"
