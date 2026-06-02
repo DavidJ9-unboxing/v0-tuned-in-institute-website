@@ -77,6 +77,40 @@ export function LessonViewer({
     }
   }
 
+  // On phones, automatically expand a PDF to fullscreen when the device is
+  // physically rotated to landscape, and collapse back to the windowed viewer
+  // when rotated back to portrait. We don't lock orientation here since the
+  // reader is driving it by turning the phone.
+  const activeIsPdf =
+    active?.kind === 'document' && !!active.fileUrl && isPdf(active.fileUrl, active.fileName)
+
+  useEffect(() => {
+    if (typeof window === 'undefined') return
+    const landscapeMql = window.matchMedia('(orientation: landscape)')
+    const phoneMql = window.matchMedia('(max-width: 768px)')
+
+    async function handleOrientation() {
+      if (!phoneMql.matches) return // desktops/tablets keep the windowed viewer
+      const el = docWrapRef.current
+      if (landscapeMql.matches && activeIsPdf && el && !document.fullscreenElement) {
+        try {
+          await el.requestFullscreen?.()
+        } catch {
+          /* gesture/permission blocked — reader can use the button instead */
+        }
+      } else if (!landscapeMql.matches && document.fullscreenElement) {
+        try {
+          await document.exitFullscreen()
+        } catch {
+          /* ignore */
+        }
+      }
+    }
+
+    landscapeMql.addEventListener('change', handleOrientation)
+    return () => landscapeMql.removeEventListener('change', handleOrientation)
+  }, [activeIsPdf])
+
   if (lessons.length === 0) {
     return (
       <p className="rounded-2xl border border-dashed border-stone bg-card px-6 py-12 text-center font-serif text-[15px] text-charcoal/70">
@@ -157,12 +191,12 @@ export function LessonViewer({
                       isFullscreen ? 'flex h-screen w-screen flex-col rounded-none' : 'rounded-2xl',
                     )}
                   >
-                    {/* view=FitH fits the PDF to the frame width so wide pages
-                        don't overflow; the height is capped responsively and the
-                        viewer scrolls internally for long documents. */}
+                    {/* view=Fit shows the whole page within the frame, so wide
+                        landscape pages fit fully (just smaller) instead of
+                        overflowing. The viewer scrolls internally between pages. */}
                     <iframe
                       key={active.id}
-                      src={`/api/library/file/${active.id}#toolbar=1&navpanes=0&view=FitH`}
+                      src={`/api/library/file/${active.id}#toolbar=1&navpanes=0&view=Fit`}
                       title={active.title}
                       className={cn('w-full', isFullscreen ? 'flex-1' : 'h-[60vh] md:h-[75vh]')}
                     />
@@ -190,9 +224,11 @@ export function LessonViewer({
                   </a>
                 </div>
                 {isPdf(active.fileUrl, active.fileName) && (
-                  <p className="font-sans text-xs text-charcoal/55">
-                    Tip: tap &ldquo;View fullscreen,&rdquo; then turn your phone sideways for a
-                    wide, landscape view of the document.
+                  <p className="font-sans text-xs leading-relaxed text-charcoal/55">
+                    Tip: turn your phone sideways and the document will expand to fullscreen;
+                    turn it back upright to return to the window. You can also tap &ldquo;View
+                    fullscreen&rdquo; anytime. Many documents are easier to read on a laptop or
+                    desktop.
                   </p>
                 )}
               </div>
