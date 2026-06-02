@@ -1,9 +1,10 @@
 import { and, asc, eq, ilike, or, sql } from 'drizzle-orm'
 import { db } from '@/lib/db'
-import { lesson, section } from '@/lib/db/schema'
+import { featured, lesson, section } from '@/lib/db/schema'
 
 export type Section = typeof section.$inferSelect
 export type Lesson = typeof lesson.$inferSelect
+export type Featured = typeof featured.$inferSelect
 
 export type SectionWithCount = Section & { lessonCount: number }
 
@@ -31,6 +32,91 @@ export async function getSections(): Promise<SectionWithCount[]> {
     .groupBy(section.id)
     .orderBy(asc(section.position), asc(section.id))
   return rows
+}
+
+export type FeaturedLesson = Lesson & {
+  sectionSlug: string
+  sectionTitle: string
+  /** Admin overrides from the featured table (fall back to the lesson's own). */
+  featuredId: number
+  headline: string | null
+  blurb: string | null
+}
+
+/**
+ * Admin-curated featured content for the public resources page. Reads from the
+ * featured table (joined to the lesson + section), applying any custom headline
+ * and blurb, ordered by the admin-chosen position. Hidden lessons/sections are
+ * filtered out so a featured item that later gets hidden won't leak.
+ */
+export async function getFeaturedLessons(limit = 4): Promise<FeaturedLesson[]> {
+  const rows = await db
+    .select({
+      id: lesson.id,
+      sectionId: lesson.sectionId,
+      kind: lesson.kind,
+      title: lesson.title,
+      description: lesson.description,
+      videoUrl: lesson.videoUrl,
+      body: lesson.body,
+      externalUrl: lesson.externalUrl,
+      fileUrl: lesson.fileUrl,
+      fileName: lesson.fileName,
+      hidden: lesson.hidden,
+      position: lesson.position,
+      createdAt: lesson.createdAt,
+      updatedAt: lesson.updatedAt,
+      sectionSlug: section.slug,
+      sectionTitle: section.title,
+      featuredId: featured.id,
+      headline: featured.headline,
+      blurb: featured.blurb,
+    })
+    .from(featured)
+    .innerJoin(lesson, eq(lesson.id, featured.lessonId))
+    .innerJoin(section, eq(section.id, lesson.sectionId))
+    .where(and(eq(lesson.hidden, false), eq(section.hidden, false)))
+    .orderBy(asc(featured.position), asc(featured.id))
+    .limit(limit)
+  return rows
+}
+
+export type FeaturedAdminRow = {
+  featuredId: number
+  lessonId: number
+  position: number
+  headline: string | null
+  blurb: string | null
+  lessonTitle: string
+  lessonDescription: string | null
+  kind: string
+  sectionTitle: string
+  sectionSlug: string
+}
+
+/**
+ * All featured rows for the admin manager, joined to their lesson + section.
+ * Not filtered by hidden state so admins can still see and remove a featured
+ * item even if its lesson was later hidden.
+ */
+export async function getFeaturedForAdmin(): Promise<FeaturedAdminRow[]> {
+  return db
+    .select({
+      featuredId: featured.id,
+      lessonId: featured.lessonId,
+      position: featured.position,
+      headline: featured.headline,
+      blurb: featured.blurb,
+      lessonTitle: lesson.title,
+      lessonDescription: lesson.description,
+      kind: lesson.kind,
+      sectionTitle: section.title,
+      sectionSlug: section.slug,
+    })
+    .from(featured)
+    .innerJoin(lesson, eq(lesson.id, featured.lessonId))
+    .innerJoin(section, eq(section.id, lesson.sectionId))
+    .orderBy(asc(featured.position), asc(featured.id))
 }
 
 export type SectionWithLessons = Section & { lessons: Lesson[] }

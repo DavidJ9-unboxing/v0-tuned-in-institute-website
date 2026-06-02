@@ -103,3 +103,19 @@ export const lesson = pgTable('lesson', {
   createdAt: timestamp('createdAt').notNull().defaultNow(),
   updatedAt: timestamp('updatedAt').notNull().defaultNow(),
 })
+
+// Admin-curated featured content shown on the public resources page. Each row
+// points to a lesson and can override its presentation with a custom headline
+// and blurb. `position` controls display order.
+export const featured = pgTable('featured', {
+  id: serial('id').primaryKey(),
+  lessonId: integer('lessonId')
+    .notNull()
+    .unique()
+    .references(() => lesson.id, { onDelete: 'cascade' }),
+  headline: text('headline'),
+  blurb: text('blurb'),
+  position: integer('position').notNull().default(0),
+  createdAt: timestamp('createdAt').notNull().defaultNow(),
+  updatedAt: timestamp('updatedAt').notNull().defaultNow(),
+})

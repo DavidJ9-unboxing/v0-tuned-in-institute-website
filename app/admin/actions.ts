@@ -2,11 +2,11 @@
 
 import { revalidatePath } from 'next/cache'
 import { headers } from 'next/headers'
-import { eq } from 'drizzle-orm'
+import { eq, sql } from 'drizzle-orm'
 import { del } from '@vercel/blob'
 import { auth } from '@/lib/auth'
 import { db } from '@/lib/db'
-import { lesson, section, user } from '@/lib/db/schema'
+import { featured, lesson, section, user } from '@/lib/db/schema'
 import { requireAdmin } from '@/lib/session'
 import { toEmbedUrl } from '@/lib/video'
 import { sendWelcomeEmail } from '@/lib/email'
@@ -581,4 +581,101 @@ export async function deleteLesson(lessonId: number) {
   await db.delete(lesson).where(eq(lesson.id, lessonId))
   revalidatePath('/admin/content')
   revalidatePath('/library')
+}
+
+// --- Featured content ------------------------------------------------------
+
+/** Revalidate every page that renders featured content. */
+function revalidateFeatured() {
+  revalidatePath('/admin/featured')
+  revalidatePath('/resources')
+}
+
+/**
+ * Add a lesson to the featured list with an optional custom headline/blurb.
+ * Appends to the end of the current order. No-ops gracefully if the lesson is
+ * already featured (the unique constraint is handled with onConflictDoNothing).
+ */
+export async function addFeatured(formData: FormData): Promise<ActionState> {
+  await requireAdmin()
+  const lessonId = Number(formData.get('lessonId'))
+  const headline = String(formData.get('headline') ?? '').trim() || null
+  const blurb = String(formData.get('blurb') ?? '').trim() || null
+
+  if (!lessonId || Number.isNaN(lessonId)) {
+    return { status: 'error', message: 'Please choose a piece of content to feature.' }
+  }
+
+  try {
+    const [{ max } = { max: 0 }] = await db
+      .select({ max: sql<number>`coalesce(max(${featured.position}), 0)` })
+      .from(featured)
+
+    const inserted = await db
+      .insert(featured)
+      .values({ lessonId, headline, blurb, position: max + 1 })
+      .onConflictDoNothing({ target: featured.lessonId })
+      .returning({ id: featured.id })
+
+    revalidateFeatured()
+    return {
+      status: 'success',
+      message: inserted.length ? 'Added to featured.' : 'That content is already featured.',
+    }
+  } catch (err) {
+    const message = err instanceof Error ? err.message : 'Could not feature that content.'
+    return { status: 'error', message }
+  }
+}
+
+/** Update the custom headline/blurb for a featured item. */
+export async function updateFeatured(formData: FormData): Promise<ActionState> {
+  await requireAdmin()
+  const featuredId = Number(formData.get('featuredId'))
+  const headline = String(formData.get('headline') ?? '').trim() || null
+  const blurb = String(formData.get('blurb') ?? '').trim() || null
+
+  if (!featuredId || Number.isNaN(featuredId)) {
+    return { status: 'error', message: 'Missing featured item.' }
+  }
+
+  try {
+    await db
+      .update(featured)
+      .set({ headline, blurb, updatedAt: new Date() })
+      .where(eq(featured.id, featuredId))
+    revalidateFeatured()
+    return { status: 'success', message: 'Featured item updated.' }
+  } catch (err) {
+    const message = err instanceof Error ? err.message : 'Could not update the featured item.'
+    return { status: 'error', message }
+  }
+}
+
+/** Remove a lesson from the featured list (does not delete the lesson). */
+export async function removeFeatured(featuredId: number) {
+  await requireAdmin()
+  await db.delete(featured).where(eq(featured.id, featuredId))
+  revalidateFeatured()
+}
+
+/** Move a featured item up or down by swapping positions with its neighbor. */
+export async function moveFeatured(featuredId: number, direction: 'up' | 'down') {
+  await requireAdmin()
+  const rows = await db
+    .select({ id: featured.id, position: featured.position })
+    .from(featured)
+    .orderBy(featured.position, featured.id)
+
+  const index = rows.findIndex((r) => r.id === featuredId)
+  if (index === -1) return
+  const swapWith = direction === 'up' ? index - 1 : index + 1
+  if (swapWith < 0 || swapWith >= rows.length) return
+
+  const a = rows[index]
+  const b = rows[swapWith]
+  // Swap their stored positions.
+  await db.update(featured).set({ position: b.position }).where(eq(featured.id, a.id))
+  await db.update(featured).set({ position: a.position }).where(eq(featured.id, b.id))
+  revalidateFeatured()
 }

@@ -1,10 +1,20 @@
 import type { Metadata } from 'next'
-import { FileText, Headphones, Video, BookOpen, Download, ListChecks } from 'lucide-react'
+import Link from 'next/link'
+import {
+  FileText,
+  Headphones,
+  Video,
+  BookOpen,
+  Download,
+  ListChecks,
+  ArrowRight,
+} from 'lucide-react'
 import { AccessCta, SignInCta } from '@/components/site/access-cta'
 import { PageHero } from '@/components/site/page-hero'
 import { SectionLabel } from '@/components/site/section-label'
 import { SearchBar } from '@/components/site/search-bar'
 import { getCurrentUser } from '@/lib/session'
+import { getFeaturedLessons } from '@/lib/content'
 
 export const metadata: Metadata = {
   title: 'Resources',
@@ -21,31 +31,19 @@ const resourceTypes = [
   { icon: BookOpen, title: 'Articles', body: 'Deep dives into the science, in plain language.' },
 ]
 
-const featured = [
-  {
-    tag: 'Article',
-    title: 'The science of the meltdown: what is happening in a sensitive nervous system',
-    body: 'A plain-language walk through overstimulation, the window of tolerance, and why willpower is the wrong tool.',
-  },
-  {
-    tag: 'Worksheet',
-    title: 'The bedtime wind-down plan for sensitive kids',
-    body: 'A step-by-step, printable routine that lowers nighttime arousal and makes sleep easier for the whole house.',
-  },
-  {
-    tag: 'Quick guide',
-    title: 'Scripts for the moment your child says &ldquo;I&apos;m too much&rdquo;',
-    body: 'Exact words to use when a sensitive child voices shame, plus what to avoid.',
-  },
-  {
-    tag: 'Article',
-    title: 'Sensitive adults at work: designing an environment that fits',
-    body: 'Practical adjustments and language for managers, open offices, and back-to-back meetings.',
-  },
-]
+// Human-readable label for each lesson kind, used on the featured cards.
+const kindLabel: Record<string, string> = {
+  video: 'Video',
+  article: 'Article',
+  link: 'Resource',
+  document: 'Document',
+}
 
 export default async function ResourcesPage() {
   const user = await getCurrentUser()
+  const featured = await getFeaturedLessons(4)
+  // Members go straight into the library; guests are routed to request access.
+  const browseHref = user ? '/library' : '/request-access'
   return (
     <>
       <PageHero
@@ -75,52 +73,77 @@ export default async function ResourcesPage() {
           </h2>
           <div className="mt-12 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
             {resourceTypes.map((r) => (
-              <div key={r.title} className="rounded-xl border border-stone bg-card p-7">
+              <Link
+                key={r.title}
+                href={browseHref}
+                className="group flex flex-col rounded-xl border border-stone bg-card p-7 transition-all hover:border-deep-teal/40 hover:shadow-[0_12px_32px_-20px_rgba(27,80,90,0.45)]"
+              >
                 <div className="flex size-11 items-center justify-center rounded-lg bg-sage-light text-deep-teal">
                   <r.icon className="size-5" />
                 </div>
                 <h3 className="mt-5 font-serif text-xl font-semibold text-deep-teal">{r.title}</h3>
-                <p className="mt-2 font-serif text-[15px] leading-relaxed text-charcoal/80">
+                <p className="mt-2 flex-1 font-serif text-[15px] leading-relaxed text-charcoal/80">
                   {r.body}
                 </p>
-              </div>
+                <span className="mt-5 inline-flex items-center gap-1 font-sans text-sm font-semibold text-deep-teal">
+                  {user ? 'Browse in library' : 'Request access'}
+                  <ArrowRight
+                    className="size-4 transition-transform group-hover:translate-x-0.5"
+                    aria-hidden="true"
+                  />
+                </span>
+              </Link>
             ))}
           </div>
         </div>
       </section>
 
       {/* Featured resources */}
-      <section className="border-y border-stone bg-paper">
-        <div className="mx-auto max-w-6xl px-5 py-20 sm:px-8">
-          <SectionLabel>Featured</SectionLabel>
-          <h2 className="mt-5 font-serif text-3xl font-semibold leading-tight text-deep-teal text-balance sm:text-4xl">
-            Start with these.
-          </h2>
-          <div className="mt-12 grid gap-6 md:grid-cols-2">
-            {featured.map((f) => (
-              <article
-                key={f.title}
-                className="flex flex-col rounded-xl border border-stone bg-card p-7"
-              >
-                <span className="font-sans text-[11px] font-semibold uppercase tracking-[0.14em] text-sage-deep">
-                  {f.tag}
-                </span>
-                <h3
-                  className="mt-3 font-serif text-xl font-semibold leading-snug text-deep-teal"
-                  dangerouslySetInnerHTML={{ __html: f.title }}
-                />
-                <p
-                  className="mt-3 flex-1 font-serif text-[15px] leading-relaxed text-charcoal/80"
-                  dangerouslySetInnerHTML={{ __html: f.body }}
-                />
-                <span className="mt-5 font-sans text-sm font-semibold text-charcoal/45">
-                  Members only
-                </span>
-              </article>
-            ))}
+      {featured.length > 0 && (
+        <section className="border-y border-stone bg-paper">
+          <div className="mx-auto max-w-6xl px-5 py-20 sm:px-8">
+            <SectionLabel>Featured</SectionLabel>
+            <h2 className="mt-5 font-serif text-3xl font-semibold leading-tight text-deep-teal text-balance sm:text-4xl">
+              Start with these.
+            </h2>
+            <div className="mt-12 grid gap-6 md:grid-cols-2">
+              {featured.map((f) => {
+                // Members deep-link into the exact lesson; guests are routed to
+                // request access since the library is members-only.
+                const href = user
+                  ? `/library/${f.sectionSlug}?lesson=${f.id}`
+                  : '/request-access'
+                return (
+                  <Link
+                    key={f.id}
+                    href={href}
+                    className="group flex flex-col rounded-xl border border-stone bg-card p-7 transition-all hover:border-deep-teal/40 hover:shadow-[0_12px_32px_-20px_rgba(27,80,90,0.45)]"
+                  >
+                    <span className="font-sans text-[11px] font-semibold uppercase tracking-[0.14em] text-sage-deep">
+                      {kindLabel[f.kind] ?? 'Resource'}
+                    </span>
+                    <h3 className="mt-3 font-serif text-xl font-semibold leading-snug text-deep-teal">
+                      {f.headline || f.title}
+                    </h3>
+                    {(f.blurb || f.description) && (
+                      <p className="mt-3 flex-1 font-serif text-[15px] leading-relaxed text-charcoal/80">
+                        {f.blurb || f.description}
+                      </p>
+                    )}
+                    <span className="mt-5 inline-flex items-center gap-1 font-sans text-sm font-semibold text-deep-teal">
+                      {user ? 'Open' : 'Members only — request access'}
+                      <ArrowRight
+                        className="size-4 transition-transform group-hover:translate-x-0.5"
+                        aria-hidden="true"
+                      />
+                    </span>
+                  </Link>
+                )
+              })}
+            </div>
           </div>
-        </div>
-      </section>
+        </section>
+      )}
 
       {/* CTA */}
       <section className="bg-deep-teal text-off-white">
