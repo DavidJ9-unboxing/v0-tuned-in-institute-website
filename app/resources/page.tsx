@@ -123,11 +123,11 @@ export default async function ResourcesPage() {
                       {kindLabel[f.kind] ?? 'Resource'}
                     </span>
                     <h3 className="mt-3 font-serif text-xl font-semibold leading-snug text-deep-teal">
-                      {f.title}
+                      {f.headline || f.title}
                     </h3>
-                    {f.description && (
+                    {(f.blurb || f.description) && (
                       <p className="mt-3 flex-1 font-serif text-[15px] leading-relaxed text-charcoal/80">
-                        {f.description}
+                        {f.blurb || f.description}
                       </p>
                     )}
                     <span className="mt-5 inline-flex items-center gap-1 font-sans text-sm font-semibold text-deep-teal">
