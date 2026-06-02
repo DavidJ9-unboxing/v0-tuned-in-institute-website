@@ -43,20 +43,20 @@ export function Hero() {
       </div>
 
       <div className="mx-auto max-w-6xl px-5 py-3 sm:px-8 md:py-5">
-        <div className="text-center md:text-left">
+        <div className="text-center">
           {/* Title block */}
           <div className="flex-1">
-            <p className="mx-auto max-w-2xl font-sans text-lg leading-relaxed text-off-white/85 md:mx-0">
+            <p className="mx-auto max-w-2xl font-sans text-lg leading-relaxed text-off-white/85">
               <span className="font-semibold text-off-white">The Tuned In Institute</span> is the
               research and education arm of{' '}
-              <span className="font-semibold text-off-white">Rooted Rhythm Therapy</span>. This is
+              <span className="whitespace-nowrap font-semibold text-off-white">Rooted Rhythm Therapy</span>. This is
               where you can access our research and self-help tools, plus{' '}
               <span className="font-semibold text-off-white">Remi</span>, your AI concierge who helps
               you navigate the content and get real answers to your real questions.
             </p>
 
-            <div className="mt-6 flex flex-col items-center gap-2 md:items-start">
-              <div className="flex flex-col items-center justify-center gap-3 sm:flex-row md:justify-start">
+            <div className="mt-6 flex flex-col items-center gap-2">
+              <div className="flex flex-col items-center justify-center gap-3 sm:flex-row">
                 <SignInCta
                   label="Sign In to the Library"
                   variant="default"
@@ -67,7 +67,7 @@ export function Hero() {
                   variant="outline"
                   className="h-12 w-full border-2 border-off-white/50 bg-transparent px-8 text-base font-semibold text-off-white font-sans transition-colors hover:bg-off-white hover:text-deep-teal sm:w-auto"
                   libraryVariant="default"
-                  libraryClassName="h-12 w-full px-8 text-base font-semibold bg-sage font-sans text-deep-teal shadow-sm transition-shadow hover:bg-sage/90 hover:shadow-md sm:w-auto"
+                  libraryClassName="h-12 w-full px-8 text-base font-semibold bg-sage font-sans text-deep-teal shadow-sm transition-shadow hover:bg-sage/90 hover:shadow-md sm:w-52"
                 />
                 {user && (
                   <Button
@@ -75,7 +75,7 @@ export function Hero() {
                     onClick={() => openRemi()}
                     size="lg"
                     variant="outline"
-                    className="h-12 w-full gap-2 border-2 border-off-white/50 bg-transparent px-8 text-base font-semibold text-off-white font-sans transition-colors hover:bg-off-white hover:text-deep-teal sm:w-auto"
+                    className="h-12 w-full gap-2 border-2 border-off-white/50 bg-transparent px-8 text-base font-semibold text-off-white font-sans transition-colors hover:bg-off-white hover:text-deep-teal sm:w-52"
                   >
                     <Sparkles className="size-4" aria-hidden="true" />
                     Ask Remi
@@ -83,7 +83,7 @@ export function Hero() {
                 )}
               </div>
               {!user && (
-                <span className="w-full text-center font-sans text-xs text-off-white/60 md:text-left">
+                <span className="w-full text-center font-sans text-xs text-off-white/60">
                   Full access requires membership
                 </span>
               )}

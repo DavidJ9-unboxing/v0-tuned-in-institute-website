@@ -568,7 +568,7 @@ export function RemiChat({
                       return (
                         <p
                           key={i}
-                          className={`whitespace-pre-wrap font-serif text-[15px] leading-relaxed ${
+                          className={`whitespace-pre-wrap break-words font-serif text-[15px] leading-relaxed ${
                             isUser ? 'text-off-white' : 'text-charcoal/85'
                           }`}
                         >
@@ -683,9 +683,10 @@ export function RemiChat({
                 }
               }}
               rows={1}
+              cols={1}
               placeholder="Ask Remi…"
               aria-label="Ask Remi"
-              className="max-h-32 min-h-[2.75rem] flex-1 resize-none rounded-xl border border-stone bg-off-white px-4 py-2.5 font-sans text-[15px] text-charcoal placeholder:text-charcoal/45 focus:border-deep-teal focus:outline-none focus:ring-2 focus:ring-deep-teal/20"
+              className="max-h-32 min-h-[2.75rem] w-full min-w-0 flex-1 resize-none rounded-xl border border-stone bg-off-white px-4 py-2.5 font-sans text-[15px] text-charcoal placeholder:text-charcoal/45 focus:border-deep-teal focus:outline-none focus:ring-2 focus:ring-deep-teal/20"
             />
             {isSupported && (
               <Button

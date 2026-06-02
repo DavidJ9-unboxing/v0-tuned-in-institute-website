@@ -53,12 +53,15 @@ export default async function AdminMetricsPage({
       .select({ bucket: sessionBucket, value: count() })
       .from(session)
       .where(inSessionRange)
-      .groupBy(sessionBucket),
+      // Group by the selected bucket's ordinal position so it always matches the
+      // exact SELECT expression (Drizzle qualifies the column differently between
+      // SELECT and GROUP BY, which Postgres rejects otherwise).
+      .groupBy(sql`1`),
     db
       .select({ bucket: signupBucket, value: count() })
       .from(user)
       .where(inUserRange)
-      .groupBy(signupBucket),
+      .groupBy(sql`1`),
     // --- All-time snapshot ----------------------------------------------
     db.select({ totalAccounts: count() }).from(user),
     db.select({ role: user.role, value: count() }).from(user).groupBy(user.role),
