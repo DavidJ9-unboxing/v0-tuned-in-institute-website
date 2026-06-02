@@ -37,7 +37,19 @@ export default async function LibraryPage({
       </header>
 
       <div className="mt-8">
-        <RemiChat initialQuery={initialQuery} />
+        <RemiChat
+          initialQuery={initialQuery}
+          intro={
+            <>
+              Hi, I&apos;m Remi. Tell me what you&apos;re looking for and I&apos;ll point you to the
+              right articles, guides, and videos in the library — or just share what&apos;s on your
+              mind and we can talk it through.{' '}
+              <span className="text-charcoal/60">
+                (Chat is private and not saved but avoid full names and identifying details.)
+              </span>
+            </>
+          }
+        />
       </div>
 
       {sections.length === 0 ? (
