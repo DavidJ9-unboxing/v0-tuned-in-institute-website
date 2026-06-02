@@ -11,6 +11,7 @@ import {
 } from 'react'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
+import posthog from 'posthog-js'
 import { Check, Copy, Lock, Sparkles, X } from 'lucide-react'
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from '@/components/ui/sheet'
 import {
@@ -57,12 +58,24 @@ export function RemiProvider({ children }: { children: ReactNode }) {
   const [initialQuery, setInitialQuery] = useState('')
   const pathname = usePathname()
 
-  const open = useCallback((query?: string) => {
-    // Guard against being used directly as an event handler (e.g. onClick={open}),
-    // where the first argument would be a synthetic event rather than a string.
-    setInitialQuery(typeof query === 'string' ? query.trim() : '')
-    setIsOpen(true)
-  }, [])
+  const open = useCallback(
+    (query?: string) => {
+      // Guard against being used directly as an event handler (e.g. onClick={open}),
+      // where the first argument would be a synthetic event rather than a string.
+      const trimmed = typeof query === 'string' ? query.trim() : ''
+      setInitialQuery(trimmed)
+      setIsOpen(true)
+      // Product analytics: every "Ask Remi" entry point (FAB, CTA buttons, links)
+      // funnels through here, so this captures all opens with where it happened.
+      if (posthog.__loaded) {
+        posthog.capture('remi_opened', {
+          from_path: pathname,
+          has_prefilled_query: trimmed.length > 0,
+        })
+      }
+    },
+    [pathname],
+  )
   const close = useCallback(() => setIsOpen(false), [])
   const value = useMemo(() => ({ open, close }), [open, close])
 
@@ -75,7 +88,7 @@ export function RemiProvider({ children }: { children: ReactNode }) {
       {showFab && (
         <button
           type="button"
-          onClick={open}
+          onClick={() => open()}
           aria-label="Ask Remi, the Tuned In Institute AI concierge"
           className="group fixed bottom-5 right-5 z-40 flex items-center gap-2.5 rounded-full bg-deep-teal py-2.5 pl-2.5 pr-4 text-off-white shadow-[0_10px_30px_-10px_rgba(27,80,90,0.7)] transition-transform hover:scale-[1.03] focus:outline-none focus-visible:ring-2 focus-visible:ring-deep-teal/40 focus-visible:ring-offset-2 sm:bottom-6 sm:right-6"
         >
@@ -122,7 +135,7 @@ export function AskRemiButton({
   return (
     <Button
       type="button"
-      onClick={open}
+      onClick={() => open()}
       size={size}
       variant={variant}
       className={cn('gap-2 font-sans font-semibold', className)}

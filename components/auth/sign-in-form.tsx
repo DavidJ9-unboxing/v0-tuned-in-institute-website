@@ -49,7 +49,7 @@ export function SignInForm() {
 
   return (
     <form onSubmit={onSubmit} className="mt-8 flex w-full flex-col gap-4">
-      <div className="flex flex-col gap-2">
+      <div className="flex flex-col gap-2" suppressHydrationWarning>
         <label htmlFor="email" className={labelClass}>
           Email address
         </label>
@@ -65,7 +65,7 @@ export function SignInForm() {
           placeholder="you@example.com"
         />
       </div>
-      <div className="flex flex-col gap-2">
+      <div className="flex flex-col gap-2" suppressHydrationWarning>
         <div className="flex items-center justify-between">
           <label htmlFor="password" className={labelClass}>
             Password
