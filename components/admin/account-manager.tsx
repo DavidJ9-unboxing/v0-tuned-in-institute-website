@@ -9,6 +9,7 @@ import {
   createClientAccount,
   changeUserRole,
   removeUser,
+  resetClientPassword,
   type ActionState,
 } from '@/app/admin/actions'
 
@@ -42,6 +43,7 @@ export function AccountManager({
   const formRef = useRef<HTMLFormElement>(null)
   const lastStatus = useRef(state.status)
   const [query, setQuery] = useState('')
+  const [resettingId, setResettingId] = useState<string | null>(null)
 
   // Sort alphabetically by last name (then first name), and filter by the
   // search term across name and email.
@@ -185,6 +187,25 @@ export function AccountManager({
                     <option value="client">Client</option>
                     <option value="admin">Admin</option>
                   </select>
+                  <button
+                    disabled={resettingId === a.id}
+                    onClick={async () => {
+                      if (
+                        confirm(
+                          `Send ${a.email} a new temporary password? Their current password will stop working.`,
+                        )
+                      ) {
+                        setResettingId(a.id)
+                        const result = await resetClientPassword(a.id)
+                        setResettingId(null)
+                        alert(result.message)
+                        router.refresh()
+                      }
+                    }}
+                    className="font-sans text-xs font-medium text-deep-teal hover:underline disabled:opacity-50"
+                  >
+                    {resettingId === a.id ? 'Sending…' : 'Reset password'}
+                  </button>
                   {a.id !== currentUserId && (
                     <button
                       onClick={async () => {
