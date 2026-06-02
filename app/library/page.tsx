@@ -30,8 +30,8 @@ export default async function LibraryPage({
           Your content library
         </h1>
         <p className="max-w-2xl font-serif text-[16px] leading-relaxed text-charcoal/75">
-          Talk with Remi in your own words and she&apos;ll guide you to the most relevant resources,
-          or browse the collections below.
+          Remi answers anything on your mind and can also help you find a document, or scroll down
+          to browse our library.
         </p>
       </header>
 
