@@ -25,6 +25,7 @@ import { Button } from '@/components/ui/button'
 import { cn } from '@/lib/utils'
 import { useSession } from '@/lib/auth-client'
 import { RemiChat } from '@/components/library/remi-chat'
+import { RemiStoreProvider, useRemiStore } from '@/components/library/remi-store'
 
 type RemiContextValue = {
   /** Open Remi, optionally pre-filling and auto-sending a question. */
@@ -82,10 +83,11 @@ export function RemiProvider({ children }: { children: ReactNode }) {
   const showFab = !HIDE_FAB_PREFIXES.some((p) => pathname.startsWith(p))
 
   return (
-    <RemiContext.Provider value={value}>
-      {children}
+    <RemiStoreProvider>
+      <RemiContext.Provider value={value}>
+        {children}
 
-      {showFab && (
+        {showFab && (
         <button
           type="button"
           onClick={() => open()}
@@ -104,15 +106,16 @@ export function RemiProvider({ children }: { children: ReactNode }) {
         </button>
       )}
 
-      <RemiPanel
-        open={isOpen}
-        onOpenChange={(v) => {
-          setIsOpen(v)
-          if (!v) setInitialQuery('')
-        }}
-        initialQuery={initialQuery}
-      />
-    </RemiContext.Provider>
+        <RemiPanel
+          open={isOpen}
+          onOpenChange={(v) => {
+            setIsOpen(v)
+            if (!v) setInitialQuery('')
+          }}
+          initialQuery={initialQuery}
+        />
+      </RemiContext.Provider>
+    </RemiStoreProvider>
   )
 }
 
@@ -157,8 +160,9 @@ function RemiPanel({
 }) {
   const { data: session, isPending } = useSession()
   const user = session?.user
+  const { remember } = useRemiStore()
 
-  // The close confirmation reminds members the chat isn't saved before it disappears.
+  // The close confirmation explains where the conversation goes before the panel closes.
   const [confirmOpen, setConfirmOpen] = useState(false)
   // Once a member checks "don't show again", we skip the reminder for the rest of the session.
   const [skipConfirm, setSkipConfirm] = useState(false)
@@ -289,7 +293,6 @@ function RemiPanel({
 
         <div className="min-h-0 flex-1">
           <RemiChat
-            key={initialQuery || 'blank'}
             variant="panel"
             initialQuery={initialQuery}
             onTranscriptChange={(t) => {
@@ -305,11 +308,12 @@ function RemiPanel({
         <div className="flex flex-col gap-5 px-7 py-7">
           <DialogHeader className="gap-2">
             <DialogTitle className="font-serif text-xl font-semibold text-deep-teal text-balance">
-              Your chat will not be saved
+              {remember ? 'Your conversation will be here next time' : 'Closing Remi'}
             </DialogTitle>
             <DialogDescription className="font-serif text-[15px] leading-relaxed text-charcoal/75">
-              Once you close this chat, it&apos;s gone for good. If you&apos;d like to keep it, copy
-              the conversation and paste it somewhere safe before you go.
+              {remember
+                ? "Because you turned on remembering, this conversation is saved on this device and will be waiting when you open Remi again. You can also copy it to keep your own copy."
+                : "Your conversation stays available for the rest of this visit, but it won't be saved once you leave. To keep it, turn on remembering in the chat, or copy it somewhere safe."}
             </DialogDescription>
           </DialogHeader>
 

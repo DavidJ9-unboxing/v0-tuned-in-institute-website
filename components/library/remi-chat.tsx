@@ -3,7 +3,6 @@
 import { useEffect, useRef, useState } from 'react'
 import Link from 'next/link'
 import { useChat } from '@ai-sdk/react'
-import { DefaultChatTransport } from 'ai'
 import {
   ArrowUp,
   ChevronDown,
@@ -16,11 +15,13 @@ import {
   Mic,
   PlayCircle,
   Sparkles,
+  Trash2,
   X,
 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { cn } from '@/lib/utils'
 import { useSpeechRecognition } from '@/hooks/use-speech-recognition'
+import { useRemiStore } from '@/components/library/remi-store'
 
 const CRISIS_RESOURCE_URL =
   'https://988lifeline.org/learn/our-crisis-centers/crisis-centers-by-state-and-u-s-territory/'
@@ -124,9 +125,10 @@ export function RemiChat({
   /** Emits a plain-text transcript of the conversation whenever it changes. */
   onTranscriptChange?: (transcript: string) => void
 }) {
-  const { messages, sendMessage, status, error } = useChat({
-    transport: new DefaultChatTransport({ api: '/api/library/remi' }),
-  })
+  // Every Remi surface (this page chat and the slide-over panel) shares one conversation
+  // via the store, so it survives navigation and stays in sync between surfaces.
+  const { chat, remember, setRemember, clearChat } = useRemiStore()
+  const { messages, sendMessage, status, error } = useChat({ chat })
   const [input, setInput] = useState('')
   // In the slide-over the resource list is collapsed by default so it doesn't eat the small
   // mobile screen; members still see a labelled, tappable header telling them links are there.
@@ -340,19 +342,58 @@ export function RemiChat({
           )}
         >
           <p>
-            Chats aren&apos;t saved and Remi is{' '}
+            Remi is{' '}
             <span className="font-medium text-charcoal/80">not HIPAA-compliant</span>, so please skip
-            full names, addresses, and other identifying details, but we don&apos;t have access to
-            your chat and we don&apos;t store it anywhere. To continue later, ask Remi for a summary,
-            copy and save it somewhere safe, and repost it in the chat next time to continue.
+            full names, addresses, and other identifying details. We don&apos;t have access to your
+            chat and we never store it on our servers. Your conversation stays available during this
+            visit; to keep it for next time, turn on remembering below.
           </p>
-          <button
-            type="button"
-            onClick={() => setPrivacyDismissed(true)}
-            className="self-start rounded-lg border border-stone bg-card px-3 py-1.5 font-sans text-xs font-medium text-deep-teal transition-colors hover:border-deep-teal/40"
-          >
-            Got it
-          </button>
+
+          {/* Opt-in, device-only memory. Stored in this browser only — never sent to us. */}
+          <div className="flex items-start gap-2.5 rounded-lg border border-stone bg-card p-3">
+            <button
+              type="button"
+              role="switch"
+              aria-checked={remember}
+              onClick={() => setRemember(!remember)}
+              className={cn(
+                'mt-0.5 flex h-5 w-9 shrink-0 items-center rounded-full p-0.5 transition-colors',
+                remember ? 'justify-end bg-deep-teal' : 'justify-start bg-stone',
+              )}
+            >
+              <span className="size-4 rounded-full bg-off-white shadow-sm" />
+              <span className="sr-only">Remember my conversations on this device</span>
+            </button>
+            <span className="flex flex-col gap-0.5">
+              <span className="font-sans text-xs font-semibold text-charcoal">
+                Remember my conversations on this device
+              </span>
+              <span className="font-sans text-[11px] leading-relaxed text-charcoal/60">
+                Saved only in this browser so Remi can pick up where you left off. Avoid this on a
+                shared or public computer.
+              </span>
+            </span>
+          </div>
+
+          <div className="flex flex-wrap items-center gap-2">
+            <button
+              type="button"
+              onClick={() => setPrivacyDismissed(true)}
+              className="rounded-lg border border-stone bg-card px-3 py-1.5 font-sans text-xs font-medium text-deep-teal transition-colors hover:border-deep-teal/40"
+            >
+              Got it
+            </button>
+            {hasConversation && (
+              <button
+                type="button"
+                onClick={clearChat}
+                className="flex items-center gap-1.5 rounded-lg border border-stone bg-card px-3 py-1.5 font-sans text-xs font-medium text-charcoal/70 transition-colors hover:border-deep-teal/40 hover:text-deep-teal"
+              >
+                <Trash2 className="size-3.5" aria-hidden="true" />
+                Clear conversation
+              </button>
+            )}
+          </div>
         </div>
       )}
     </section>
@@ -457,8 +498,7 @@ export function RemiChat({
                       moment with your child, or something you&apos;re carrying yourself. Share
                       whatever&apos;s on your mind.{' '}
                       <span className="text-charcoal/60">
-                        (Chat is private and not saved but avoid full names and identifying
-                        details.)
+                        (Chat is private — please avoid full names and identifying details.)
                       </span>
                     </>
                   )}
