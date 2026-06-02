@@ -7,6 +7,7 @@ const adminNav = [
   { href: '/admin', label: 'Overview' },
   { href: '/admin/content', label: 'Content' },
   { href: '/admin/accounts', label: 'Accounts' },
+  { href: '/admin/metrics', label: 'Metrics' },
 ]
 
 export default async function AdminLayout({ children }: { children: ReactNode }) {
