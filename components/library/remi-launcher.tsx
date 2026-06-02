@@ -88,7 +88,7 @@ export function RemiProvider({ children }: { children: ReactNode }) {
       {showFab && (
         <button
           type="button"
-          onClick={open}
+          onClick={() => open()}
           aria-label="Ask Remi, the Tuned In Institute AI concierge"
           className="group fixed bottom-5 right-5 z-40 flex items-center gap-2.5 rounded-full bg-deep-teal py-2.5 pl-2.5 pr-4 text-off-white shadow-[0_10px_30px_-10px_rgba(27,80,90,0.7)] transition-transform hover:scale-[1.03] focus:outline-none focus-visible:ring-2 focus-visible:ring-deep-teal/40 focus-visible:ring-offset-2 sm:bottom-6 sm:right-6"
         >
@@ -135,7 +135,7 @@ export function AskRemiButton({
   return (
     <Button
       type="button"
-      onClick={open}
+      onClick={() => open()}
       size={size}
       variant={variant}
       className={cn('gap-2 font-sans font-semibold', className)}
