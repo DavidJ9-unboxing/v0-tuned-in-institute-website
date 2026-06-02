@@ -89,7 +89,7 @@ export function SiteHeader() {
         <div className="flex items-center gap-2">
           <Button
             type="button"
-            onClick={openRemi}
+            onClick={() => openRemi()}
             variant="outline"
             size="icon"
             aria-label="Ask Remi, the AI concierge"
@@ -152,14 +152,25 @@ export function SiteHeader() {
               <Link
                 key={link.href}
                 href={link.href}
+                onClick={() => setOpen(false)}
                 className="border-b border-stone/60 py-3 font-sans text-sm font-medium uppercase tracking-[0.1em] text-charcoal/80 last:border-0"
               >
                 {link.label}
               </Link>
             ))}
+            <Link
+              href="/#featured"
+              onClick={() => setOpen(false)}
+              className="border-b border-stone/60 py-3 font-sans text-sm font-medium uppercase tracking-[0.1em] text-charcoal/80"
+            >
+              Featured
+            </Link>
             <Button
               type="button"
-              onClick={openRemi}
+              onClick={() => {
+                setOpen(false)
+                openRemi()
+              }}
               variant="outline"
               size="lg"
               className="mt-4 gap-2 border-deep-teal/30 bg-transparent font-sans font-semibold text-deep-teal"
@@ -169,12 +180,16 @@ export function SiteHeader() {
             </Button>
             {user ? (
               <Button asChild className="mt-2 font-sans font-semibold" size="lg">
-                <Link href="/library">Go to Library</Link>
+                <Link href="/library" onClick={() => setOpen(false)}>
+                  Go to Library
+                </Link>
               </Button>
             ) : (
               <>
                 <Button asChild className="mt-4 font-sans font-semibold" size="lg">
-                  <Link href="/request-access">Request Access</Link>
+                  <Link href="/request-access" onClick={() => setOpen(false)}>
+                    Request Access
+                  </Link>
                 </Button>
                 <Button
                   asChild
@@ -182,7 +197,9 @@ export function SiteHeader() {
                   className="mt-2 border-deep-teal/30 bg-transparent font-sans font-semibold text-deep-teal"
                   size="lg"
                 >
-                  <Link href="/sign-in">Sign In</Link>
+                  <Link href="/sign-in" onClick={() => setOpen(false)}>
+                    Sign In
+                  </Link>
                 </Button>
               </>
             )}

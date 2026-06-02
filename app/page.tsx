@@ -8,8 +8,11 @@ import { SearchBar } from '@/components/site/search-bar'
 import { ProgramCard } from '@/components/site/program-card'
 import { ConciergeExchange, conciergeExamples } from '@/components/site/concierge-exchange'
 import { AskRemiButton } from '@/components/library/remi-launcher'
+import { FeaturedGrid } from '@/components/site/featured-grid'
 import { Hero } from '@/components/home/hero'
 import { programs, clinicalFoundations, whatWeAre, whatWeAreNot } from '@/lib/site'
+import { getFeaturedLessons } from '@/lib/content'
+import { getCurrentUser } from '@/lib/session'
 
 const pillars = [
   {
@@ -43,7 +46,8 @@ const stats = [
   { number: '4', label: 'program tracks: children, teens, adults, parenting' },
 ]
 
-export default function HomePage() {
+export default async function HomePage() {
+  const [featured, user] = await Promise.all([getFeaturedLessons(4), getCurrentUser()])
   return (
     <>
       <Hero />
@@ -89,6 +93,29 @@ export default function HomePage() {
           </Link>
         </div>
       </section>
+
+      {/* Featured library content */}
+      {featured.length > 0 && (
+        <section id="featured" className="scroll-mt-24 border-y border-stone bg-paper">
+          <div className="mx-auto max-w-6xl px-5 py-14 sm:px-8 md:py-16">
+            <SectionLabel>From the library</SectionLabel>
+            <div className="flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
+              <h2 className="mt-5 max-w-2xl font-serif text-3xl font-semibold leading-tight text-deep-teal text-balance sm:text-4xl">
+                A few articles that you may find interesting.
+              </h2>
+              <Button asChild size="lg" className="shrink-0 font-sans font-semibold">
+                <Link href="/library">Browse the library</Link>
+              </Button>
+            </div>
+            <p className="mt-4 max-w-2xl font-serif text-lg leading-relaxed text-charcoal/85">
+              Browse the library for access to all our resources.
+            </p>
+            <div className="mt-12">
+              <FeaturedGrid items={featured} isMember={Boolean(user)} />
+            </div>
+          </div>
+        </section>
+      )}
 
       {/* Four pillars */}
       <section className="border-y border-stone bg-paper">
