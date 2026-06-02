@@ -33,6 +33,41 @@ export async function getSections(): Promise<SectionWithCount[]> {
   return rows
 }
 
+export type FeaturedLesson = Lesson & { sectionSlug: string; sectionTitle: string }
+
+/**
+ * A small set of real, visible lessons to feature on the public resources page.
+ * Ordered by section/lesson position so the "start here" content surfaces
+ * first, and joined to the section so each can deep-link into the library.
+ */
+export async function getFeaturedLessons(limit = 4): Promise<FeaturedLesson[]> {
+  const rows = await db
+    .select({
+      id: lesson.id,
+      sectionId: lesson.sectionId,
+      kind: lesson.kind,
+      title: lesson.title,
+      description: lesson.description,
+      videoUrl: lesson.videoUrl,
+      body: lesson.body,
+      externalUrl: lesson.externalUrl,
+      fileUrl: lesson.fileUrl,
+      fileName: lesson.fileName,
+      hidden: lesson.hidden,
+      position: lesson.position,
+      createdAt: lesson.createdAt,
+      updatedAt: lesson.updatedAt,
+      sectionSlug: section.slug,
+      sectionTitle: section.title,
+    })
+    .from(lesson)
+    .innerJoin(section, eq(section.id, lesson.sectionId))
+    .where(and(eq(lesson.hidden, false), eq(section.hidden, false)))
+    .orderBy(asc(section.position), asc(lesson.position), asc(lesson.id))
+    .limit(limit)
+  return rows
+}
+
 export type SectionWithLessons = Section & { lessons: Lesson[] }
 
 /** All sections with their full ordered lesson lists (used by the admin). */
