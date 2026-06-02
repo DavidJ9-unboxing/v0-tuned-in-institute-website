@@ -175,7 +175,7 @@ export function LessonViewer({
                   rel="noopener noreferrer"
                   className="inline-flex items-center gap-2 rounded-full bg-deep-teal px-5 py-2.5 font-sans text-sm font-semibold text-off-white transition-colors hover:bg-deep-teal/90"
                 >
-                  Open content
+                  Open this content
                   <ExternalLink className="size-4" aria-hidden="true" />
                 </a>
               </div>
