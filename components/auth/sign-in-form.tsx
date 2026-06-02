@@ -40,10 +40,17 @@ export function SignInForm() {
       }
       return
     }
-    // Send admins straight to the dashboard; everyone else to the library.
+    // Members still on their temporary password are prompted to set their own.
     const { data: session } = await authClient.getSession()
-    const role = (session?.user as { role?: string } | undefined)?.role
-    router.push(role === 'admin' ? '/admin' : '/library')
+    const sessionUser = session?.user as
+      | { role?: string; mustChangePassword?: boolean }
+      | undefined
+    if (sessionUser?.mustChangePassword) {
+      router.push('/account/password?first=1')
+    } else {
+      // Send admins straight to the dashboard; everyone else to the library.
+      router.push(sessionUser?.role === 'admin' ? '/admin' : '/library')
+    }
     router.refresh()
   }
 

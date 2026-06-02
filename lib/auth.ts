@@ -24,6 +24,18 @@ export const auth = betterAuth({
     },
   }),
   baseURL,
+  user: {
+    additionalFields: {
+      // Surfaced in the session so the client can prompt members who are still
+      // using their temporary password to choose a new one. Not user-settable
+      // via the sign-up/update APIs (we manage it server-side).
+      mustChangePassword: {
+        type: 'boolean',
+        defaultValue: false,
+        input: false,
+      },
+    },
+  },
   emailAndPassword: {
     enabled: true,
     // No public self-registration — the admin team creates client accounts.

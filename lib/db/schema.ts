@@ -14,6 +14,9 @@ export const user = pgTable('user', {
   banned: boolean('banned').notNull().default(false),
   banReason: text('banReason'),
   banExpires: timestamp('banExpires'),
+  // True for admin-created accounts using a temporary password. When set, the
+  // member is prompted to choose their own password after signing in.
+  mustChangePassword: boolean('mustChangePassword').notNull().default(false),
   createdAt: timestamp('createdAt').notNull().defaultNow(),
   updatedAt: timestamp('updatedAt').notNull().defaultNow(),
 })
