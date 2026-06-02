@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useRef, useState } from 'react'
 import { Download, ExternalLink, FileText, PlayCircle } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import type { Lesson } from '@/lib/content'
@@ -23,6 +23,15 @@ export function LessonViewer({
     lessons.find((l) => l.id === initialLessonId) ?? lessons[0] ?? null
   const [activeId, setActiveId] = useState<number | null>(initial?.id ?? null)
   const active = lessons.find((l) => l.id === activeId) ?? null
+  const viewerRef = useRef<HTMLDivElement>(null)
+
+  // The viewer sits above the lesson list (and on mobile the list is stacked
+  // below it), so selecting a lesson would otherwise update content that's off
+  // the top of the screen. Bring the viewer back into view on every selection.
+  function selectLesson(id: number) {
+    setActiveId(id)
+    viewerRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' })
+  }
 
   if (lessons.length === 0) {
     return (
@@ -35,7 +44,7 @@ export function LessonViewer({
   return (
     <div className="grid gap-8 lg:grid-cols-[1fr_320px]">
       {/* Main viewer */}
-      <div className="order-1 flex flex-col gap-5">
+      <div ref={viewerRef} className="order-1 flex flex-col gap-5 scroll-mt-24">
         {active && (
           <>
             {active.kind === 'video' && active.videoUrl ? (
@@ -98,11 +107,14 @@ export function LessonViewer({
               <div className="flex flex-col gap-4">
                 {isPdf(active.fileUrl, active.fileName) && (
                   <div className="overflow-hidden rounded-2xl border border-stone bg-card">
+                    {/* view=FitH fits the PDF to the frame width so wide pages
+                        don't overflow; the height is capped responsively and the
+                        viewer scrolls internally for long documents. */}
                     <iframe
                       key={active.id}
-                      src={`/api/library/file/${active.id}`}
+                      src={`/api/library/file/${active.id}#toolbar=1&navpanes=0&view=FitH`}
                       title={active.title}
-                      className="h-[70vh] w-full"
+                      className="h-[60vh] w-full md:h-[75vh]"
                     />
                   </div>
                 )}
@@ -149,7 +161,7 @@ export function LessonViewer({
               <li key={l.id}>
                 <button
                   type="button"
-                  onClick={() => setActiveId(l.id)}
+                  onClick={() => selectLesson(l.id)}
                   className={cn(
                     'flex w-full items-start gap-3 rounded-xl border px-4 py-3 text-left transition-colors',
                     isActive
