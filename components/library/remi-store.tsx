@@ -26,6 +26,11 @@ const REMEMBER_KEY = 'remi-chat-remember-v1'
 // Persistent per-user copy, only written when the member opts in. Scoped by user id so
 // a shared browser doesn't surface one member's chat to another.
 const SAVED_PREFIX = 'remi-chat-saved-v1:'
+// Timestamp (ms) until which we won't re-show the gentle "remember chats?" prompt after
+// a member dismisses it. Keeps the nudge occasional rather than every single close.
+const PROMPT_SNOOZE_KEY = 'remi-chat-remember-prompt-snooze-v1'
+// How long to wait before nudging again after a dismissal.
+const PROMPT_SNOOZE_MS = 1000 * 60 * 60 * 24 * 14 // 14 days
 
 function savedKey(userId: string) {
   return `${SAVED_PREFIX}${userId}`
@@ -39,6 +44,13 @@ type RemiStoreValue = {
   setRemember: (value: boolean) => void
   /** Wipe the current conversation and any stored copies. */
   clearChat: () => void
+  /**
+   * True when it's appropriate to gently nudge the member to turn on remembering:
+   * they're signed in, haven't opted in, and haven't recently dismissed the nudge.
+   */
+  canPromptRemember: boolean
+  /** Dismiss the gentle nudge for a while (without opting in). */
+  snoozeRememberPrompt: () => void
 }
 
 const RemiStoreContext = createContext<RemiStoreValue | null>(null)
@@ -64,15 +76,32 @@ export function RemiStoreProvider({ children }: { children: ReactNode }) {
   )
 
   const [remember, setRememberState] = useState(false)
+  // ms timestamp until which the gentle nudge stays hidden; 0 means "never snoozed".
+  const [promptSnoozedUntil, setPromptSnoozedUntil] = useState(0)
 
-  // Load the saved opt-in preference on mount (client only).
+  // Load the saved opt-in preference and snooze state on mount (client only).
   useEffect(() => {
     try {
       setRememberState(localStorage.getItem(REMEMBER_KEY) === '1')
+      const snooze = Number(localStorage.getItem(PROMPT_SNOOZE_KEY) ?? '0')
+      if (Number.isFinite(snooze)) setPromptSnoozedUntil(snooze)
     } catch {
       // Ignore storage access errors (private mode, disabled storage, etc.).
     }
   }, [])
+
+  const snoozeRememberPrompt = useCallback(() => {
+    const until = Date.now() + PROMPT_SNOOZE_MS
+    setPromptSnoozedUntil(until)
+    try {
+      localStorage.setItem(PROMPT_SNOOZE_KEY, String(until))
+    } catch {
+      // Ignore storage errors.
+    }
+  }, [])
+
+  // Only nudge signed-in members who haven't opted in and aren't currently snoozed.
+  const canPromptRemember = Boolean(userId) && !remember && Date.now() >= promptSnoozedUntil
 
   const clearChat = useCallback(() => {
     // The Chat instance exposes a messages setter that notifies all subscribers.
@@ -107,8 +136,15 @@ export function RemiStoreProvider({ children }: { children: ReactNode }) {
   )
 
   const value = useMemo(
-    () => ({ chat, remember, setRemember, clearChat }),
-    [chat, remember, setRemember, clearChat],
+    () => ({
+      chat,
+      remember,
+      setRemember,
+      clearChat,
+      canPromptRemember,
+      snoozeRememberPrompt,
+    }),
+    [chat, remember, setRemember, clearChat, canPromptRemember, snoozeRememberPrompt],
   )
 
   return (

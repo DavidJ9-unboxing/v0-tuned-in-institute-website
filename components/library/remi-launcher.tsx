@@ -160,7 +160,9 @@ function RemiPanel({
 }) {
   const { data: session, isPending } = useSession()
   const user = session?.user
-  const { remember } = useRemiStore()
+  const { remember, setRemember, canPromptRemember, snoozeRememberPrompt } = useRemiStore()
+  // Whether to show the gentle "remember next time?" nudge inside the close dialog.
+  const showRememberNudge = canPromptRemember && !remember
 
   // The close confirmation explains where the conversation goes before the panel closes.
   const [confirmOpen, setConfirmOpen] = useState(false)
@@ -251,6 +253,8 @@ function RemiPanel({
   }
 
   function confirmClose() {
+    // If we showed the nudge and they didn't opt in, back off for a while.
+    if (showRememberNudge) snoozeRememberPrompt()
     setConfirmOpen(false)
     onOpenChange(false)
   }
@@ -317,6 +321,39 @@ function RemiPanel({
             </DialogDescription>
           </DialogHeader>
 
+          {showRememberNudge && (
+            <div className="flex flex-col gap-3 rounded-xl border border-deep-teal/25 bg-sage-light/60 p-4">
+              <div className="flex flex-col gap-1">
+                <p className="font-serif text-[15px] font-semibold text-deep-teal">
+                  Want Remi to remember next time?
+                </p>
+                <p className="font-sans text-xs leading-relaxed text-charcoal/70">
+                  We can keep your conversations on this device so Remi picks up where you left off.
+                  Nothing is sent to us. Best avoided on shared computers.
+                </p>
+              </div>
+              <div className="flex flex-col gap-2 sm:flex-row">
+                <Button
+                  type="button"
+                  size="sm"
+                  onClick={() => setRemember(true)}
+                  className="font-sans font-semibold"
+                >
+                  Remember my chats
+                </Button>
+                <Button
+                  type="button"
+                  size="sm"
+                  variant="ghost"
+                  onClick={snoozeRememberPrompt}
+                  className="font-sans font-semibold text-charcoal/70 hover:text-charcoal"
+                >
+                  Not now
+                </Button>
+              </div>
+            </div>
+          )}
+
           <button
             type="button"
             onClick={copyTranscript}
@@ -381,7 +418,10 @@ function RemiPanel({
               type="button"
               size="lg"
               variant="ghost"
-              onClick={() => setConfirmOpen(false)}
+              onClick={() => {
+                if (showRememberNudge) snoozeRememberPrompt()
+                setConfirmOpen(false)
+              }}
               className="font-sans font-semibold text-charcoal/70 hover:text-charcoal"
             >
               Keep chatting

@@ -3,7 +3,7 @@
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
-import { LogOut, ChevronDown, Shield, KeyRound } from 'lucide-react'
+import { LogOut, ChevronDown, Shield, KeyRound, Settings } from 'lucide-react'
 import { authClient } from '@/lib/auth-client'
 import {
   DropdownMenu,
@@ -63,6 +63,12 @@ export function AccountMenu({
             </Link>
           </DropdownMenuItem>
         )}
+        <DropdownMenuItem asChild>
+          <Link href="/account" className="cursor-pointer font-sans">
+            <Settings className="size-4" aria-hidden="true" />
+            Account settings
+          </Link>
+        </DropdownMenuItem>
         <DropdownMenuItem asChild>
           <Link href="/account/password" className="cursor-pointer font-sans">
             <KeyRound className="size-4" aria-hidden="true" />
