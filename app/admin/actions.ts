@@ -1,6 +1,7 @@
 'use server'
 
 import { revalidatePath } from 'next/cache'
+import { headers } from 'next/headers'
 import { eq } from 'drizzle-orm'
 import { del } from '@vercel/blob'
 import { auth } from '@/lib/auth'
@@ -8,8 +9,41 @@ import { db } from '@/lib/db'
 import { lesson, section, user } from '@/lib/db/schema'
 import { requireAdmin } from '@/lib/session'
 import { toEmbedUrl } from '@/lib/video'
+import { sendWelcomeEmail } from '@/lib/email'
 
 export type ActionState = { status: 'idle' | 'success' | 'error'; message: string }
+
+/** Absolute base URL of the app, used to build links in emails. */
+function appBaseUrl() {
+  return (
+    process.env.BETTER_AUTH_URL ??
+    (process.env.VERCEL_PROJECT_PRODUCTION_URL
+      ? `https://${process.env.VERCEL_PROJECT_PRODUCTION_URL}`
+      : process.env.VERCEL_URL
+        ? `https://${process.env.VERCEL_URL}`
+        : process.env.V0_RUNTIME_URL ?? 'http://localhost:3000')
+  )
+}
+
+/**
+ * Builds a temporary password: first name + first initial of last name +
+ * five random digits (e.g. "JaneD48217"). Falls back gracefully when a name
+ * has only one word, and pads to satisfy the 8-character minimum.
+ */
+function generateTempPassword(fullName: string) {
+  const parts = fullName.trim().split(/\s+/).filter(Boolean)
+  const first = (parts[0] ?? 'member').replace(/[^a-zA-Z]/g, '')
+  const lastInitial = parts.length > 1 ? (parts[parts.length - 1][0] ?? '') : ''
+  const base = `${first.charAt(0).toUpperCase()}${first.slice(1).toLowerCase()}${lastInitial.toUpperCase()}`
+  let digits = String(Math.floor(10000 + Math.random() * 90000)) // always 5 digits
+  let password = `${base}${digits}`
+  // Guarantee the 8-char minimum even for very short names.
+  while (password.length < 8) {
+    digits += Math.floor(Math.random() * 10)
+    password = `${base}${digits}`
+  }
+  return password
+}
 
 function slugify(input: string) {
   return input
@@ -28,12 +62,14 @@ export async function createClientAccount(
   await requireAdmin()
   const name = String(formData.get('name') ?? '').trim()
   const email = String(formData.get('email') ?? '').trim().toLowerCase()
-  const password = String(formData.get('password') ?? '')
   const role = String(formData.get('role') ?? 'client')
 
-  if (!name || !email || password.length < 8) {
-    return { status: 'error', message: 'Name, email, and a password of at least 8 characters are required.' }
+  if (!name || !email) {
+    return { status: 'error', message: 'A name and email are required.' }
   }
+
+  // Auto-generate a temporary password — the admin never types one.
+  const password = generateTempPassword(name)
 
   try {
     await auth.api.createUser({
@@ -41,17 +77,30 @@ export async function createClientAccount(
         name,
         email,
         password,
-        role: role === 'admin' ? 'admin' : 'client',
+        // The admin plugin's static types only know the built-in roles, but at
+        // runtime our custom "client" role is valid (it's the configured
+        // defaultRole). Cast to satisfy the type checker.
+        role: (role === 'admin' ? 'admin' : 'client') as 'admin',
       },
     })
-    // Admin-created accounts are trusted, so mark the email as verified.
-    // The client can sign in immediately with the password you set — no
-    // verification email required.
-    await db.update(user).set({ emailVerified: true }).where(eq(user.email, email))
+    // Admin-created accounts are trusted, so mark the email as verified, and
+    // flag the account so the member is prompted to choose their own password
+    // after their first sign-in with the temporary one.
+    await db
+      .update(user)
+      .set({ emailVerified: true, mustChangePassword: true })
+      .where(eq(user.email, email))
+
+    // Email the new member their credentials automatically.
+    const signInUrl = `${appBaseUrl()}/sign-in`
+    const sent = await sendWelcomeEmail({ to: email, name, email, tempPassword: password, signInUrl })
+
     revalidatePath('/admin/accounts')
     return {
       status: 'success',
-      message: `Account created for ${email}. They can sign in now with the password you set.`,
+      message: sent.ok
+        ? `Account created. A welcome email with the temporary password was sent to ${email}.`
+        : `Account created, but the welcome email could not be sent (${sent.error}). Temporary password: ${password}`,
     }
   } catch (err) {
     const message = err instanceof Error ? err.message : 'Could not create the account.'
@@ -61,7 +110,10 @@ export async function createClientAccount(
 
 export async function changeUserRole(userId: string, role: 'admin' | 'client') {
   await requireAdmin()
-  await auth.api.setUserRole({ body: { userId, role } })
+  await auth.api.setRole({
+    body: { userId, role: role as 'admin' },
+    headers: await headers(),
+  })
   revalidatePath('/admin/accounts')
 }
 

@@ -8,18 +8,23 @@ export type SessionUser = {
   email: string
   role: string
   emailVerified: boolean
+  mustChangePassword: boolean
 }
 
 export async function getCurrentUser(): Promise<SessionUser | null> {
   const session = await auth.api.getSession({ headers: await headers() })
   if (!session?.user) return null
-  const u = session.user as typeof session.user & { role?: string }
+  const u = session.user as typeof session.user & {
+    role?: string
+    mustChangePassword?: boolean
+  }
   return {
     id: u.id,
     name: u.name,
     email: u.email,
     role: u.role ?? 'client',
     emailVerified: u.emailVerified,
+    mustChangePassword: u.mustChangePassword ?? false,
   }
 }
 
