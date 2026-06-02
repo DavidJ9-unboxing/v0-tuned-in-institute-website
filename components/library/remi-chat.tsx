@@ -144,6 +144,7 @@ export function RemiChat({
   const [safetyCollapsed, setSafetyCollapsed] = useState(variant === 'panel')
   const scrollRef = useRef<HTMLDivElement>(null)
   const lastUserRef = useRef<HTMLDivElement>(null)
+  const inputRef = useRef<HTMLTextAreaElement>(null)
   const didAutoSend = useRef(false)
   // The message text that existed when the current dictation session began.
   const dictationBaseRef = useRef('')
@@ -191,6 +192,18 @@ export function RemiChat({
     if (!container || !anchor) return
     container.scrollTo({ top: anchor.offsetTop - 16, behavior: 'smooth' })
   }, [userMessageCount])
+
+  // Grow the input to fit its content (like ChatGPT/Claude), capped at ~6 lines (128px = max-h-32),
+  // after which it scrolls internally. Re-runs whenever the text changes — including dictation
+  // and clearing after send, which snaps it back to a single line.
+  useEffect(() => {
+    const el = inputRef.current
+    if (!el) return
+    el.style.height = 'auto'
+    const max = 128
+    el.style.height = `${Math.min(el.scrollHeight, max)}px`
+    el.style.overflowY = el.scrollHeight > max ? 'auto' : 'hidden'
+  }, [input])
 
   function submit(text: string) {
     const trimmed = text.trim()
@@ -660,6 +673,7 @@ export function RemiChat({
         <form onSubmit={onSubmit} className="shrink-0 border-t border-stone bg-card px-4 py-3">
           <div className="flex items-end gap-2">
             <textarea
+              ref={inputRef}
               value={input}
               onChange={(e) => setInput(e.target.value)}
               onKeyDown={(e) => {
