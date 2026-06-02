@@ -6,7 +6,6 @@ import { AccessCta } from '@/components/site/access-cta'
 import { SectionLabel } from '@/components/site/section-label'
 import { SearchBar } from '@/components/site/search-bar'
 import { ProgramCard } from '@/components/site/program-card'
-import { ConciergeExchange, conciergeExamples } from '@/components/site/concierge-exchange'
 import { AskRemiButton } from '@/components/library/remi-launcher'
 import { FeaturedGrid } from '@/components/site/featured-grid'
 import { Hero } from '@/components/home/hero'
@@ -134,28 +133,6 @@ export default async function HomePage() {
         </div>
       </section>
 
-      {/* Four program tracks */}
-      <section className="bg-off-white">
-        <div className="mx-auto max-w-6xl px-5 py-14 sm:px-8 md:py-16">
-          <SectionLabel>The programs</SectionLabel>
-          <h2 className="mt-5 max-w-2xl font-serif text-3xl font-semibold leading-tight text-deep-teal text-balance sm:text-4xl">
-            Four program tracks. One research foundation.
-          </h2>
-          <div className="mt-12 grid gap-6 md:grid-cols-2">
-            {programs.map((program) => (
-              <ProgramCard
-                key={program.slug}
-                name={program.name}
-                modules={program.modules}
-                status={program.status}
-                description={program.description}
-                href={`/programs/${program.slug}`}
-              />
-            ))}
-          </div>
-        </div>
-      </section>
-
       {/* What we are / are not */}
       <section className="bg-off-white">
         <div className="mx-auto max-w-6xl px-5 py-16 sm:px-8">
@@ -200,6 +177,28 @@ export default async function HomePage() {
               ))}
             </ul>
           </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Four program tracks */}
+      <section className="bg-off-white">
+        <div className="mx-auto max-w-6xl px-5 py-14 sm:px-8 md:py-16">
+          <SectionLabel>The programs</SectionLabel>
+          <h2 className="mt-5 max-w-2xl font-serif text-3xl font-semibold leading-tight text-deep-teal text-balance sm:text-4xl">
+            Four program tracks. One research foundation.
+          </h2>
+          <div className="mt-12 grid gap-6 md:grid-cols-2">
+            {programs.map((program) => (
+              <ProgramCard
+                key={program.slug}
+                name={program.name}
+                modules={program.modules}
+                status={program.status}
+                description={program.description}
+                href={`/programs/${program.slug}`}
+              />
+            ))}
           </div>
         </div>
       </section>
@@ -285,13 +284,7 @@ export default async function HomePage() {
             Parenting a sensitive child at 11pm and hit a wall? Remi is there, trained on every
             module, every resource, and every principle in our curriculum.
           </p>
-          <div className="mt-12">
-            <ConciergeExchange
-              question={conciergeExamples[0].question}
-              answer={conciergeExamples[0].answer}
-            />
-          </div>
-          <div className="mt-8 flex justify-center">
+          <div className="mt-10 flex justify-center">
             <AskRemiButton label="Ask Remi" />
           </div>
           <p className="mt-8 text-center font-sans text-sm text-charcoal/60">

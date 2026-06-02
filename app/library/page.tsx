@@ -45,7 +45,7 @@ export default async function LibraryPage({
               right articles, guides, and videos in the library — or just share what&apos;s on your
               mind and we can talk it through.{' '}
               <span className="text-charcoal/60">
-                (Chat is private and not saved but avoid full names and identifying details.)
+                (Chat is private — please avoid full names and identifying details.)
               </span>
             </>
           }

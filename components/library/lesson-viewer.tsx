@@ -1,10 +1,22 @@
 'use client'
 
 import { useEffect, useRef, useState } from 'react'
-import { Download, ExternalLink, FileText, Maximize, PlayCircle } from 'lucide-react'
+import { Download, ExternalLink, FileText, Lock, Maximize, PlayCircle } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import type { Lesson } from '@/lib/content'
 import { toEmbedUrl } from '@/lib/video'
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog'
+import { Button } from '@/components/ui/button'
+
+// Session-scoped flag: once a member acknowledges the sharing terms, we don't
+// re-prompt on every download for the rest of their visit.
+const DOWNLOAD_ACK_KEY = 'tii-download-ack-v1'
 
 /** PDFs can be previewed inline; other document types only offer a download. */
 function isPdf(url: string, fileName?: string | null) {
@@ -38,6 +50,44 @@ export function LessonViewer({
   // locks to landscape — letting the reader rotate for a wide horizontal view.
   const docWrapRef = useRef<HTMLDivElement>(null)
   const [isFullscreen, setIsFullscreen] = useState(false)
+
+  // One-time sharing/copyright acknowledgment before the first download of a visit.
+  const [ackOpen, setAckOpen] = useState(false)
+  const pendingDownloadRef = useRef<string | null>(null)
+
+  // Returns true if the member already acknowledged this session.
+  function hasAcknowledged() {
+    try {
+      return sessionStorage.getItem(DOWNLOAD_ACK_KEY) === '1'
+    } catch {
+      return false
+    }
+  }
+
+  // Open the document in a new tab (matches the previous <a target="_blank"> behaviour).
+  function openDownload(url: string) {
+    window.open(url, '_blank', 'noopener,noreferrer')
+  }
+
+  // Intercept a download: prompt with the terms first time, then proceed.
+  function handleDownloadClick(e: React.MouseEvent<HTMLAnchorElement>, url: string) {
+    if (hasAcknowledged()) return // let the anchor navigate normally
+    e.preventDefault()
+    pendingDownloadRef.current = url
+    setAckOpen(true)
+  }
+
+  function confirmDownload() {
+    try {
+      sessionStorage.setItem(DOWNLOAD_ACK_KEY, '1')
+    } catch {
+      /* storage unavailable — proceed anyway */
+    }
+    const url = pendingDownloadRef.current
+    setAckOpen(false)
+    if (url) openDownload(url)
+    pendingDownloadRef.current = null
+  }
 
   useEffect(() => {
     function onChange() {
@@ -217,12 +267,25 @@ export function LessonViewer({
                     href={`/api/library/file/${active.id}?download=1`}
                     target="_blank"
                     rel="noopener noreferrer"
+                    onClick={(e) =>
+                      handleDownloadClick(e, `/api/library/file/${active.id}?download=1`)
+                    }
                     className="inline-flex items-center gap-2 rounded-full bg-deep-teal px-5 py-2.5 font-sans text-sm font-semibold text-off-white transition-colors hover:bg-deep-teal/90"
                   >
                     {isPdf(active.fileUrl, active.fileName) ? 'Download' : 'Open document'}
                     <Download className="size-4" aria-hidden="true" />
                   </a>
                 </div>
+
+                <p className="flex items-start gap-2 rounded-lg border border-stone bg-off-white px-3.5 py-2.5 font-sans text-xs leading-relaxed text-charcoal/65">
+                  <Lock className="mt-0.5 size-3.5 shrink-0 text-deep-teal" aria-hidden="true" />
+                  <span>
+                    For members only. This material is copyrighted by The Tuned In Institute and
+                    provided for your personal use. Please don&apos;t share it publicly. You&apos;re
+                    welcome to share it with family members who would benefit, but please ask them
+                    to keep it within the family and not redistribute it.
+                  </span>
+                </p>
                 {isPdf(active.fileUrl, active.fileName) && (
                   <p className="font-sans text-xs leading-relaxed text-charcoal/55">
                     Tip: turn your phone sideways and the document will expand to fullscreen;
@@ -306,6 +369,48 @@ export function LessonViewer({
           })}
         </ol>
       </aside>
+
+      <Dialog open={ackOpen} onOpenChange={setAckOpen}>
+        <DialogContent className="max-w-md gap-0 p-0">
+          <div className="flex flex-col gap-5 px-7 py-7">
+            <DialogHeader className="gap-2">
+              <span className="flex size-11 items-center justify-center rounded-full bg-deep-teal/10">
+                <Lock className="size-5 text-deep-teal" aria-hidden="true" />
+              </span>
+              <DialogTitle className="font-serif text-xl font-semibold text-deep-teal text-balance">
+                Before you download
+              </DialogTitle>
+              <DialogDescription className="font-serif text-[15px] leading-relaxed text-charcoal/75">
+                This material is for members only and is copyrighted by The Tuned In Institute.
+                Please keep it for your personal use and don&apos;t share it publicly or online.
+                You&apos;re welcome to share it with family members who would benefit from reading
+                it &mdash; we just ask that they keep it within the family and not pass it on
+                further.
+              </DialogDescription>
+            </DialogHeader>
+
+            <div className="flex flex-col gap-2.5">
+              <Button
+                type="button"
+                size="lg"
+                onClick={confirmDownload}
+                className="font-sans font-semibold"
+              >
+                I understand &mdash; download
+              </Button>
+              <Button
+                type="button"
+                size="lg"
+                variant="ghost"
+                onClick={() => setAckOpen(false)}
+                className="font-sans font-semibold text-charcoal/70 hover:text-charcoal"
+              >
+                Cancel
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   )
 }
