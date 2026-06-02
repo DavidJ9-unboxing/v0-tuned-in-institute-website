@@ -334,7 +334,9 @@ function RemiPanel({
                   ? 'Nothing to copy yet'
                   : copyState === 'error'
                     ? "Couldn't copy — select the chat and copy manually"
-                    : 'Copy and paste to preserve the chat for yourself'}
+                    : remember
+                      ? 'Copy this conversation'
+                      : 'Copy this conversation to keep your own copy'}
             </span>
           </button>
 
