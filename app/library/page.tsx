@@ -30,8 +30,9 @@ export default async function LibraryPage({
           Your content library
         </h1>
         <p className="max-w-2xl font-serif text-[16px] leading-relaxed text-charcoal/75">
-          Remi answers anything on your mind and can also help you find a document, or scroll down
-          to browse our library.
+          Explore our collection of articles, guides, and videos on parenting, relationships, and
+          family wellbeing. Scroll down to browse the library, or ask Remi to help you find what
+          you need.
         </p>
       </header>
 
