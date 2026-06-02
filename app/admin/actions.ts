@@ -76,7 +76,10 @@ export async function createClientAccount(
         name,
         email,
         password,
-        role: role === 'admin' ? 'admin' : 'client',
+        // The admin plugin's static types only know the built-in roles, but at
+        // runtime our custom "client" role is valid (it's the configured
+        // defaultRole). Cast to satisfy the type checker.
+        role: (role === 'admin' ? 'admin' : 'client') as 'admin',
       },
     })
     // Admin-created accounts are trusted, so mark the email as verified, and
@@ -106,7 +109,7 @@ export async function createClientAccount(
 
 export async function changeUserRole(userId: string, role: 'admin' | 'client') {
   await requireAdmin()
-  await auth.api.setUserRole({ body: { userId, role } })
+  await auth.api.setRole({ body: { userId, role: role as 'admin' } })
   revalidatePath('/admin/accounts')
 }
 
