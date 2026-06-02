@@ -89,7 +89,7 @@ export function SiteHeader() {
         <div className="flex items-center gap-2">
           <Button
             type="button"
-            onClick={openRemi}
+            onClick={() => openRemi()}
             variant="outline"
             size="icon"
             aria-label="Ask Remi, the AI concierge"
