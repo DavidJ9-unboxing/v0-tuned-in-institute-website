@@ -110,10 +110,17 @@ function ResourceCards({ resources }: { resources: RemiResource[] }) {
 export function RemiChat({
   initialQuery = '',
   variant = 'page',
+  intro,
   onTranscriptChange,
 }: {
   initialQuery?: string
   variant?: 'page' | 'panel'
+  /**
+   * The opening greeting Remi shows before any conversation. Defaults to the
+   * general message used everywhere; the library passes a tailored one so Remi
+   * introduces herself in the context of finding content.
+   */
+  intro?: React.ReactNode
   /** Emits a plain-text transcript of the conversation whenever it changes. */
   onTranscriptChange?: (transcript: string) => void
 }) {
@@ -444,12 +451,17 @@ export function RemiChat({
               <RemiAvatar />
               <div className="max-w-[85%] rounded-2xl rounded-tl-sm border border-stone bg-card px-4 py-3">
                 <p className="font-serif text-[15px] leading-relaxed text-charcoal/85">
-                  Hi, I&apos;m Remi. I&apos;m here to talk things through with you — a hard moment
-                  with your child, or something you&apos;re carrying yourself. Share whatever&apos;s
-                  on your mind.{' '}
-                  <span className="text-charcoal/60">
-                    (Chat is private and not saved but avoid full names and identifying details.)
-                  </span>
+                  {intro ?? (
+                    <>
+                      Hi, I&apos;m Remi. I&apos;m here to talk things through with you — a hard
+                      moment with your child, or something you&apos;re carrying yourself. Share
+                      whatever&apos;s on your mind.{' '}
+                      <span className="text-charcoal/60">
+                        (Chat is private and not saved but avoid full names and identifying
+                        details.)
+                      </span>
+                    </>
+                  )}
                 </p>
               </div>
             </div>

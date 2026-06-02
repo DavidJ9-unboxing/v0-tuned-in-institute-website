@@ -1,7 +1,7 @@
 'use client'
 
-import { useRef, useState } from 'react'
-import { Download, ExternalLink, FileText, PlayCircle } from 'lucide-react'
+import { useEffect, useRef, useState } from 'react'
+import { Download, ExternalLink, FileText, Maximize, PlayCircle } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import type { Lesson } from '@/lib/content'
 import { toEmbedUrl } from '@/lib/video'
@@ -32,6 +32,84 @@ export function LessonViewer({
     setActiveId(id)
     viewerRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' })
   }
+
+  // Fullscreen support for documents. Landscape PDFs are hard to read in the
+  // portrait viewer, so the fullscreen button fills the screen and (on phones)
+  // locks to landscape — letting the reader rotate for a wide horizontal view.
+  const docWrapRef = useRef<HTMLDivElement>(null)
+  const [isFullscreen, setIsFullscreen] = useState(false)
+
+  useEffect(() => {
+    function onChange() {
+      const fs = Boolean(document.fullscreenElement)
+      setIsFullscreen(fs)
+      // Release the orientation lock when leaving fullscreen.
+      if (!fs) {
+        try {
+          ;(screen.orientation as ScreenOrientation & { unlock?: () => void })?.unlock?.()
+        } catch {
+          /* unsupported — ignore */
+        }
+      }
+    }
+    document.addEventListener('fullscreenchange', onChange)
+    return () => document.removeEventListener('fullscreenchange', onChange)
+  }, [])
+
+  async function openFullscreen() {
+    const el = docWrapRef.current
+    if (!el) return
+    try {
+      if (el.requestFullscreen) await el.requestFullscreen()
+      // Lock to landscape on devices that support it (mostly phones/tablets).
+      const orientation = screen.orientation as ScreenOrientation & {
+        lock?: (o: string) => Promise<void>
+      }
+      if (orientation?.lock) {
+        try {
+          await orientation.lock('landscape')
+        } catch {
+          /* desktop / unsupported — stays in current orientation */
+        }
+      }
+    } catch {
+      /* fullscreen blocked — nothing we can do */
+    }
+  }
+
+  // On phones, automatically expand a PDF to fullscreen when the device is
+  // physically rotated to landscape, and collapse back to the windowed viewer
+  // when rotated back to portrait. We don't lock orientation here since the
+  // reader is driving it by turning the phone.
+  const activeIsPdf =
+    active?.kind === 'document' && !!active.fileUrl && isPdf(active.fileUrl, active.fileName)
+
+  useEffect(() => {
+    if (typeof window === 'undefined') return
+    const landscapeMql = window.matchMedia('(orientation: landscape)')
+    const phoneMql = window.matchMedia('(max-width: 768px)')
+
+    async function handleOrientation() {
+      if (!phoneMql.matches) return // desktops/tablets keep the windowed viewer
+      const el = docWrapRef.current
+      if (landscapeMql.matches && activeIsPdf && el && !document.fullscreenElement) {
+        try {
+          await el.requestFullscreen?.()
+        } catch {
+          /* gesture/permission blocked — reader can use the button instead */
+        }
+      } else if (!landscapeMql.matches && document.fullscreenElement) {
+        try {
+          await document.exitFullscreen()
+        } catch {
+          /* ignore */
+        }
+      }
+    }
+
+    landscapeMql.addEventListener('change', handleOrientation)
+    return () => landscapeMql.removeEventListener('change', handleOrientation)
+  }, [activeIsPdf])
 
   if (lessons.length === 0) {
     return (
@@ -89,7 +167,7 @@ export function LessonViewer({
             {active.kind === 'link' && active.externalUrl && (
               <div className="flex flex-col items-start gap-4 rounded-2xl border border-stone bg-sage-light px-6 py-8">
                 <p className="font-serif text-[15px] leading-relaxed text-charcoal/75">
-                  This resource opens on an external page.
+                  This library content will open in a new browser tab.
                 </p>
                 <a
                   href={active.externalUrl}
@@ -97,7 +175,7 @@ export function LessonViewer({
                   rel="noopener noreferrer"
                   className="inline-flex items-center gap-2 rounded-full bg-deep-teal px-5 py-2.5 font-sans text-sm font-semibold text-off-white transition-colors hover:bg-deep-teal/90"
                 >
-                  Open resource
+                  Open this content
                   <ExternalLink className="size-4" aria-hidden="true" />
                 </a>
               </div>
@@ -106,27 +184,53 @@ export function LessonViewer({
             {active.kind === 'document' && active.fileUrl && (
               <div className="flex flex-col gap-4">
                 {isPdf(active.fileUrl, active.fileName) && (
-                  <div className="overflow-hidden rounded-2xl border border-stone bg-card">
-                    {/* view=FitH fits the PDF to the frame width so wide pages
-                        don't overflow; the height is capped responsively and the
-                        viewer scrolls internally for long documents. */}
+                  <div
+                    ref={docWrapRef}
+                    className={cn(
+                      'overflow-hidden border border-stone bg-card',
+                      isFullscreen ? 'flex h-screen w-screen flex-col rounded-none' : 'rounded-2xl',
+                    )}
+                  >
+                    {/* view=Fit shows the whole page within the frame, so wide
+                        landscape pages fit fully (just smaller) instead of
+                        overflowing. The viewer scrolls internally between pages. */}
                     <iframe
                       key={active.id}
-                      src={`/api/library/file/${active.id}#toolbar=1&navpanes=0&view=FitH`}
+                      src={`/api/library/file/${active.id}#toolbar=1&navpanes=0&view=Fit`}
                       title={active.title}
-                      className="h-[60vh] w-full md:h-[75vh]"
+                      className={cn('w-full', isFullscreen ? 'flex-1' : 'h-[60vh] md:h-[75vh]')}
                     />
                   </div>
                 )}
-                <a
-                  href={`/api/library/file/${active.id}?download=1`}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="inline-flex w-fit items-center gap-2 rounded-full bg-deep-teal px-5 py-2.5 font-sans text-sm font-semibold text-off-white transition-colors hover:bg-deep-teal/90"
-                >
-                  {isPdf(active.fileUrl, active.fileName) ? 'Download' : 'Open document'}
-                  <Download className="size-4" aria-hidden="true" />
-                </a>
+                <div className="flex flex-wrap items-center gap-3">
+                  {isPdf(active.fileUrl, active.fileName) && (
+                    <button
+                      type="button"
+                      onClick={openFullscreen}
+                      className="inline-flex items-center gap-2 rounded-full border border-deep-teal/40 px-5 py-2.5 font-sans text-sm font-semibold text-deep-teal transition-colors hover:bg-sage-light"
+                    >
+                      View fullscreen
+                      <Maximize className="size-4" aria-hidden="true" />
+                    </button>
+                  )}
+                  <a
+                    href={`/api/library/file/${active.id}?download=1`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-flex items-center gap-2 rounded-full bg-deep-teal px-5 py-2.5 font-sans text-sm font-semibold text-off-white transition-colors hover:bg-deep-teal/90"
+                  >
+                    {isPdf(active.fileUrl, active.fileName) ? 'Download' : 'Open document'}
+                    <Download className="size-4" aria-hidden="true" />
+                  </a>
+                </div>
+                {isPdf(active.fileUrl, active.fileName) && (
+                  <p className="font-sans text-xs leading-relaxed text-charcoal/55">
+                    Tip: turn your phone sideways and the document will expand to fullscreen;
+                    turn it back upright to return to the window. You can also tap &ldquo;View
+                    fullscreen&rdquo; anytime. Many documents are easier to read on a laptop or
+                    desktop.
+                  </p>
+                )}
               </div>
             )}
 
