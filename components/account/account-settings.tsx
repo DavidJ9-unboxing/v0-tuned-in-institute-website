@@ -126,7 +126,7 @@ export function AccountSettings({ name, email }: { name: string; email: string }
             {nameSaved && (
               <span className="flex items-center gap-1.5 font-sans text-sm font-medium text-sage-deep">
                 <Check className="size-4" aria-hidden="true" />
-                Saved
+                Saved 🤍
               </span>
             )}
           </div>

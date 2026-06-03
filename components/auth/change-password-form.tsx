@@ -57,7 +57,7 @@ export function ChangePasswordForm({ firstTime = false }: { firstTime?: boolean 
         <CheckCircle2 className="size-10 text-sage-deep" aria-hidden="true" />
         <h2 className="font-serif text-2xl font-semibold text-deep-teal">Password updated</h2>
         <p className="max-w-sm font-serif text-[15px] leading-relaxed text-charcoal/80">
-          Your password has been changed. Use it the next time you sign in.
+          Your password has been changed. Use it the next time you sign in. 🤍
         </p>
         <Button asChild size="lg" className="font-sans font-semibold">
           <Link href="/library">Go to the library</Link>
