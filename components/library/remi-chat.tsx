@@ -22,7 +22,9 @@ import {
 import { Button } from '@/components/ui/button'
 import { cn } from '@/lib/utils'
 import { useSpeechRecognition } from '@/hooks/use-speech-recognition'
+import { useSpeechSynthesis } from '@/hooks/use-speech-synthesis'
 import { useRemiStore } from '@/components/library/remi-store'
+import { MessageActions } from '@/components/library/message-actions'
 
 const CRISIS_RESOURCE_URL =
   'https://988lifeline.org/learn/our-crisis-centers/crisis-centers-by-state-and-u-s-territory/'
@@ -162,6 +164,14 @@ export function RemiChat({
   const { isListening, isSupported, start, stop: stopListening } = useSpeechRecognition({
     onSessionTranscript: handleSessionTranscript,
   })
+
+  // Text-to-speech for the "Listen" action on each of Remi's replies. A single instance
+  // here means only one message reads aloud at a time across the conversation.
+  const {
+    isSupported: speechSupported,
+    speakingId,
+    speak,
+  } = useSpeechSynthesis()
 
   function toggleMic() {
     if (isListening) {
@@ -545,6 +555,16 @@ export function RemiChat({
             const isUser = message.role === 'user'
             const isLastUser =
               isUser && !messages.slice(index + 1).some((m) => m.role === 'user')
+            // The plain-text content of this message, used for copy / listen / share.
+            const messageText = message.parts
+              .filter((p) => p.type === 'text')
+              .map((p) => (p as { text: string }).text)
+              .join('')
+              .trim()
+            // Only show the action row on Remi's finished replies that have text — never on
+            // the member's own messages, and not while the reply is still streaming in.
+            const showActions =
+              !isUser && messageText.length > 0 && !(busy && index === messages.length - 1)
             return (
               <div
                 key={message.id}
@@ -556,30 +576,40 @@ export function RemiChat({
                 ) : (
                   <RemiAvatar />
                 )}
-                <div
-                  className={`max-w-[85%] rounded-2xl px-4 py-3 ${
-                    isUser
-                      ? 'rounded-tr-sm bg-deep-teal text-off-white'
-                      : 'rounded-tl-sm border border-stone bg-card text-charcoal/85'
-                  }`}
-                >
-                  {message.parts.map((part, i) => {
-                    if (part.type === 'text') {
-                      return (
-                        <p
-                          key={i}
-                          className={`whitespace-pre-wrap break-words font-serif text-[15px] leading-relaxed ${
-                            isUser ? 'text-off-white' : 'text-charcoal/85'
-                          }`}
-                        >
-                          {part.text}
-                        </p>
-                      )
-                    }
-                    // Cited resources are collected and shown below the dialogue,
-                    // not inline in the conversation bubbles.
-                    return null
-                  })}
+                <div className={`flex max-w-[85%] flex-col ${isUser ? 'items-end' : 'items-start'}`}>
+                  <div
+                    className={`rounded-2xl px-4 py-3 ${
+                      isUser
+                        ? 'rounded-tr-sm bg-deep-teal text-off-white'
+                        : 'rounded-tl-sm border border-stone bg-card text-charcoal/85'
+                    }`}
+                  >
+                    {message.parts.map((part, i) => {
+                      if (part.type === 'text') {
+                        return (
+                          <p
+                            key={i}
+                            className={`whitespace-pre-wrap break-words font-serif text-[15px] leading-relaxed ${
+                              isUser ? 'text-off-white' : 'text-charcoal/85'
+                            }`}
+                          >
+                            {part.text}
+                          </p>
+                        )
+                      }
+                      // Cited resources are collected and shown below the dialogue,
+                      // not inline in the conversation bubbles.
+                      return null
+                    })}
+                  </div>
+                  {showActions && (
+                    <MessageActions
+                      text={messageText}
+                      speechSupported={speechSupported}
+                      isSpeaking={speakingId === message.id}
+                      onToggleSpeak={() => speak(message.id, messageText)}
+                    />
+                  )}
                 </div>
               </div>
             )
