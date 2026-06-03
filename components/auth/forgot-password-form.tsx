@@ -39,7 +39,7 @@ export function ForgotPasswordForm() {
         <h2 className="font-serif text-2xl font-semibold text-deep-teal">Check your inbox</h2>
         <p className="max-w-sm font-serif text-[15px] leading-relaxed text-charcoal/80">
           If an account exists for {email}, we&apos;ve sent a link to reset your password. The link
-          expires in one hour. 🤍
+          expires in one hour.
         </p>
       </div>
     )
