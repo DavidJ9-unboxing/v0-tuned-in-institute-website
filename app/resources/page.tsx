@@ -97,7 +97,7 @@ export default async function ResourcesPage() {
           <div className="mx-auto max-w-6xl px-5 py-20 sm:px-8">
             <SectionLabel>Featured</SectionLabel>
             <h2 className="mt-5 font-serif text-3xl font-semibold leading-tight text-deep-teal text-balance sm:text-4xl">
-              Start with these.
+              A few pieces of content you may find interesting
             </h2>
             <div className="mt-12">
               <FeaturedGrid items={featured} isMember={Boolean(user)} />
