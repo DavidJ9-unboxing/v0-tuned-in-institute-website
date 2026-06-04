@@ -23,9 +23,9 @@ const resourceTypes = [
 
 const featured = [
   {
-    tag: 'Article',
-    title: 'The science of the meltdown: what is happening in a sensitive nervous system',
-    body: 'A plain-language walk through overstimulation, the window of tolerance, and why willpower is the wrong tool.',
+    tag: 'Book',
+    title: 'Tuned In: A Guide for Parents of Sensitive Children',
+    body: 'The complete Tuned In book by Sophie Schauermann, LCSW &mdash; a warm, practical guide to understanding and parenting sensitive children ages 2&ndash;12, grounded in neuroscience and attachment research.',
   },
   {
     tag: 'Worksheet',
@@ -94,7 +94,7 @@ export default async function ResourcesPage() {
         <div className="mx-auto max-w-6xl px-5 py-20 sm:px-8">
           <SectionLabel>Featured</SectionLabel>
           <h2 className="mt-5 font-serif text-3xl font-semibold leading-tight text-deep-teal text-balance sm:text-4xl">
-            Start with these.
+            A few pieces of content you may find interesting
           </h2>
           <div className="mt-12 grid gap-6 md:grid-cols-2">
             {featured.map((f) => (
