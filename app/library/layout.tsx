@@ -6,6 +6,6 @@ export default async function LibraryLayout({ children }: { children: React.Reac
   const user = await requireUser()
   // Force first-time users (admin-created accounts on a shared temporary
   // password) to choose their own password before browsing the library.
-  if (user.mustChangePassword) redirect('/change-password')
+  if (user.mustChangePassword) redirect('/account/password?first=1')
   return <div className="min-h-[80vh] bg-off-white">{children}</div>
 }

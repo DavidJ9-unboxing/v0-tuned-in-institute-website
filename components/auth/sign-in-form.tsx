@@ -40,16 +40,23 @@ export function SignInForm() {
       }
       return
     }
-    // Send admins straight to the dashboard; everyone else to the library.
+    // Members still on their temporary password are prompted to set their own.
     const { data: session } = await authClient.getSession()
-    const role = (session?.user as { role?: string } | undefined)?.role
-    router.push(role === 'admin' ? '/admin' : '/library')
+    const sessionUser = session?.user as
+      | { role?: string; mustChangePassword?: boolean }
+      | undefined
+    if (sessionUser?.mustChangePassword) {
+      router.push('/account/password?first=1')
+    } else {
+      // Send admins straight to the dashboard; everyone else to the library.
+      router.push(sessionUser?.role === 'admin' ? '/admin' : '/library')
+    }
     router.refresh()
   }
 
   return (
     <form onSubmit={onSubmit} className="mt-8 flex w-full flex-col gap-4">
-      <div className="flex flex-col gap-2">
+      <div className="flex flex-col gap-2" suppressHydrationWarning>
         <label htmlFor="email" className={labelClass}>
           Email address
         </label>
@@ -65,7 +72,7 @@ export function SignInForm() {
           placeholder="you@example.com"
         />
       </div>
-      <div className="flex flex-col gap-2">
+      <div className="flex flex-col gap-2" suppressHydrationWarning>
         <div className="flex items-center justify-between">
           <label htmlFor="password" className={labelClass}>
             Password

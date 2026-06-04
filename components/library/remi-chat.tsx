@@ -1,25 +1,30 @@
 'use client'
 
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import Link from 'next/link'
 import { useChat } from '@ai-sdk/react'
-import { DefaultChatTransport } from 'ai'
 import {
   ArrowUp,
   ChevronDown,
   Download,
   ExternalLink,
   FileText,
+  Info,
   LifeBuoy,
   Loader2,
   Lock,
   Mic,
   PlayCircle,
   Sparkles,
+  Trash2,
+  X,
 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { cn } from '@/lib/utils'
 import { useSpeechRecognition } from '@/hooks/use-speech-recognition'
+import { useSpeechSynthesis } from '@/hooks/use-speech-synthesis'
+import { useRemiStore } from '@/components/library/remi-store'
+import { MessageActions } from '@/components/library/message-actions'
 
 const CRISIS_RESOURCE_URL =
   'https://988lifeline.org/learn/our-crisis-centers/crisis-centers-by-state-and-u-s-territory/'
@@ -109,22 +114,39 @@ function ResourceCards({ resources }: { resources: RemiResource[] }) {
 export function RemiChat({
   initialQuery = '',
   variant = 'page',
+  intro,
+  onTranscriptChange,
 }: {
   initialQuery?: string
   variant?: 'page' | 'panel'
+  /**
+   * The opening greeting Remi shows before any conversation. Defaults to the
+   * general message used everywhere; the library passes a tailored one so Remi
+   * introduces herself in the context of finding content.
+   */
+  intro?: React.ReactNode
+  /** Emits a plain-text transcript of the conversation whenever it changes. */
+  onTranscriptChange?: (transcript: string) => void
 }) {
-  const { messages, sendMessage, status, error } = useChat({
-    transport: new DefaultChatTransport({ api: '/api/library/remi' }),
-  })
+  // Every Remi surface (this page chat and the slide-over panel) shares one conversation
+  // via the store, so it survives navigation and stays in sync between surfaces.
+  const { chat, remember, setRemember, clearChat } = useRemiStore()
+  const { messages, sendMessage, status, error } = useChat({ chat })
   const [input, setInput] = useState('')
   // In the slide-over the resource list is collapsed by default so it doesn't eat the small
   // mobile screen; members still see a labelled, tappable header telling them links are there.
   const [resourcesOpen, setResourcesOpen] = useState(false)
-  // Privacy note is collapsed by default; the header always shows a short summary so the
-  // important "not HIPAA-compliant / don't share identifying details" point stays visible.
+  // Privacy note is collapsed by default; the header shows a one-line summary. Once a member
+  // reads it and dismisses it, it's hidden for the rest of the session (not persisted).
   const [privacyOpen, setPrivacyOpen] = useState(false)
+  const [privacyDismissed, setPrivacyDismissed] = useState(false)
+  // The crisis/safety note can be collapsed to a single tappable line so the privacy note and
+  // input have room on small screens. In the slide-over panel (mobile) it starts collapsed so the
+  // privacy footer below it stays fully visible; it can be reopened anytime.
+  const [safetyCollapsed, setSafetyCollapsed] = useState(variant === 'panel')
   const scrollRef = useRef<HTMLDivElement>(null)
   const lastUserRef = useRef<HTMLDivElement>(null)
+  const inputRef = useRef<HTMLTextAreaElement>(null)
   const didAutoSend = useRef(false)
   // The message text that existed when the current dictation session began.
   const dictationBaseRef = useRef('')
@@ -142,6 +164,14 @@ export function RemiChat({
   const { isListening, isSupported, start, stop: stopListening } = useSpeechRecognition({
     onSessionTranscript: handleSessionTranscript,
   })
+
+  // Text-to-speech for the "Listen" action on each of Remi's replies. A single instance
+  // here means only one message reads aloud at a time across the conversation.
+  const {
+    isSupported: speechSupported,
+    speakingId,
+    speak,
+  } = useSpeechSynthesis()
 
   function toggleMic() {
     if (isListening) {
@@ -173,6 +203,18 @@ export function RemiChat({
     container.scrollTo({ top: anchor.offsetTop - 16, behavior: 'smooth' })
   }, [userMessageCount])
 
+  // Grow the input to fit its content (like ChatGPT/Claude), capped at ~6 lines (128px = max-h-32),
+  // after which it scrolls internally. Re-runs whenever the text changes — including dictation
+  // and clearing after send, which snaps it back to a single line.
+  useEffect(() => {
+    const el = inputRef.current
+    if (!el) return
+    el.style.height = 'auto'
+    const max = 128
+    el.style.height = `${Math.min(el.scrollHeight, max)}px`
+    el.style.overflowY = el.scrollHeight > max ? 'auto' : 'hidden'
+  }, [input])
+
   function submit(text: string) {
     const trimmed = text.trim()
     if (!trimmed || busy) return
@@ -188,6 +230,45 @@ export function RemiChat({
   }
 
   const hasConversation = messages.length > 0
+
+  // Guardrail: Remi re-sends the entire conversation to the model on every turn, so a very
+  // long thread can eventually crowd the model's context window and the earliest messages
+  // (e.g. "I have 5 grandchildren") start getting dropped. We estimate the conversation size
+  // from its character count (~4 chars per token is a rough industry heuristic) and gently warn
+  // before that happens. The threshold is intentionally conservative and easy to tune.
+  const WARN_AFTER_CHARS = 60_000 // ~15k tokens: a genuinely long conversation for this use case
+  const conversationChars = useMemo(() => {
+    let total = 0
+    for (const m of messages) {
+      for (const part of m.parts) {
+        if (part.type === 'text') total += part.text.length
+      }
+    }
+    return total
+  }, [messages])
+  const conversationGettingLong = conversationChars >= WARN_AFTER_CHARS
+  // Once dismissed, stay quiet for the rest of this session so it isn't nagging.
+  const [lengthNoticeDismissed, setLengthNoticeDismissed] = useState(false)
+  const showLengthNotice = conversationGettingLong && !lengthNoticeDismissed
+
+  // Publish a plain-text transcript upward so the close dialog can offer "copy & paste to keep it".
+  useEffect(() => {
+    if (!onTranscriptChange) return
+    const transcript = messages
+      .map((m) => {
+        const text = m.parts
+          .filter((p) => p.type === 'text')
+          .map((p) => (p as { text: string }).text)
+          .join('')
+          .trim()
+        if (!text) return ''
+        return `${m.role === 'user' ? 'You' : 'Remi'}: ${text}`
+      })
+      .filter(Boolean)
+      .join('\n\n')
+    onTranscriptChange(transcript)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [messages])
 
   // The most recent thing the member said, so the error note can offer a one-tap retry.
   const lastUserText = [...messages]
@@ -264,7 +345,7 @@ export function RemiChat({
       </section>
     ))
 
-  const privacyNote = (
+  const privacyNote = privacyDismissed ? null : (
     <section
       aria-label="Privacy and confidentiality"
       className={cn(
@@ -277,23 +358,21 @@ export function RemiChat({
         onClick={() => setPrivacyOpen((v) => !v)}
         aria-expanded={privacyOpen}
         className={cn(
-          'flex w-full items-start justify-between gap-2 text-left transition-colors hover:bg-card/60',
+          'flex w-full items-center justify-between gap-2 text-left transition-colors hover:bg-card/60',
           isPanel ? 'px-5 py-3' : 'rounded-xl px-4 py-3',
         )}
       >
-        <span className="flex items-start gap-2.5">
-          <Lock className="mt-0.5 size-4 shrink-0 text-deep-teal" aria-hidden="true" />
+        <span className="flex items-center gap-2.5">
+          <Lock className="size-4 shrink-0 text-deep-teal" aria-hidden="true" />
           <span className="font-sans text-xs leading-relaxed text-charcoal/65">
-            <span className="font-semibold text-charcoal">Privacy &amp; Confidentiality</span> — chats
-            aren&apos;t saved and Remi is{' '}
-            <span className="font-medium text-charcoal/80">not HIPAA-compliant</span>, so please avoid
-            sharing identifying details.{' '}
+            <span className="font-semibold text-charcoal">Privacy &amp; Confidentiality:</span> Remi is
+            powered by OpenAI.{' '}
             <span className="text-deep-teal">{privacyOpen ? 'Show less' : 'Read more'}</span>
           </span>
         </span>
         <ChevronDown
           className={cn(
-            'mt-0.5 size-4 shrink-0 text-charcoal/55 transition-transform',
+            'size-4 shrink-0 text-charcoal/55 transition-transform',
             privacyOpen && 'rotate-180',
           )}
           aria-hidden="true"
@@ -302,36 +381,86 @@ export function RemiChat({
       {privacyOpen && (
         <div
           className={cn(
-            'flex flex-col gap-2 font-sans text-xs leading-relaxed text-charcoal/65',
+            'flex flex-col gap-3 font-sans text-xs leading-relaxed text-charcoal/65',
             isPanel ? 'px-5 pb-4 pl-[2.65rem]' : 'px-4 pb-4 pl-[2.4rem]',
           )}
         >
           <p>
-            Your conversations with Remi are private and are not saved between chats. Remi
-            won&apos;t remember your conversation the next time you return unless you choose to save a
-            summary and bring it back with you.
+            Remi is{' '}
+            <span className="font-medium text-charcoal/80">not HIPAA-compliant</span>, so please skip
+            full names, addresses, and other identifying details. We don&apos;t have access to your
+            chat and we never store it on our servers. Your conversation stays available during this
+            visit; to keep it for next time, turn on remembering below.
           </p>
-          <p>
-            Please note that Remi is{' '}
-            <span className="font-medium text-charcoal/80">not HIPAA-compliant</span> because it is
-            powered by OpenAI technology. To protect your privacy, please avoid sharing full names,
-            addresses, dates of birth, insurance information, or other identifying details.
-          </p>
-          <p>
-            Remi is trained to draw from educational content created by the Tuned In Institute and
-            Rooted Rhythm Therapy to offer guidance, resources, and support. Think of Remi as a
-            private educational guide rather than a clinical record.
-          </p>
-          <p>
-            Want to continue later? Simply ask Remi for a summary before you leave, save it somewhere
-            secure, and paste it into a new chat when you return.
-          </p>
+
+          {/* Opt-in, device-only memory. Stored in this browser only — never sent to us. */}
+          <div className="flex items-start gap-2.5 rounded-lg border border-stone bg-card p-3">
+            <button
+              type="button"
+              role="switch"
+              aria-checked={remember}
+              onClick={() => setRemember(!remember)}
+              className={cn(
+                'mt-0.5 flex h-5 w-9 shrink-0 items-center rounded-full p-0.5 transition-colors',
+                remember ? 'justify-end bg-deep-teal' : 'justify-start bg-stone',
+              )}
+            >
+              <span className="size-4 rounded-full bg-off-white shadow-sm" />
+              <span className="sr-only">Remember my conversations on this device</span>
+            </button>
+            <span className="flex flex-col gap-0.5">
+              <span className="font-sans text-xs font-semibold text-charcoal">
+                Remember my conversations on this device
+              </span>
+              <span className="font-sans text-[11px] leading-relaxed text-charcoal/60">
+                Saved only in this browser so Remi can pick up where you left off. Avoid this on a
+                shared or public computer.
+              </span>
+            </span>
+          </div>
+
+          <div className="flex flex-wrap items-center gap-2">
+            <button
+              type="button"
+              onClick={() => setPrivacyDismissed(true)}
+              className="rounded-lg border border-stone bg-card px-3 py-1.5 font-sans text-xs font-medium text-deep-teal transition-colors hover:border-deep-teal/40"
+            >
+              Got it
+            </button>
+            {hasConversation && (
+              <button
+                type="button"
+                onClick={clearChat}
+                className="flex items-center gap-1.5 rounded-lg border border-stone bg-card px-3 py-1.5 font-sans text-xs font-medium text-charcoal/70 transition-colors hover:border-deep-teal/40 hover:text-deep-teal"
+              >
+                <Trash2 className="size-3.5" aria-hidden="true" />
+                Clear conversation
+              </button>
+            )}
+          </div>
         </div>
       )}
     </section>
   )
 
-  const safetyNote = (
+  const safetyNote = safetyCollapsed ? (
+    // Collapsed: a single quiet line that still surfaces the crisis link and can reopen the full note.
+    <div
+      className={cn(
+        'flex items-center gap-2.5 border-stone bg-card',
+        isPanel ? 'shrink-0 border-t px-5 py-2.5' : 'rounded-xl border px-4 py-2.5',
+      )}
+    >
+      <LifeBuoy className="size-4 shrink-0 text-deep-teal" aria-hidden="true" />
+      <button
+        type="button"
+        onClick={() => setSafetyCollapsed(false)}
+        className="font-sans text-xs leading-relaxed text-charcoal/65 underline underline-offset-2 transition-colors hover:text-deep-teal"
+      >
+        If you&apos;re in immediate danger
+      </button>
+    </div>
+  ) : (
     <div
       className={cn(
         'flex items-start gap-2.5 border-stone bg-card',
@@ -339,7 +468,7 @@ export function RemiChat({
       )}
     >
       <LifeBuoy className="mt-0.5 size-4 shrink-0 text-deep-teal" aria-hidden="true" />
-      <p className="font-sans text-xs leading-relaxed text-charcoal/65">
+      <p className="flex-1 font-sans text-xs leading-relaxed text-charcoal/65">
         Remi is a guide, not a therapist or crisis service. If you&apos;re in immediate danger, call
         your local emergency number (911 in the US) or call or text 988. You can also find a{' '}
         <a
@@ -352,11 +481,26 @@ export function RemiChat({
         </a>
         .
       </p>
+      <button
+        type="button"
+        onClick={() => setSafetyCollapsed(true)}
+        className="-mr-1 -mt-0.5 flex shrink-0 items-center gap-1 rounded-md px-1.5 py-0.5 font-sans text-xs font-medium text-charcoal/55 transition-colors hover:bg-paper hover:text-charcoal/80"
+        aria-label="Collapse safety notice"
+      >
+        <X className="size-3.5" aria-hidden="true" />
+        Close
+      </button>
     </div>
   )
 
   return (
-    <div className={cn(isPanel ? 'flex h-full min-h-0 flex-col' : 'flex flex-col gap-4')}>
+    <div
+      className={cn(
+        isPanel
+          ? 'flex h-full min-h-0 flex-col pb-[env(safe-area-inset-bottom)]'
+          : 'flex flex-col gap-4',
+      )}
+    >
       <div
         className={cn(
           'bg-paper',
@@ -392,15 +536,16 @@ export function RemiChat({
               <RemiAvatar />
               <div className="max-w-[85%] rounded-2xl rounded-tl-sm border border-stone bg-card px-4 py-3">
                 <p className="font-serif text-[15px] leading-relaxed text-charcoal/85">
-                  Hi, I&apos;m Remi. I&apos;m here to talk things through with you — a hard moment
-                  with your child, or something you&apos;re carrying yourself. Share whatever&apos;s
-                  on your mind.
-                </p>
-                <p className="mt-2.5 font-sans text-xs leading-relaxed text-charcoal/60">
-                  A quick note: our chat is private and isn&apos;t saved. When we&apos;re done, just
-                  ask and I&apos;ll write a short summary you can save and bring back next time.
-                  However, please skip full names or identifying details (see the privacy note
-                  below).
+                  {intro ?? (
+                    <>
+                      Hi, I&apos;m Remi. I&apos;m here to talk things through with you — a hard
+                      moment with your child, or something you&apos;re carrying yourself. Share
+                      whatever&apos;s on your mind.{' '}
+                      <span className="text-charcoal/60">
+                        (Chat is private — please avoid full names and identifying details.)
+                      </span>
+                    </>
+                  )}
                 </p>
               </div>
             </div>
@@ -410,6 +555,16 @@ export function RemiChat({
             const isUser = message.role === 'user'
             const isLastUser =
               isUser && !messages.slice(index + 1).some((m) => m.role === 'user')
+            // The plain-text content of this message, used for copy / listen / share.
+            const messageText = message.parts
+              .filter((p) => p.type === 'text')
+              .map((p) => (p as { text: string }).text)
+              .join('')
+              .trim()
+            // Only show the action row on Remi's finished replies that have text — never on
+            // the member's own messages, and not while the reply is still streaming in.
+            const showActions =
+              !isUser && messageText.length > 0 && !(busy && index === messages.length - 1)
             return (
               <div
                 key={message.id}
@@ -421,30 +576,40 @@ export function RemiChat({
                 ) : (
                   <RemiAvatar />
                 )}
-                <div
-                  className={`max-w-[85%] rounded-2xl px-4 py-3 ${
-                    isUser
-                      ? 'rounded-tr-sm bg-deep-teal text-off-white'
-                      : 'rounded-tl-sm border border-stone bg-card text-charcoal/85'
-                  }`}
-                >
-                  {message.parts.map((part, i) => {
-                    if (part.type === 'text') {
-                      return (
-                        <p
-                          key={i}
-                          className={`whitespace-pre-wrap font-serif text-[15px] leading-relaxed ${
-                            isUser ? 'text-off-white' : 'text-charcoal/85'
-                          }`}
-                        >
-                          {part.text}
-                        </p>
-                      )
-                    }
-                    // Cited resources are collected and shown below the dialogue,
-                    // not inline in the conversation bubbles.
-                    return null
-                  })}
+                <div className={`flex max-w-[85%] flex-col ${isUser ? 'items-end' : 'items-start'}`}>
+                  <div
+                    className={`rounded-2xl px-4 py-3 ${
+                      isUser
+                        ? 'rounded-tr-sm bg-deep-teal text-off-white'
+                        : 'rounded-tl-sm border border-stone bg-card text-charcoal/85'
+                    }`}
+                  >
+                    {message.parts.map((part, i) => {
+                      if (part.type === 'text') {
+                        return (
+                          <p
+                            key={i}
+                            className={`whitespace-pre-wrap break-words font-serif text-[15px] leading-relaxed ${
+                              isUser ? 'text-off-white' : 'text-charcoal/85'
+                            }`}
+                          >
+                            {part.text}
+                          </p>
+                        )
+                      }
+                      // Cited resources are collected and shown below the dialogue,
+                      // not inline in the conversation bubbles.
+                      return null
+                    })}
+                  </div>
+                  {showActions && (
+                    <MessageActions
+                      text={messageText}
+                      speechSupported={speechSupported}
+                      isSpeaking={speakingId === message.id}
+                      onToggleSpeak={() => speak(message.id, messageText)}
+                    />
+                  )}
                 </div>
               </div>
             )
@@ -503,10 +668,42 @@ export function RemiChat({
           </div>
         )}
 
+        {/* Conversation-length guardrail: gentle heads-up before a very long thread risks
+            crowding the model's memory of earlier details. */}
+        {showLengthNotice && (
+          <div className="flex items-start gap-2.5 border-t border-amber/40 bg-amber/10 px-4 py-3">
+            <Info className="mt-0.5 size-4 shrink-0 text-amber" aria-hidden="true" />
+            <p className="flex-1 font-sans text-xs leading-relaxed text-charcoal/75">
+              This conversation is getting long. Remi may start to lose track of the earliest
+              details. For the sharpest help, consider asking Remi for a quick summary, then{' '}
+              <button
+                type="button"
+                onClick={() => {
+                  clearChat()
+                  setLengthNoticeDismissed(false)
+                }}
+                className="font-semibold text-deep-teal underline underline-offset-2 hover:text-teal-mid"
+              >
+                start a fresh chat
+              </button>
+              .
+            </p>
+            <button
+              type="button"
+              onClick={() => setLengthNoticeDismissed(true)}
+              className="-mr-1 -mt-0.5 flex shrink-0 items-center gap-1 rounded-md px-1.5 py-0.5 font-sans text-xs font-medium text-charcoal/55 transition-colors hover:bg-paper hover:text-charcoal/80"
+              aria-label="Dismiss length notice"
+            >
+              <X className="size-3.5" aria-hidden="true" />
+            </button>
+          </div>
+        )}
+
         {/* Input */}
         <form onSubmit={onSubmit} className="shrink-0 border-t border-stone bg-card px-4 py-3">
           <div className="flex items-end gap-2">
             <textarea
+              ref={inputRef}
               value={input}
               onChange={(e) => setInput(e.target.value)}
               onKeyDown={(e) => {
@@ -516,9 +713,10 @@ export function RemiChat({
                 }
               }}
               rows={1}
+              cols={1}
               placeholder="Ask Remi…"
               aria-label="Ask Remi"
-              className="max-h-32 min-h-[2.75rem] flex-1 resize-none rounded-xl border border-stone bg-off-white px-4 py-2.5 font-sans text-[15px] text-charcoal placeholder:text-charcoal/45 focus:border-deep-teal focus:outline-none focus:ring-2 focus:ring-deep-teal/20"
+              className="max-h-32 min-h-[2.75rem] w-full min-w-0 flex-1 resize-none rounded-xl border border-stone bg-off-white px-4 py-2.5 font-sans text-[15px] text-charcoal placeholder:text-charcoal/45 focus:border-deep-teal focus:outline-none focus:ring-2 focus:ring-deep-teal/20"
             />
             {isSupported && (
               <Button
@@ -556,14 +754,14 @@ export function RemiChat({
 
         {/* In the slide-over panel, resources + safety stay attached to the chat card. */}
         {isPanel && resourcesPanel}
-        {isPanel && privacyNote}
         {isPanel && safetyNote}
+        {isPanel && privacyNote}
       </div>
 
       {/* On the page, resources + safety sit below the dialogue. */}
       {!isPanel && resourcesPanel}
-      {!isPanel && privacyNote}
       {!isPanel && safetyNote}
+      {!isPanel && privacyNote}
     </div>
   )
 }

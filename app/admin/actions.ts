@@ -1,15 +1,49 @@
 'use server'
 
 import { revalidatePath } from 'next/cache'
-import { eq } from 'drizzle-orm'
+import { headers } from 'next/headers'
+import { eq, sql } from 'drizzle-orm'
 import { del } from '@vercel/blob'
 import { auth } from '@/lib/auth'
 import { db } from '@/lib/db'
-import { lesson, section, user } from '@/lib/db/schema'
+import { featured, lesson, section, user } from '@/lib/db/schema'
 import { requireAdmin } from '@/lib/session'
 import { toEmbedUrl } from '@/lib/video'
+import { sendWelcomeEmail } from '@/lib/email'
 
 export type ActionState = { status: 'idle' | 'success' | 'error'; message: string }
+
+/** Absolute base URL of the app, used to build links in emails. */
+function appBaseUrl() {
+  return (
+    process.env.BETTER_AUTH_URL ??
+    (process.env.VERCEL_PROJECT_PRODUCTION_URL
+      ? `https://${process.env.VERCEL_PROJECT_PRODUCTION_URL}`
+      : process.env.VERCEL_URL
+        ? `https://${process.env.VERCEL_URL}`
+        : process.env.V0_RUNTIME_URL ?? 'http://localhost:3000')
+  )
+}
+
+/**
+ * Builds a temporary password: first name + first initial of last name +
+ * five random digits (e.g. "JaneD48217"). Falls back gracefully when a name
+ * has only one word, and pads to satisfy the 8-character minimum.
+ */
+function generateTempPassword(fullName: string) {
+  const parts = fullName.trim().split(/\s+/).filter(Boolean)
+  const first = (parts[0] ?? 'member').replace(/[^a-zA-Z]/g, '')
+  const lastInitial = parts.length > 1 ? (parts[parts.length - 1][0] ?? '') : ''
+  const base = `${first.charAt(0).toUpperCase()}${first.slice(1).toLowerCase()}${lastInitial.toUpperCase()}`
+  let digits = String(Math.floor(10000 + Math.random() * 90000)) // always 5 digits
+  let password = `${base}${digits}`
+  // Guarantee the 8-char minimum even for very short names.
+  while (password.length < 8) {
+    digits += Math.floor(Math.random() * 10)
+    password = `${base}${digits}`
+  }
+  return password
+}
 
 function slugify(input: string) {
   return input
@@ -28,12 +62,14 @@ export async function createClientAccount(
   await requireAdmin()
   const name = String(formData.get('name') ?? '').trim()
   const email = String(formData.get('email') ?? '').trim().toLowerCase()
-  const password = String(formData.get('password') ?? '')
   const role = String(formData.get('role') ?? 'client')
 
-  if (!name || !email || password.length < 8) {
-    return { status: 'error', message: 'Name, email, and a password of at least 8 characters are required.' }
+  if (!name || !email) {
+    return { status: 'error', message: 'A name and email are required.' }
   }
+
+  // Auto-generate a temporary password — the admin never types one.
+  const password = generateTempPassword(name)
 
   try {
     await auth.api.createUser({
@@ -41,21 +77,30 @@ export async function createClientAccount(
         name,
         email,
         password,
-        role: role === 'admin' ? 'admin' : 'client',
+        // The admin plugin's static types only know the built-in roles, but at
+        // runtime our custom "client" role is valid (it's the configured
+        // defaultRole). Cast to satisfy the type checker.
+        role: (role === 'admin' ? 'admin' : 'client') as 'admin',
       },
     })
-    // Admin-created accounts are trusted, so mark the email as verified.
-    // The client can sign in immediately with the password you set — no
-    // verification email required. They'll be required to choose their own
-    // password on first sign-in (the password set here is temporary).
+    // Admin-created accounts are trusted, so mark the email as verified, and
+    // flag the account so the member is prompted to choose their own password
+    // after their first sign-in with the temporary one.
     await db
       .update(user)
       .set({ emailVerified: true, mustChangePassword: true })
       .where(eq(user.email, email))
+
+    // Email the new member their credentials automatically.
+    const signInUrl = `${appBaseUrl()}/sign-in`
+    const sent = await sendWelcomeEmail({ to: email, name, email, tempPassword: password, signInUrl })
+
     revalidatePath('/admin/accounts')
     return {
       status: 'success',
-      message: `Account created for ${email}. They can sign in now with the password you set.`,
+      message: sent.ok
+        ? `Account created. A welcome email with the temporary password was sent to ${email}.`
+        : `Account created, but the welcome email could not be sent (${sent.error}). Temporary password: ${password}`,
     }
   } catch (err) {
     const message = err instanceof Error ? err.message : 'Could not create the account.'
@@ -65,15 +110,95 @@ export async function createClientAccount(
 
 export async function changeUserRole(userId: string, role: 'admin' | 'client') {
   await requireAdmin()
-  await auth.api.setUserRole({ body: { userId, role } })
+  await auth.api.setRole({
+    body: { userId, role: role as 'admin' },
+    headers: await headers(),
+  })
   revalidatePath('/admin/accounts')
 }
 
-export async function removeUser(userId: string) {
+export async function removeUser(userId: string): Promise<ActionState> {
   const admin = await requireAdmin()
-  if (admin.id === userId) return // never delete yourself
-  await auth.api.removeUser({ body: { userId } })
-  revalidatePath('/admin/accounts')
+  if (admin.id === userId) {
+    return { status: 'error', message: 'You cannot delete your own account.' }
+  }
+
+  try {
+    // Delete directly from the database. The Better Auth admin `removeUser`
+    // endpoint was leaving the row in place (its session-based authorization
+    // can silently reject the call), so we own the deletion here. The session
+    // and account tables both cascade on `user.id`, so those rows are removed
+    // automatically.
+    const deleted = await db
+      .delete(user)
+      .where(eq(user.id, userId))
+      .returning({ id: user.id })
+
+    if (deleted.length === 0) {
+      return { status: 'error', message: 'That account no longer exists.' }
+    }
+
+    revalidatePath('/admin/accounts')
+    return { status: 'success', message: 'Account removed.' }
+  } catch (err) {
+    const message = err instanceof Error ? err.message : 'Could not remove the account.'
+    console.error('[v0] removeUser failed:', message)
+    return { status: 'error', message }
+  }
+}
+
+/**
+ * Issues a fresh temporary password for an existing member — used when a client
+ * contacts us because they've lost or forgotten their password. We generate a
+ * new temp password, set it on their account, re-flag the account so they're
+ * prompted to choose their own password on next sign-in, and email them the new
+ * credentials (the same welcome email used at account creation).
+ */
+export async function resetClientPassword(userId: string): Promise<ActionState> {
+  await requireAdmin()
+
+  const [member] = await db
+    .select({ name: user.name, email: user.email })
+    .from(user)
+    .where(eq(user.id, userId))
+    .limit(1)
+
+  if (!member) {
+    return { status: 'error', message: 'That account no longer exists.' }
+  }
+
+  const password = generateTempPassword(member.name)
+
+  try {
+    // The admin plugin authorizes from the request session, so forward headers.
+    await auth.api.setUserPassword({
+      body: { userId, newPassword: password },
+      headers: await headers(),
+    })
+
+    await db.update(user).set({ mustChangePassword: true }).where(eq(user.id, userId))
+
+    const signInUrl = `${appBaseUrl()}/sign-in`
+    const sent = await sendWelcomeEmail({
+      to: member.email,
+      name: member.name,
+      email: member.email,
+      tempPassword: password,
+      signInUrl,
+    })
+
+    revalidatePath('/admin/accounts')
+    return {
+      status: 'success',
+      message: sent.ok
+        ? `A new temporary password was emailed to ${member.email}.`
+        : `Password reset, but the email could not be sent (${sent.error}). Temporary password: ${password}`,
+    }
+  } catch (err) {
+    const message = err instanceof Error ? err.message : 'Could not reset the password.'
+    console.error('[v0] resetClientPassword failed:', message)
+    return { status: 'error', message }
+  }
 }
 
 // --- Sections --------------------------------------------------------------
@@ -456,4 +581,101 @@ export async function deleteLesson(lessonId: number) {
   await db.delete(lesson).where(eq(lesson.id, lessonId))
   revalidatePath('/admin/content')
   revalidatePath('/library')
+}
+
+// --- Featured content ------------------------------------------------------
+
+/** Revalidate every page that renders featured content. */
+function revalidateFeatured() {
+  revalidatePath('/admin/featured')
+  revalidatePath('/resources')
+}
+
+/**
+ * Add a lesson to the featured list with an optional custom headline/blurb.
+ * Appends to the end of the current order. No-ops gracefully if the lesson is
+ * already featured (the unique constraint is handled with onConflictDoNothing).
+ */
+export async function addFeatured(formData: FormData): Promise<ActionState> {
+  await requireAdmin()
+  const lessonId = Number(formData.get('lessonId'))
+  const headline = String(formData.get('headline') ?? '').trim() || null
+  const blurb = String(formData.get('blurb') ?? '').trim() || null
+
+  if (!lessonId || Number.isNaN(lessonId)) {
+    return { status: 'error', message: 'Please choose a piece of content to feature.' }
+  }
+
+  try {
+    const [{ max } = { max: 0 }] = await db
+      .select({ max: sql<number>`coalesce(max(${featured.position}), 0)` })
+      .from(featured)
+
+    const inserted = await db
+      .insert(featured)
+      .values({ lessonId, headline, blurb, position: max + 1 })
+      .onConflictDoNothing({ target: featured.lessonId })
+      .returning({ id: featured.id })
+
+    revalidateFeatured()
+    return {
+      status: 'success',
+      message: inserted.length ? 'Added to featured.' : 'That content is already featured.',
+    }
+  } catch (err) {
+    const message = err instanceof Error ? err.message : 'Could not feature that content.'
+    return { status: 'error', message }
+  }
+}
+
+/** Update the custom headline/blurb for a featured item. */
+export async function updateFeatured(formData: FormData): Promise<ActionState> {
+  await requireAdmin()
+  const featuredId = Number(formData.get('featuredId'))
+  const headline = String(formData.get('headline') ?? '').trim() || null
+  const blurb = String(formData.get('blurb') ?? '').trim() || null
+
+  if (!featuredId || Number.isNaN(featuredId)) {
+    return { status: 'error', message: 'Missing featured item.' }
+  }
+
+  try {
+    await db
+      .update(featured)
+      .set({ headline, blurb, updatedAt: new Date() })
+      .where(eq(featured.id, featuredId))
+    revalidateFeatured()
+    return { status: 'success', message: 'Featured item updated.' }
+  } catch (err) {
+    const message = err instanceof Error ? err.message : 'Could not update the featured item.'
+    return { status: 'error', message }
+  }
+}
+
+/** Remove a lesson from the featured list (does not delete the lesson). */
+export async function removeFeatured(featuredId: number) {
+  await requireAdmin()
+  await db.delete(featured).where(eq(featured.id, featuredId))
+  revalidateFeatured()
+}
+
+/** Move a featured item up or down by swapping positions with its neighbor. */
+export async function moveFeatured(featuredId: number, direction: 'up' | 'down') {
+  await requireAdmin()
+  const rows = await db
+    .select({ id: featured.id, position: featured.position })
+    .from(featured)
+    .orderBy(featured.position, featured.id)
+
+  const index = rows.findIndex((r) => r.id === featuredId)
+  if (index === -1) return
+  const swapWith = direction === 'up' ? index - 1 : index + 1
+  if (swapWith < 0 || swapWith >= rows.length) return
+
+  const a = rows[index]
+  const b = rows[swapWith]
+  // Swap their stored positions.
+  await db.update(featured).set({ position: b.position }).where(eq(featured.id, a.id))
+  await db.update(featured).set({ position: a.position }).where(eq(featured.id, b.id))
+  revalidateFeatured()
 }

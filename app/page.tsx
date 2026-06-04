@@ -6,15 +6,18 @@ import { AccessCta } from '@/components/site/access-cta'
 import { SectionLabel } from '@/components/site/section-label'
 import { SearchBar } from '@/components/site/search-bar'
 import { ProgramCard } from '@/components/site/program-card'
-import { ConciergeExchange, conciergeExamples } from '@/components/site/concierge-exchange'
 import { AskRemiButton } from '@/components/library/remi-launcher'
+import { FeaturedGrid } from '@/components/site/featured-grid'
 import { Hero } from '@/components/home/hero'
-import { programs, clinicalFoundations } from '@/lib/site'
+import { ScrollToTopOnLoad } from '@/components/home/scroll-to-top-on-load'
+import { programs, clinicalFoundations, whatWeAre, whatWeAreNot } from '@/lib/site'
+import { getFeaturedLessons } from '@/lib/content'
+import { getCurrentUser } from '@/lib/session'
 
 const pillars = [
   {
     title: 'Research-grounded.',
-    body: "Every module is rooted in neuroscience, polyvagal theory, and Dr. Elaine Aron's decades of HSP research, translated into real-life practice.",
+    body: 'Every module is rooted in neuroscience, polyvagal theory, attachment science, and over a decade of clinical practice, translated into real-life practice.',
   },
   {
     title: 'For every stage of life.',
@@ -38,14 +41,16 @@ const membershipFeatures = [
 ]
 
 const stats = [
-  { number: '15–20%', label: 'of people are born highly sensitive' },
+  { number: 'All of us', label: 'carry sensitivities in a fast, overstimulating world' },
   { number: '12+', label: 'years of clinical practice behind every module' },
-  { number: '4', label: 'program tracks: children, teens, adults' },
+  { number: '4', label: 'program tracks: children, teens, adults, parenting' },
 ]
 
-export default function HomePage() {
+export default async function HomePage() {
+  const [featured, user] = await Promise.all([getFeaturedLessons(4), getCurrentUser()])
   return (
     <>
+      <ScrollToTopOnLoad />
       <Hero />
 
       {/* Ask Remi, the AI concierge */}
@@ -77,9 +82,9 @@ export default function HomePage() {
             Sensitivity is not a flaw. It&apos;s a different operating system.
           </h2>
           <p className="mt-6 font-serif text-lg leading-relaxed text-charcoal/85">
-            About fifteen to twenty percent of people are born highly sensitive, wired to notice
-            more, process more deeply, and feel more intensely. The problem is not the sensitivity.
-            It is the lack of understanding around it.
+            The world can be overwhelming. We all have sensitivities, stressors, and moments when we
+            feel disconnected from ourselves or the people we love. The problem is not your
+            sensitivity. It is how little we are taught to understand and work with it.
           </p>
           <Link
             href="/what-is-sensitivity"
@@ -89,6 +94,29 @@ export default function HomePage() {
           </Link>
         </div>
       </section>
+
+      {/* Featured library content */}
+      {featured.length > 0 && (
+        <section id="featured" className="scroll-mt-24 border-y border-stone bg-paper">
+          <div className="mx-auto max-w-6xl px-5 py-14 sm:px-8 md:py-16">
+            <SectionLabel>From the library</SectionLabel>
+            <div className="flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
+              <h2 className="mt-5 max-w-2xl font-serif text-3xl font-semibold leading-tight text-deep-teal text-balance sm:text-4xl">
+                A few articles that you may find interesting.
+              </h2>
+              <Button asChild size="lg" className="shrink-0 font-sans font-semibold">
+                <Link href="/library">Browse the library</Link>
+              </Button>
+            </div>
+            <p className="mt-4 max-w-2xl font-serif text-lg leading-relaxed text-charcoal/85">
+              Browse the library for access to all our resources.
+            </p>
+            <div className="mt-12">
+              <FeaturedGrid items={featured} isMember={Boolean(user)} />
+            </div>
+          </div>
+        </section>
+      )}
 
       {/* Four pillars */}
       <section className="border-y border-stone bg-paper">
@@ -103,6 +131,54 @@ export default function HomePage() {
                 </p>
               </div>
             ))}
+          </div>
+        </div>
+      </section>
+
+      {/* What we are / are not */}
+      <section className="bg-off-white">
+        <div className="mx-auto max-w-6xl px-5 py-16 sm:px-8">
+          <div className="mx-auto max-w-3xl text-center">
+            <SectionLabel center>Where we stand</SectionLabel>
+            <h2 className="mt-5 font-serif text-3xl font-semibold leading-tight text-deep-teal text-balance sm:text-4xl">
+              Real research and practice, in a world full of quick fixes.
+            </h2>
+            <p className="mx-auto mt-5 max-w-2xl font-serif text-lg leading-relaxed text-charcoal/85 text-pretty">
+              Mental health is in crisis, and the response has been a flood of pop-up solutions,
+              influencer advice, and one-size-fits-all hacks. We are practicing, credentialed
+              therapists. Everything we publish is grounded in clinical experience and the research
+              behind it, not trends.
+            </p>
+          </div>
+          <div className="mt-12 grid gap-10 md:grid-cols-2 md:gap-12">
+          <div>
+            <SectionLabel>What we are</SectionLabel>
+            <ul className="mt-6 space-y-3.5">
+              {whatWeAre.map((item) => (
+                <li
+                  key={item}
+                  className="flex gap-3 font-serif text-[15px] leading-relaxed text-charcoal/85"
+                >
+                  <span className="mt-2 h-1.5 w-1.5 shrink-0 rounded-full bg-sage" />
+                  {item}
+                </li>
+              ))}
+            </ul>
+          </div>
+          <div>
+            <SectionLabel>What we are not</SectionLabel>
+            <ul className="mt-6 space-y-3.5">
+              {whatWeAreNot.map((item) => (
+                <li
+                  key={item}
+                  className="flex gap-3 font-serif text-[15px] leading-relaxed text-charcoal/85"
+                >
+                  <span className="mt-2 h-1.5 w-1.5 shrink-0 rounded-full bg-amber" />
+                  {item}
+                </li>
+              ))}
+            </ul>
+          </div>
           </div>
         </div>
       </section>
@@ -210,13 +286,7 @@ export default function HomePage() {
             Parenting a sensitive child at 11pm and hit a wall? Remi is there, trained on every
             module, every resource, and every principle in our curriculum.
           </p>
-          <div className="mt-12">
-            <ConciergeExchange
-              question={conciergeExamples[0].question}
-              answer={conciergeExamples[0].answer}
-            />
-          </div>
-          <div className="mt-8 flex justify-center">
+          <div className="mt-10 flex justify-center">
             <AskRemiButton label="Ask Remi" />
           </div>
           <p className="mt-8 text-center font-sans text-sm text-charcoal/60">

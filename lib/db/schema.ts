@@ -17,6 +17,9 @@ export const user = pgTable('user', {
   banned: boolean('banned').notNull().default(false),
   banReason: text('banReason'),
   banExpires: timestamp('banExpires'),
+  // True for admin-created accounts using a temporary password. When set, the
+  // member is prompted to choose their own password after signing in.
+  mustChangePassword: boolean('mustChangePassword').notNull().default(false),
   createdAt: timestamp('createdAt').notNull().defaultNow(),
   updatedAt: timestamp('updatedAt').notNull().defaultNow(),
 })
@@ -99,6 +102,22 @@ export const lesson = pgTable('lesson', {
   // Hidden lessons never appear in the library, but are still fed to Remi as
   // background knowledge for answering questions.
   hidden: boolean('hidden').notNull().default(false),
+  position: integer('position').notNull().default(0),
+  createdAt: timestamp('createdAt').notNull().defaultNow(),
+  updatedAt: timestamp('updatedAt').notNull().defaultNow(),
+})
+
+// Admin-curated featured content shown on the public resources page. Each row
+// points to a lesson and can override its presentation with a custom headline
+// and blurb. `position` controls display order.
+export const featured = pgTable('featured', {
+  id: serial('id').primaryKey(),
+  lessonId: integer('lessonId')
+    .notNull()
+    .unique()
+    .references(() => lesson.id, { onDelete: 'cascade' }),
+  headline: text('headline'),
+  blurb: text('blurb'),
   position: integer('position').notNull().default(0),
   createdAt: timestamp('createdAt').notNull().defaultNow(),
   updatedAt: timestamp('updatedAt').notNull().defaultNow(),

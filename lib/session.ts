@@ -1,9 +1,6 @@
 import { headers } from 'next/headers'
 import { redirect } from 'next/navigation'
-import { eq } from 'drizzle-orm'
 import { auth } from '@/lib/auth'
-import { db } from '@/lib/db'
-import { user } from '@/lib/db/schema'
 
 export type SessionUser = {
   id: string
@@ -17,21 +14,17 @@ export type SessionUser = {
 export async function getCurrentUser(): Promise<SessionUser | null> {
   const session = await auth.api.getSession({ headers: await headers() })
   if (!session?.user) return null
-  const u = session.user as typeof session.user & { role?: string }
-  // The forced-password-change flag is a custom column not surfaced by Better
-  // Auth's session, so read it directly.
-  const [row] = await db
-    .select({ mustChangePassword: user.mustChangePassword })
-    .from(user)
-    .where(eq(user.id, u.id))
-    .limit(1)
+  const u = session.user as typeof session.user & {
+    role?: string
+    mustChangePassword?: boolean
+  }
   return {
     id: u.id,
     name: u.name,
     email: u.email,
     role: u.role ?? 'client',
     emailVerified: u.emailVerified,
-    mustChangePassword: row?.mustChangePassword ?? false,
+    mustChangePassword: u.mustChangePassword ?? false,
   }
 }
 

@@ -26,7 +26,7 @@ export default async function SignInPage() {
             alt=""
             width={120}
             height={120}
-            className="size-16 scale-[1.4] object-contain"
+            className="size-16 scale-[2.1] object-contain"
           />
         </div>
         <h1 className="mt-6 text-center font-serif text-3xl font-semibold text-deep-teal">

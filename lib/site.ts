@@ -24,7 +24,7 @@ export const programs = [
       'Knowing your sensitive child',
       'Reducing shame and understanding developmental stages',
       'Parent self-healing, self-regulation and self-care',
-      'The highly sensitive parent',
+      'The sensitive parent',
       'Loving boundaries',
       'Conscious co-parenting',
       'Future planning',
@@ -39,10 +39,10 @@ export const programs = [
     description:
       'The Tuned In framework adapted for parents of sensitive adolescents ages 12 to 18.',
     moduleList: [
-      'Understanding Your Highly Sensitive Teen',
+      'Understanding Your Sensitive Teen',
       'The Adolescent Brain & Nervous System',
       'Who You Are as the Parent of a Teenager',
-      'Knowing Your Sensitive Teen: The DOES Framework',
+      'Knowing Your Sensitive Teen',
       'Shame, Identity & the Teen Years',
       'Loving Boundaries with a Teenager',
       'Connection Across the Disconnection',
@@ -205,23 +205,37 @@ export const programs = [
 
 export const clinicalFoundations = [
   {
-    title: "Dr. Elaine Aron's HSP Research",
-    body: 'Four decades of research establishing Sensory Processing Sensitivity as a measurable, inherited trait.',
+    title: 'A Clinical Philosophy of Sensitivity',
+    body: "Sophie Schauermann's framework for understanding and honoring the sensitive nervous system, drawn from her over a decade of clinical experience and her extensive body of published work.",
   },
   {
-    title: 'Polyvagal Theory',
-    body: 'A map of the nervous system that explains why a sensitive body reaches shutdown or alarm more readily.',
+    title: 'The Relationship Comes First',
+    body: 'Real change happens inside a relationship built on trust, safety, and respect. We meet each person at their own pace, not a protocol.',
   },
   {
-    title: 'Attachment Science',
-    body: 'How early relationships shape the way a sensitive child learns to regulate and reconnect.',
+    title: 'Regulation Before Strategy',
+    body: 'Drawing on polyvagal-informed practice, we help calm the nervous system first, because no skill or conversation lands when a body feels unsafe.',
   },
   {
-    title: "Dan Siegel's Interpersonal Neurobiology",
-    body: 'The science of how relationships literally shape the developing brain, moment to moment.',
+    title: 'Play as a Natural Language',
+    body: 'With children especially, we work through play and developmentally attuned approaches that let processing, growth, and healing unfold.',
   },
   {
-    title: 'Epigenetics',
-    body: 'How environment and experience switch genes on and off, and why context matters as much as wiring.',
+    title: 'The Whole Person in Context',
+    body: 'Grounded in attachment and developmental science, we look at the family, environment, and relationships around a person, not just symptoms.',
   },
+]
+
+export const whatWeAre = [
+  'A research and education organization grounded in attachment science, polyvagal theory, and Sophie Schauermann\u2019s clinical philosophy of sensitivity.',
+  'A publisher of long-form books, course curricula, downloadable resources, and an AI concierge trained on the full body of work.',
+  'A sibling to Rooted Rhythm Therapy, which provides clinical care in Dallas, Atlanta, and Colorado, and virtual coaching worldwide.',
+  'A future home for primary research on sensitivity and nervous-system regulation across the lifespan.',
+]
+
+export const whatWeAreNot = [
+  'Not a diagnostic service, a therapy practice, or a substitute for clinical care.',
+  'Not a generic wellness brand or a self-help imprint.',
+  'Not a parenting influencer brand. There are clinical credentials and clinical hours behind every claim.',
+  'Not a tech company. The AI concierge is a delivery vehicle for the curriculum, not the product.',
 ]

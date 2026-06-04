@@ -10,27 +10,13 @@ export const metadata: Metadata = {
     'The Tuned In Institute is the research and education arm of Rooted Rhythm, led by Sophie Schauermann, MSW, LCSW, Founder and CEO.',
 }
 
-const whatWeAre = [
-  'A research and education organization grounded in attachment science, polyvagal theory, and Dr. Elaine Aron\u2019s work on Sensory Processing Sensitivity.',
-  'A publisher of long-form books, course curricula, downloadable resources, and an AI concierge trained on the full body of work.',
-  'A sibling to Rooted Rhythm Therapy, which provides clinical care in Dallas, Atlanta, and Colorado, and virtual coaching worldwide.',
-  'A future home for primary research on high sensitivity across the lifespan.',
-]
-
-const whatWeAreNot = [
-  'Not a diagnostic service, a therapy practice, or a substitute for clinical care.',
-  'Not a generic wellness brand or a self-help imprint.',
-  'Not a parenting influencer brand. There are clinical credentials and clinical hours behind every claim.',
-  'Not a tech company. The AI concierge is a delivery vehicle for the curriculum, not the product.',
-]
-
 export default function AboutPage() {
   return (
     <>
       <PageHero
         label="About"
         title="The research, education, and support home for sensitive humans."
-        intro="The Tuned In Institute makes the science of high sensitivity practical, accessible, and lifelong, so sensitive children, teens, and adults grow up understood, regulated, and free of the belief that they are too much."
+        intro="The Tuned In Institute makes the science of sensitivity and self-regulation practical, accessible, and lifelong, so children, teens, and adults can feel understood, regulated, and free of the belief that they are too much."
       />
 
       {/* Founder */}
@@ -64,8 +50,8 @@ export default function AboutPage() {
               Across more than a decade of clinical work, she watched the same pattern repeat:
               parents who felt confused and defeated, children who were treated as a problem to
               manage, and a body of research that never reached the kitchen table. The Institute
-              exists to close that gap, turning the science of high sensitivity into tools a family
-              can use tonight.
+              exists to close that gap, turning her clinical philosophy of sensitivity into tools a
+              family can use tonight.
             </p>
           </div>
         </div>
@@ -84,7 +70,7 @@ export default function AboutPage() {
             </p>
             <p className="mt-6 font-serif text-lg leading-relaxed text-charcoal/85">
               Joel Schauermann is a board-certified physician who brings the rigor of clinical
-              medicine to the Institute&apos;s work on high sensitivity. As Chief Medical Officer, he
+              medicine to the Institute&apos;s work on sensitivity and regulation. As Chief Medical Officer, he
               ensures that everything we teach is grounded in current research and sound medical
               practice.
             </p>
@@ -106,13 +92,51 @@ export default function AboutPage() {
         </div>
       </section>
 
+      {/* Clinical Director */}
+      <section className="border-t border-stone bg-off-white">
+        <div className="mx-auto grid max-w-6xl items-start gap-12 px-5 py-20 sm:px-8 md:grid-cols-[0.8fr_1.2fr]">
+          <figure className="overflow-hidden rounded-xl border border-stone shadow-[0_24px_50px_-30px_rgba(27,80,90,0.6)]">
+            <Image
+              src="/team/kate.png"
+              alt="Kate Schramm, MSW, LCSW, Clinical Director and Therapist, smiling in a green dress"
+              width={900}
+              height={900}
+              className="aspect-[4/5] h-auto w-full object-cover object-top"
+            />
+          </figure>
+          <div>
+            <SectionLabel>Leadership</SectionLabel>
+            <h2 className="mt-5 font-serif text-3xl font-semibold leading-tight text-deep-teal text-balance sm:text-4xl">
+              Kate Schramm, MSW, LCSW
+            </h2>
+            <p className="mt-2 font-sans text-sm font-medium uppercase tracking-[0.12em] text-teal-mid">
+              Clinical Director &amp; Therapist, Rooted Rhythm
+            </p>
+            <p className="mt-6 font-serif text-lg leading-relaxed text-charcoal/85">
+              Kate is an attuned, empathetic therapist with over a decade of experience supporting
+              children, bringing creativity, curiosity, and playfulness into her work. She
+              specializes in early childhood, primarily children ages 2 through 10 navigating ADHD,
+              anxiety, trauma, and the caregiver-child relationship, building a therapeutic
+              relationship rooted in mutual trust, respect, and safety.
+            </p>
+            <p className="mt-4 font-serif text-lg leading-relaxed text-charcoal/85">
+              As Clinical Director, she provides clinical leadership, supports program development,
+              and mentors clinicians as they grow their own practices. Kate earned her degree in
+              psychology from Elon University and her MSW from New York University, and integrates
+              Child-Centered Play Therapy, Synergetic Play Therapy, and CBT into her relational,
+              developmentally attuned approach.
+            </p>
+          </div>
+        </div>
+      </section>
+
       {/* Mission, vision, promise */}
       <section className="border-y border-stone bg-paper">
         <div className="mx-auto grid max-w-6xl gap-10 px-5 py-20 sm:px-8 md:grid-cols-3">
           {[
             {
               label: 'Mission',
-              body: 'To make the science of high sensitivity practical, accessible, and lifelong, so sensitive humans grow up understood, regulated, and free of the belief that they are too much.',
+              body: 'To make the science of sensitivity and self-regulation practical, accessible, and lifelong, so people of every age grow up understood, regulated, and free of the belief that they are too much.',
             },
             {
               label: 'Vision',
@@ -130,34 +154,6 @@ export default function AboutPage() {
               </p>
             </div>
           ))}
-        </div>
-      </section>
-
-      {/* What we are / are not */}
-      <section className="bg-off-white">
-        <div className="mx-auto grid max-w-6xl gap-12 px-5 py-20 sm:px-8 md:grid-cols-2">
-          <div>
-            <SectionLabel>What we are</SectionLabel>
-            <ul className="mt-6 space-y-4">
-              {whatWeAre.map((item) => (
-                <li key={item} className="flex gap-3 font-serif text-[17px] leading-relaxed text-charcoal/85">
-                  <span className="mt-2 h-1.5 w-1.5 shrink-0 rounded-full bg-sage" />
-                  {item}
-                </li>
-              ))}
-            </ul>
-          </div>
-          <div>
-            <SectionLabel>What we are not</SectionLabel>
-            <ul className="mt-6 space-y-4">
-              {whatWeAreNot.map((item) => (
-                <li key={item} className="flex gap-3 font-serif text-[17px] leading-relaxed text-charcoal/85">
-                  <span className="mt-2 h-1.5 w-1.5 shrink-0 rounded-full bg-amber" />
-                  {item}
-                </li>
-              ))}
-            </ul>
-          </div>
         </div>
       </section>
 
