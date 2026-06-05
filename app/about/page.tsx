@@ -130,6 +130,48 @@ export default function AboutPage() {
         </div>
       </section>
 
+      {/* Director of Systems & Experience */}
+      <section className="border-t border-stone bg-off-white">
+        <div className="mx-auto grid max-w-6xl items-start gap-12 px-5 py-20 sm:px-8 md:grid-cols-[1.2fr_0.8fr]">
+          <div className="md:order-1 md:row-start-1">
+            <SectionLabel>Leadership</SectionLabel>
+            <h2 className="mt-5 font-serif text-3xl font-semibold leading-tight text-deep-teal text-balance sm:text-4xl">
+              Katie Pendergast
+            </h2>
+            <p className="mt-2 font-sans text-sm font-medium uppercase tracking-[0.12em] text-teal-mid">
+              Director of Systems &amp; Experience
+            </p>
+            <p className="mt-6 font-serif text-lg leading-relaxed text-charcoal/85">
+              Katie is deeply connected to the mission of the Tuned In Institute, both personally and
+              professionally. As a highly sensitive person herself, she understands the impact that
+              self-awareness, support, and the right tools can have on a person&apos;s ability to
+              thrive. With a background in child psychology, mindfulness meditation, web development,
+              and user experience design, she has built her career at the intersection of human
+              connection and systems thinking, believing that thoughtful systems create more space
+              for meaningful care.
+            </p>
+            <p className="mt-4 font-serif text-lg leading-relaxed text-charcoal/85">
+              As Practice Director at Rooted Rhythm Therapy, Katie has helped build the operational
+              infrastructure that supports clinicians, children, and families across multiple states.
+              At the Tuned In Institute, she brings that same passion for creating people-centered
+              systems and experiences that make transformative resources, education, and support more
+              accessible to sensitive individuals and families. She is honored to support a mission
+              that resonates deeply with her own journey and helps more sensitive people find the
+              understanding, connection, and tools they need to thrive.
+            </p>
+          </div>
+          <figure className="overflow-hidden rounded-xl border border-stone shadow-[0_24px_50px_-30px_rgba(27,80,90,0.6)] md:order-2 md:row-start-1">
+            <Image
+              src="/team/katie.png"
+              alt="Katie Pendergast, Director of Systems and Experience, smiling in a blue dress"
+              width={900}
+              height={900}
+              className="aspect-[4/5] h-auto w-full object-cover object-top"
+            />
+          </figure>
+        </div>
+      </section>
+
       {/* Mission, vision, promise */}
       <section className="border-y border-stone bg-paper">
         <div className="mx-auto grid max-w-6xl gap-10 px-5 py-20 sm:px-8 md:grid-cols-3">
