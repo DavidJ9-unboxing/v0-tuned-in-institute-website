@@ -127,40 +127,6 @@ export function LessonViewer({
     }
   }
 
-  // On phones, automatically expand a PDF to fullscreen when the device is
-  // physically rotated to landscape, and collapse back to the windowed viewer
-  // when rotated back to portrait. We don't lock orientation here since the
-  // reader is driving it by turning the phone.
-  const activeIsPdf =
-    active?.kind === 'document' && !!active.fileUrl && isPdf(active.fileUrl, active.fileName)
-
-  useEffect(() => {
-    if (typeof window === 'undefined') return
-    const landscapeMql = window.matchMedia('(orientation: landscape)')
-    const phoneMql = window.matchMedia('(max-width: 768px)')
-
-    async function handleOrientation() {
-      if (!phoneMql.matches) return // desktops/tablets keep the windowed viewer
-      const el = docWrapRef.current
-      if (landscapeMql.matches && activeIsPdf && el && !document.fullscreenElement) {
-        try {
-          await el.requestFullscreen?.()
-        } catch {
-          /* gesture/permission blocked — reader can use the button instead */
-        }
-      } else if (!landscapeMql.matches && document.fullscreenElement) {
-        try {
-          await document.exitFullscreen()
-        } catch {
-          /* ignore */
-        }
-      }
-    }
-
-    landscapeMql.addEventListener('change', handleOrientation)
-    return () => landscapeMql.removeEventListener('change', handleOrientation)
-  }, [activeIsPdf])
-
   if (lessons.length === 0) {
     return (
       <p className="rounded-2xl border border-dashed border-stone bg-card px-6 py-12 text-center font-serif text-[15px] text-charcoal/70">
@@ -234,30 +200,59 @@ export function LessonViewer({
             {active.kind === 'document' && active.fileUrl && (
               <div className="flex flex-col gap-4">
                 {isPdf(active.fileUrl, active.fileName) && (
-                  <div
-                    ref={docWrapRef}
-                    className={cn(
-                      'overflow-hidden border border-stone bg-card',
-                      isFullscreen ? 'flex h-screen w-screen flex-col rounded-none' : 'rounded-2xl',
-                    )}
-                  >
-                    {/* view=Fit shows the whole page within the frame, so wide
-                        landscape pages fit fully (just smaller) instead of
-                        overflowing. The viewer scrolls internally between pages. */}
-                    <iframe
-                      key={active.id}
-                      src={`/api/library/file/${active.id}#toolbar=1&navpanes=0&view=Fit`}
-                      title={active.title}
-                      className={cn('w-full', isFullscreen ? 'flex-1' : 'h-[60vh] md:h-[75vh]')}
-                    />
-                  </div>
+                  <>
+                    {/* Tablet / desktop: inline PDF preview. Hidden on phones,
+                        where embedded PDFs render oversized and can't be
+                        pinch-zoomed — those get the preview card below instead. */}
+                    <div
+                      ref={docWrapRef}
+                      className={cn(
+                        'overflow-hidden border border-stone bg-card',
+                        isFullscreen
+                          ? 'flex h-screen w-screen flex-col rounded-none'
+                          : 'hidden rounded-2xl md:block',
+                      )}
+                    >
+                      {/* view=Fit shows the whole page within the frame, so wide
+                          landscape pages fit fully (just smaller) instead of
+                          overflowing. The viewer scrolls internally between pages. */}
+                      <iframe
+                        key={active.id}
+                        src={`/api/library/file/${active.id}#toolbar=1&navpanes=0&view=Fit`}
+                        title={active.title}
+                        className={cn('w-full', isFullscreen ? 'flex-1' : 'h-[75vh]')}
+                      />
+                    </div>
+
+                    {/* Phones: a compact card that opens the document in the
+                        device's native reader (proper pinch-to-zoom + scroll)
+                        rather than an oversized inline iframe. */}
+                    <div className="flex flex-col items-start gap-3 rounded-2xl border border-stone bg-sage-light px-5 py-6 md:hidden">
+                      <span className="flex size-11 items-center justify-center rounded-full bg-deep-teal/10">
+                        <FileText className="size-5 text-deep-teal" aria-hidden="true" />
+                      </span>
+                      <p className="font-serif text-[15px] leading-relaxed text-charcoal/75">
+                        This document opens in your phone&apos;s reader, where you can pinch to zoom
+                        and scroll comfortably.
+                      </p>
+                      <a
+                        href={`/api/library/file/${active.id}`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="inline-flex items-center gap-2 rounded-full bg-deep-teal px-5 py-2.5 font-sans text-sm font-semibold text-off-white transition-colors hover:bg-deep-teal/90"
+                      >
+                        Open document
+                        <ExternalLink className="size-4" aria-hidden="true" />
+                      </a>
+                    </div>
+                  </>
                 )}
                 <div className="flex flex-wrap items-center gap-3">
                   {isPdf(active.fileUrl, active.fileName) && (
                     <button
                       type="button"
                       onClick={openFullscreen}
-                      className="inline-flex items-center gap-2 rounded-full border border-deep-teal/40 px-5 py-2.5 font-sans text-sm font-semibold text-deep-teal transition-colors hover:bg-sage-light"
+                      className="hidden items-center gap-2 rounded-full border border-deep-teal/40 px-5 py-2.5 font-sans text-sm font-semibold text-deep-teal transition-colors hover:bg-sage-light md:inline-flex"
                     >
                       View fullscreen
                       <Maximize className="size-4" aria-hidden="true" />
@@ -288,10 +283,9 @@ export function LessonViewer({
                 </p>
                 {isPdf(active.fileUrl, active.fileName) && (
                   <p className="font-sans text-xs leading-relaxed text-charcoal/55">
-                    Tip: turn your phone sideways and the document will expand to fullscreen;
-                    turn it back upright to return to the window. You can also tap &ldquo;View
-                    fullscreen&rdquo; anytime. Many documents are easier to read on a laptop or
-                    desktop.
+                    Tip: on a phone, tap &ldquo;Open document&rdquo; to read it in your device&apos;s
+                    reader with pinch-to-zoom. On a laptop or desktop you can tap &ldquo;View
+                    fullscreen&rdquo; for a larger view — many documents are easiest to read there.
                   </p>
                 )}
               </div>
