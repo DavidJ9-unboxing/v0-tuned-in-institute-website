@@ -13,7 +13,32 @@ import { useEffect } from 'react'
  */
 export function ScrollToTopOnLoad() {
   useEffect(() => {
-    window.scrollTo(0, 0)
+    const history = window.history
+    const previous = history.scrollRestoration
+
+    // Stop the browser from re-applying the last scroll position while the home
+    // page is open. Without this, native restoration can fire after our reset
+    // and drop the visitor back down the page.
+    if ('scrollRestoration' in history) {
+      history.scrollRestoration = 'manual'
+    }
+
+    const toTop = () => window.scrollTo(0, 0)
+
+    // Reset immediately on mount...
+    toTop()
+
+    // ...and again on `pageshow`, which also covers returning to the page from
+    // the bfcache (reopening the tab or pressing back), when React doesn't
+    // remount and the effect above wouldn't otherwise run.
+    window.addEventListener('pageshow', toTop)
+
+    return () => {
+      window.removeEventListener('pageshow', toTop)
+      if ('scrollRestoration' in history) {
+        history.scrollRestoration = previous
+      }
+    }
   }, [])
 
   return null
