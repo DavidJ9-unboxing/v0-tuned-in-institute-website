@@ -259,8 +259,8 @@ export function LessonViewer({
                               <Image
                                 src={cover.src || '/placeholder.svg'}
                                 alt={`Cover of ${cover.label}`}
-                                width={320}
-                                height={426}
+                                width={460}
+                                height={655}
                                 className="h-auto w-full"
                               />
                             </a>
