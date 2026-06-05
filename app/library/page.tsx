@@ -2,7 +2,7 @@ import type { Metadata } from 'next'
 import { BookOpen } from 'lucide-react'
 import { getCurrentUser } from '@/lib/session'
 import { getSections } from '@/lib/content'
-import { RemiChat } from '@/components/library/remi-chat'
+import { LibrarySearch } from '@/components/library/library-search'
 import { SectionCard } from '@/components/library/section-card'
 
 export const metadata: Metadata = {
@@ -31,25 +31,17 @@ export default async function LibraryPage({
         </h1>
         <p className="max-w-2xl font-serif text-[16px] leading-relaxed text-charcoal/75">
           Explore our collection of articles, guides, and videos on parenting, relationships, and
-          family wellbeing. Scroll down to browse the library, or ask Remi to help you find what
-          you need.
+          family wellbeing. Search below or browse the collections, and tap Ask Remi anytime if
+          you&apos;d like a guide to help you find what you need.
         </p>
       </header>
 
       <div className="mt-8">
-        <RemiChat
-          initialQuery={initialQuery}
-          intro={
-            <>
-              Hi, I&apos;m Remi. Tell me what you&apos;re looking for and I&apos;ll point you to the
-              right articles, guides, and videos in the library — or just share what&apos;s on your
-              mind and we can talk it through.{' '}
-              <span className="text-charcoal/60">
-                (Chat is private — please avoid full names and identifying details.)
-              </span>
-            </>
-          }
-        />
+        <LibrarySearch initialQuery={initialQuery} />
+        <p className="mt-2 px-1 font-sans text-xs leading-relaxed text-charcoal/55">
+          Type a keyword or a full question in your own words — Remi will help you find the right
+          resources.
+        </p>
       </div>
 
       {sections.length === 0 ? (

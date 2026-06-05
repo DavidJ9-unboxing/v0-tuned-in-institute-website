@@ -12,7 +12,7 @@ import {
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import posthog from 'posthog-js'
-import { Check, Copy, Lock, Sparkles, X } from 'lucide-react'
+import { Check, Copy, Lock, Sparkles, Trash2, X } from 'lucide-react'
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from '@/components/ui/sheet'
 import {
   Dialog,
@@ -46,7 +46,6 @@ export function useRemi() {
 
 // Routes where the floating launcher is redundant or out of place.
 const HIDE_FAB_PREFIXES = [
-  '/library', // Remi already lives on the page here
   '/admin',
   '/sign-in',
   '/forgot-password',
@@ -160,7 +159,8 @@ function RemiPanel({
 }) {
   const { data: session, isPending } = useSession()
   const user = session?.user
-  const { remember, setRemember, canPromptRemember, snoozeRememberPrompt } = useRemiStore()
+  const { remember, setRemember, canPromptRemember, snoozeRememberPrompt, clearChat } =
+    useRemiStore()
   // Whether to show the gentle "remember next time?" nudge inside the close dialog.
   const showRememberNudge = canPromptRemember && !remember
 
@@ -172,6 +172,9 @@ function RemiPanel({
   const [copyState, setCopyState] = useState<'idle' | 'copied' | 'empty' | 'error'>('idle')
   // Latest plain-text transcript, kept in a ref so copying doesn't depend on re-renders.
   const transcriptRef = useRef('')
+  // Reactive flag for whether there's anything in the conversation, so the close
+  // dialog can offer "forget this conversation" only when there's something to forget.
+  const [hasConversation, setHasConversation] = useState(false)
   // A hidden textarea rendered *inside* the dialog. Selecting an element inside the
   // focus-trapped dialog is reliable; a textarea appended to document.body gets its
   // selection cleared by Radix's focus guard before execCommand can run.
@@ -259,6 +262,15 @@ function RemiPanel({
     onOpenChange(false)
   }
 
+  // Discard this conversation on close. Wipes the current thread and any saved copy,
+  // while leaving the member's overall "remember" preference untouched so future
+  // conversations are still saved if they've opted in.
+  function forgetAndClose() {
+    clearChat()
+    setConfirmOpen(false)
+    onOpenChange(false)
+  }
+
   // Members get the full slide-over concierge chat.
   return (
     <>
@@ -301,6 +313,7 @@ function RemiPanel({
             initialQuery={initialQuery}
             onTranscriptChange={(t) => {
               transcriptRef.current = t
+              setHasConversation(t.trim().length > 0)
             }}
           />
         </div>
@@ -412,8 +425,20 @@ function RemiPanel({
               onClick={confirmClose}
               className="font-sans font-semibold"
             >
-              Close chat
+              {remember ? 'Close and save' : 'Close chat'}
             </Button>
+            {hasConversation && (
+              <Button
+                type="button"
+                size="lg"
+                variant="outline"
+                onClick={forgetAndClose}
+                className="gap-2 border-stone bg-transparent font-sans font-semibold text-charcoal/75 hover:border-deep-teal/40 hover:bg-sage-light hover:text-deep-teal"
+              >
+                <Trash2 className="size-4" aria-hidden="true" />
+                {remember ? "Forget this one — don't save it" : 'Close and forget this conversation'}
+              </Button>
+            )}
             <Button
               type="button"
               size="lg"
