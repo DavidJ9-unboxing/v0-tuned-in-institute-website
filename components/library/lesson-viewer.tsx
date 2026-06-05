@@ -1,9 +1,25 @@
 'use client'
 
 import { useEffect, useRef, useState } from 'react'
+import Image from 'next/image'
 import { Download, ExternalLink, FileText, Lock, Maximize, PlayCircle } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import type { Lesson } from '@/lib/content'
+
+// Some PDF documents are full books/guides and have a real cover image we can
+// show (clickable) instead of a generic file icon. Keyed by the stored file
+// name. Documents not listed here (e.g. slide decks) fall back to the icon.
+const DOCUMENT_COVERS: Record<string, { src: string; label: string }> = {
+  'Tuned In - A Guide for Parents of Sensitive Children.pdf': {
+    src: '/images/tuned-in-book-cover.png',
+    label: 'Tuned In: A Guide for Parents of Sensitive Children',
+  },
+}
+
+function getDocumentCover(fileName?: string | null) {
+  if (!fileName) return null
+  return DOCUMENT_COVERS[fileName] ?? null
+}
 import { toEmbedUrl } from '@/lib/video'
 import {
   Dialog,
@@ -226,25 +242,50 @@ export function LessonViewer({
 
                     {/* Phones: a compact card that opens the document in the
                         device's native reader (proper pinch-to-zoom + scroll)
-                        rather than an oversized inline iframe. */}
-                    <div className="flex flex-col items-start gap-3 rounded-2xl border border-stone bg-sage-light px-5 py-6 md:hidden">
-                      <span className="flex size-11 items-center justify-center rounded-full bg-deep-teal/10">
-                        <FileText className="size-5 text-deep-teal" aria-hidden="true" />
-                      </span>
-                      <p className="font-serif text-[15px] leading-relaxed text-charcoal/75">
-                        This document opens in your phone&apos;s reader, where you can pinch to zoom
-                        and scroll comfortably.
-                      </p>
-                      <a
-                        href={`/api/library/file/${active.id}`}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="inline-flex items-center gap-2 rounded-full bg-deep-teal px-5 py-2.5 font-sans text-sm font-semibold text-off-white transition-colors hover:bg-deep-teal/90"
-                      >
-                        Open document
-                        <ExternalLink className="size-4" aria-hidden="true" />
-                      </a>
-                    </div>
+                        rather than an oversized inline iframe. When the document
+                        has a cover image (e.g. a book), show it as the tappable
+                        preview so it's clear what you're opening. */}
+                    {(() => {
+                      const cover = getDocumentCover(active.fileName)
+                      return (
+                        <div className="flex flex-col items-center gap-4 rounded-2xl border border-stone bg-sage-light px-5 py-6 md:hidden">
+                          {cover ? (
+                            <a
+                              href={`/api/library/file/${active.id}`}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="block w-40 overflow-hidden rounded-lg border border-stone shadow-sm transition-transform active:scale-[0.98]"
+                            >
+                              <Image
+                                src={cover.src || '/placeholder.svg'}
+                                alt={`Cover of ${cover.label}`}
+                                width={320}
+                                height={426}
+                                className="h-auto w-full"
+                              />
+                            </a>
+                          ) : (
+                            <span className="flex size-11 items-center justify-center rounded-full bg-deep-teal/10">
+                              <FileText className="size-5 text-deep-teal" aria-hidden="true" />
+                            </span>
+                          )}
+                          <p className="text-center font-serif text-[15px] leading-relaxed text-charcoal/75">
+                            {cover
+                              ? 'Tap the cover to read it in your phone\u2019s reader, where you can pinch to zoom and scroll comfortably \u2014 or download a copy below.'
+                              : 'This document opens in your phone\u2019s reader, where you can pinch to zoom and scroll comfortably.'}
+                          </p>
+                          <a
+                            href={`/api/library/file/${active.id}`}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="inline-flex items-center gap-2 rounded-full bg-deep-teal px-5 py-2.5 font-sans text-sm font-semibold text-off-white transition-colors hover:bg-deep-teal/90"
+                          >
+                            {cover ? 'Read in reader' : 'Open document'}
+                            <ExternalLink className="size-4" aria-hidden="true" />
+                          </a>
+                        </div>
+                      )
+                    })()}
                   </>
                 )}
                 <div className="flex flex-wrap items-center gap-3">
@@ -267,7 +308,11 @@ export function LessonViewer({
                     }
                     className="inline-flex items-center gap-2 rounded-full bg-deep-teal px-5 py-2.5 font-sans text-sm font-semibold text-off-white transition-colors hover:bg-deep-teal/90"
                   >
-                    {isPdf(active.fileUrl, active.fileName) ? 'Download' : 'Open document'}
+                    {getDocumentCover(active.fileName)
+                      ? 'Download a PDF of the book'
+                      : isPdf(active.fileUrl, active.fileName)
+                        ? 'Download'
+                        : 'Open document'}
                     <Download className="size-4" aria-hidden="true" />
                   </a>
                 </div>
