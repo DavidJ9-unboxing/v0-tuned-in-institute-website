@@ -14,6 +14,7 @@ import {
   Loader2,
   Lock,
   Mic,
+  Paperclip,
   PlayCircle,
   Sparkles,
   Trash2,
@@ -44,6 +45,33 @@ const EXAMPLES = [
   'My child refuses to go to school',
   'How do I set boundaries calmly?',
 ]
+
+// Files members can send to Remi. Images and PDFs are read natively by the model;
+// nothing is stored on our servers — each file rides along with that one message only.
+const ACCEPTED_FILE_TYPES = 'image/png,image/jpeg,image/webp,image/gif,application/pdf'
+const MAX_FILE_BYTES = 10 * 1024 * 1024 // 10 MB per file
+const MAX_FILES_PER_MESSAGE = 4
+
+type PendingAttachment = {
+  id: string
+  name: string
+  mediaType: string
+  /** Data URL (base64). Used both for preview and for sending to the model. */
+  url: string
+}
+
+function isImageType(mediaType: string) {
+  return mediaType.startsWith('image/')
+}
+
+function readFileAsDataUrl(file: File): Promise<string> {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader()
+    reader.onload = () => resolve(reader.result as string)
+    reader.onerror = () => reject(reader.error ?? new Error('Could not read file'))
+    reader.readAsDataURL(file)
+  })
+}
 
 // Distinguish "Remi is temporarily busy" (rate limit / overload) from genuine errors,
 // so members see a calm, reassuring note instead of a scary failure.
@@ -133,6 +161,11 @@ export function RemiChat({
   const { chat, remember, setRemember, clearChat } = useRemiStore()
   const { messages, sendMessage, status, error } = useChat({ chat })
   const [input, setInput] = useState('')
+  // Files queued to send with the next message. Held only in memory and cleared on send —
+  // nothing is uploaded or stored; each file travels with that single message.
+  const [attachments, setAttachments] = useState<PendingAttachment[]>([])
+  const [attachError, setAttachError] = useState<string | null>(null)
+  const fileInputRef = useRef<HTMLInputElement>(null)
   // In the slide-over the resource list is collapsed by default so it doesn't eat the small
   // mobile screen; members still see a labelled, tappable header telling them links are there.
   const [resourcesOpen, setResourcesOpen] = useState(false)
@@ -215,13 +248,70 @@ export function RemiChat({
     el.style.overflowY = el.scrollHeight > max ? 'auto' : 'hidden'
   }, [input])
 
+  async function handleFilesSelected(fileList: FileList | null) {
+    if (!fileList || fileList.length === 0) return
+    setAttachError(null)
+    const incoming = Array.from(fileList)
+    const accepted = ACCEPTED_FILE_TYPES.split(',')
+
+    const room = MAX_FILES_PER_MESSAGE - attachments.length
+    if (room <= 0) {
+      setAttachError(`You can attach up to ${MAX_FILES_PER_MESSAGE} files per message.`)
+      return
+    }
+
+    const next: PendingAttachment[] = []
+    for (const file of incoming.slice(0, room)) {
+      if (!accepted.includes(file.type)) {
+        setAttachError('Only images (PNG, JPG, WEBP, GIF) and PDFs can be attached.')
+        continue
+      }
+      if (file.size > MAX_FILE_BYTES) {
+        setAttachError('Each file must be 10 MB or smaller.')
+        continue
+      }
+      try {
+        const url = await readFileAsDataUrl(file)
+        next.push({
+          id: `${file.name}-${file.size}-${crypto.randomUUID()}`,
+          name: file.name,
+          mediaType: file.type,
+          url,
+        })
+      } catch {
+        setAttachError('One of the files could not be read. Please try again.')
+      }
+    }
+    if (incoming.length > room) {
+      setAttachError(`You can attach up to ${MAX_FILES_PER_MESSAGE} files per message.`)
+    }
+    if (next.length) setAttachments((prev) => [...prev, ...next])
+  }
+
+  function removeAttachment(id: string) {
+    setAttachments((prev) => prev.filter((a) => a.id !== id))
+    setAttachError(null)
+  }
+
   function submit(text: string) {
     const trimmed = text.trim()
-    if (!trimmed || busy) return
+    // Allow sending when there's at least text or one attachment.
+    if ((!trimmed && attachments.length === 0) || busy) return
     if (isListening) stopListening()
     dictationBaseRef.current = ''
-    sendMessage({ text: trimmed })
+    sendMessage({
+      text: trimmed,
+      files: attachments.map((a) => ({
+        type: 'file' as const,
+        mediaType: a.mediaType,
+        url: a.url,
+        filename: a.name,
+      })),
+    })
     setInput('')
+    setAttachments([])
+    setAttachError(null)
+    if (fileInputRef.current) fileInputRef.current.value = ''
   }
 
   function onSubmit(e: React.FormEvent) {
@@ -392,6 +482,11 @@ export function RemiChat({
             chat and we never store it on our servers. Your conversation stays available during this
             visit; to keep it for next time, turn on remembering below.
           </p>
+          <p>
+            You can attach photos, screenshots, or PDFs to give Remi more context. Files are sent
+            with that one message and are never stored on our servers — please block out or leave off
+            names, faces, and other identifying details before attaching.
+          </p>
 
           {/* Opt-in, device-only memory. Stored in this browser only — never sent to us. */}
           <div className="flex items-start gap-2.5 rounded-lg border border-stone bg-card p-3">
@@ -542,7 +637,7 @@ export function RemiChat({
                       moment with your child, or something you&apos;re carrying yourself. Share
                       whatever&apos;s on your mind.{' '}
                       <span className="text-charcoal/60">
-                        (Chat is private — please avoid full names and identifying details.)
+                        (Chat is private — however please avoid full names and identifying details.)
                       </span>
                     </>
                   )}
@@ -595,6 +690,42 @@ export function RemiChat({
                           >
                             {part.text}
                           </p>
+                        )
+                      }
+                      // Files the member attached: show images inline, other files (PDFs)
+                      // as a labelled chip. Nothing is stored — this is just a render of
+                      // what was sent with the message.
+                      if (part.type === 'file') {
+                        const filePart = part as {
+                          mediaType: string
+                          url: string
+                          filename?: string
+                        }
+                        if (isImageType(filePart.mediaType)) {
+                          return (
+                            // eslint-disable-next-line @next/next/no-img-element
+                            <img
+                              key={i}
+                              src={filePart.url || '/placeholder.svg'}
+                              alt={filePart.filename ?? 'Attached image'}
+                              className="mt-1 max-h-64 w-auto max-w-full rounded-lg border border-stone/60"
+                            />
+                          )
+                        }
+                        return (
+                          <span
+                            key={i}
+                            className={`mt-1 inline-flex items-center gap-2 rounded-lg px-2.5 py-1.5 font-sans text-xs ${
+                              isUser
+                                ? 'bg-off-white/15 text-off-white'
+                                : 'bg-paper text-charcoal/75'
+                            }`}
+                          >
+                            <FileText className="size-3.5 shrink-0" aria-hidden="true" />
+                            <span className="max-w-[180px] truncate">
+                              {filePart.filename ?? 'Attachment'}
+                            </span>
+                          </span>
                         )
                       }
                       // Cited resources are collected and shown below the dialogue,
@@ -701,7 +832,69 @@ export function RemiChat({
 
         {/* Input */}
         <form onSubmit={onSubmit} className="shrink-0 border-t border-stone bg-card px-4 py-3">
+          {/* Pending attachments queued for the next message (held in memory only). */}
+          {attachments.length > 0 && (
+            <ul className="mb-2 flex flex-wrap gap-2">
+              {attachments.map((a) => (
+                <li
+                  key={a.id}
+                  className="flex items-center gap-2 rounded-lg border border-stone bg-off-white py-1 pl-1 pr-1.5"
+                >
+                  {isImageType(a.mediaType) ? (
+                    // eslint-disable-next-line @next/next/no-img-element
+                    <img
+                      src={a.url || '/placeholder.svg'}
+                      alt=""
+                      className="size-8 rounded object-cover"
+                    />
+                  ) : (
+                    <span className="flex size-8 items-center justify-center rounded bg-paper">
+                      <FileText className="size-4 text-sage-deep" aria-hidden="true" />
+                    </span>
+                  )}
+                  <span className="max-w-[120px] truncate font-sans text-xs text-charcoal/75">
+                    {a.name}
+                  </span>
+                  <button
+                    type="button"
+                    onClick={() => removeAttachment(a.id)}
+                    className="flex size-5 shrink-0 items-center justify-center rounded-full text-charcoal/50 transition-colors hover:bg-stone/60 hover:text-charcoal"
+                    aria-label={`Remove ${a.name}`}
+                  >
+                    <X className="size-3.5" aria-hidden="true" />
+                  </button>
+                </li>
+              ))}
+            </ul>
+          )}
+          {attachError && (
+            <p className="mb-2 font-sans text-xs text-amber" role="alert">
+              {attachError}
+            </p>
+          )}
+          <input
+            ref={fileInputRef}
+            type="file"
+            accept={ACCEPTED_FILE_TYPES}
+            multiple
+            className="sr-only"
+            onChange={(e) => {
+              void handleFilesSelected(e.target.files)
+              e.target.value = ''
+            }}
+          />
           <div className="flex items-end gap-2">
+            <Button
+              type="button"
+              size="icon"
+              variant="outline"
+              onClick={() => fileInputRef.current?.click()}
+              disabled={busy || attachments.length >= MAX_FILES_PER_MESSAGE}
+              aria-label="Attach a photo or PDF"
+              className="size-11 shrink-0 rounded-xl border-stone text-charcoal/70 hover:text-deep-teal"
+            >
+              <Paperclip className="size-5" aria-hidden="true" />
+            </Button>
             <textarea
               ref={inputRef}
               value={input}
@@ -739,7 +932,7 @@ export function RemiChat({
             <Button
               type="submit"
               size="icon"
-              disabled={busy || !input.trim()}
+              disabled={busy || (!input.trim() && attachments.length === 0)}
               aria-label="Send message"
               className="size-11 shrink-0 rounded-xl"
             >
