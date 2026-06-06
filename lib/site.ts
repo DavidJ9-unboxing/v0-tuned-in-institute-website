@@ -55,7 +55,7 @@ export const programs = [
     slug: 'sensitive-teens',
     name: 'Tuned In Tools for Teens',
     modules: 8,
-    status: 'Launching July 4',
+    status: 'Available now',
     age: 'Sensitive teenagers, ages 12 to 18',
     description:
       'For sensitive teenagers navigating identity, relationships, school, and a world that moves too fast.',
@@ -130,7 +130,7 @@ export const programs = [
     slug: 'adults',
     name: 'Tuned In Tools for Adults',
     modules: 8,
-    status: 'Launching July 4',
+    status: 'Available now',
     age: 'Sensitive adults',
     description:
       'Regulation tools for sensitive adults navigating work, relationships, and a world not built for them.',
