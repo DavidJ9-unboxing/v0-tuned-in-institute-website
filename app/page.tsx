@@ -95,28 +95,27 @@ export default async function HomePage() {
         </div>
       </section>
 
-      {/* Featured library content */}
-      {featured.length > 0 && (
-        <section id="featured" className="scroll-mt-24 border-y border-stone bg-paper">
-          <div className="mx-auto max-w-6xl px-5 py-14 sm:px-8 md:py-16">
-            <SectionLabel>From the library</SectionLabel>
-            <div className="flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
-              <h2 className="mt-5 max-w-2xl font-serif text-3xl font-semibold leading-tight text-deep-teal text-balance sm:text-4xl">
-                A few articles that you may find interesting.
-              </h2>
-              <Button asChild size="lg" className="shrink-0 font-sans font-semibold">
-                <Link href="/library">Browse the library</Link>
-              </Button>
-            </div>
-            <p className="mt-4 max-w-2xl font-serif text-lg leading-relaxed text-charcoal/85">
-              Browse the library for access to all our resources.
-            </p>
-            <div className="mt-12">
-              <FeaturedGrid items={featured} isMember={Boolean(user)} />
-            </div>
+      {/* Four program tracks */}
+      <section className="border-y border-stone bg-paper">
+        <div className="mx-auto max-w-6xl px-5 py-14 sm:px-8 md:py-16">
+          <SectionLabel>The programs</SectionLabel>
+          <h2 className="mt-5 max-w-2xl font-serif text-3xl font-semibold leading-tight text-deep-teal text-balance sm:text-4xl">
+            Four program tracks. One research foundation.
+          </h2>
+          <div className="mt-12 grid gap-6 md:grid-cols-2">
+            {programs.map((program) => (
+              <ProgramCard
+                key={program.slug}
+                name={program.name}
+                modules={program.modules}
+                status={program.status}
+                description={program.description}
+                href={`/programs/${program.slug}`}
+              />
+            ))}
           </div>
-        </section>
-      )}
+        </div>
+      </section>
 
       {/* Four pillars */}
       <section className="border-y border-stone bg-paper">
@@ -183,27 +182,28 @@ export default async function HomePage() {
         </div>
       </section>
 
-      {/* Four program tracks */}
-      <section className="bg-off-white">
-        <div className="mx-auto max-w-6xl px-5 py-14 sm:px-8 md:py-16">
-          <SectionLabel>The programs</SectionLabel>
-          <h2 className="mt-5 max-w-2xl font-serif text-3xl font-semibold leading-tight text-deep-teal text-balance sm:text-4xl">
-            Four program tracks. One research foundation.
-          </h2>
-          <div className="mt-12 grid gap-6 md:grid-cols-2">
-            {programs.map((program) => (
-              <ProgramCard
-                key={program.slug}
-                name={program.name}
-                modules={program.modules}
-                status={program.status}
-                description={program.description}
-                href={`/programs/${program.slug}`}
-              />
-            ))}
+      {/* Featured library content */}
+      {featured.length > 0 && (
+        <section id="featured" className="scroll-mt-24 bg-off-white">
+          <div className="mx-auto max-w-6xl px-5 py-14 sm:px-8 md:py-16">
+            <SectionLabel>From the library</SectionLabel>
+            <div className="flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
+              <h2 className="mt-5 max-w-2xl font-serif text-3xl font-semibold leading-tight text-deep-teal text-balance sm:text-4xl">
+                A few articles that you may find interesting.
+              </h2>
+              <Button asChild size="lg" className="shrink-0 font-sans font-semibold">
+                <Link href="/library">Browse the library</Link>
+              </Button>
+            </div>
+            <p className="mt-4 max-w-2xl font-serif text-lg leading-relaxed text-charcoal/85">
+              Browse the library for access to all our resources.
+            </p>
+            <div className="mt-12">
+              <FeaturedGrid items={featured} isMember={Boolean(user)} />
+            </div>
           </div>
-        </div>
-      </section>
+        </section>
+      )}
 
       {/* The book */}
       <section className="border-y border-stone bg-paper">
