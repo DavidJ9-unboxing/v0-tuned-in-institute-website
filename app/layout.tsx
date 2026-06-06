@@ -32,8 +32,8 @@ export const metadata: Metadata = {
     'Research-backed education and support for sensitive children, teens, and adults, and the people who love them. Built by clinicians, grounded in attachment science and nervous-system research.',
   generator: 'v0.app',
   icons: {
-    icon: '/logos/tii-favicon.png',
-    apple: '/logos/tii-favicon.png',
+    icon: '/logos/tii-favicon-round.png',
+    apple: '/logos/tii-favicon-round.png',
   },
 }
 
