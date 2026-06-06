@@ -542,7 +542,7 @@ export function RemiChat({
                       moment with your child, or something you&apos;re carrying yourself. Share
                       whatever&apos;s on your mind.{' '}
                       <span className="text-charcoal/60">
-                        (Chat is private — please avoid full names and identifying details.)
+                        (Chat is private — however please avoid full names and identifying details.)
                       </span>
                     </>
                   )}
