@@ -59,8 +59,17 @@ export default function AboutPage() {
 
       {/* Chief Medical Officer */}
       <section className="border-t border-stone bg-off-white">
-        <div className="mx-auto grid max-w-6xl items-start gap-12 px-5 py-20 sm:px-8 md:grid-cols-[1.2fr_0.8fr]">
-          <div className="md:order-1 md:row-start-1">
+        <div className="mx-auto grid max-w-6xl items-start gap-12 px-5 py-20 sm:px-8 md:grid-cols-[0.8fr_1.2fr]">
+          <figure className="overflow-hidden rounded-xl border border-stone shadow-[0_24px_50px_-30px_rgba(27,80,90,0.6)]">
+            <Image
+              src="/team/joel.png"
+              alt="Joel Schauermann, MD, Chief Medical Officer, smiling in a white shirt"
+              width={900}
+              height={900}
+              className="aspect-[4/5] h-auto w-full object-cover object-top"
+            />
+          </figure>
+          <div>
             <SectionLabel>Leadership</SectionLabel>
             <h2 className="mt-5 font-serif text-3xl font-semibold leading-tight text-deep-teal text-balance sm:text-4xl">
               Joel Schauermann, MD
@@ -80,15 +89,6 @@ export default function AboutPage() {
               serve, keeping our education both accurate and genuinely useful.
             </p>
           </div>
-          <figure className="overflow-hidden rounded-xl border border-stone shadow-[0_24px_50px_-30px_rgba(27,80,90,0.6)] md:order-2 md:row-start-1">
-            <Image
-              src="/team/joel.png"
-              alt="Joel Schauermann, MD, Chief Medical Officer, smiling in a white shirt"
-              width={900}
-              height={900}
-              className="aspect-[4/5] h-auto w-full object-cover object-top"
-            />
-          </figure>
         </div>
       </section>
 
@@ -132,8 +132,17 @@ export default function AboutPage() {
 
       {/* Director of Systems & Experience */}
       <section className="border-t border-stone bg-off-white">
-        <div className="mx-auto grid max-w-6xl items-start gap-12 px-5 py-20 sm:px-8 md:grid-cols-[1.2fr_0.8fr]">
-          <div className="md:order-1 md:row-start-1">
+        <div className="mx-auto grid max-w-6xl items-start gap-12 px-5 py-20 sm:px-8 md:grid-cols-[0.8fr_1.2fr]">
+          <figure className="overflow-hidden rounded-xl border border-stone shadow-[0_24px_50px_-30px_rgba(27,80,90,0.6)]">
+            <Image
+              src="/team/katie.png"
+              alt="Katie Pendergast, Director of Systems and Experience, smiling in a blue dress"
+              width={900}
+              height={900}
+              className="aspect-[4/5] h-auto w-full object-cover object-top"
+            />
+          </figure>
+          <div>
             <SectionLabel>Leadership</SectionLabel>
             <h2 className="mt-5 font-serif text-3xl font-semibold leading-tight text-deep-teal text-balance sm:text-4xl">
               Katie Pendergast
@@ -160,15 +169,6 @@ export default function AboutPage() {
               understanding, connection, and tools they need to thrive.
             </p>
           </div>
-          <figure className="overflow-hidden rounded-xl border border-stone shadow-[0_24px_50px_-30px_rgba(27,80,90,0.6)] md:order-2 md:row-start-1">
-            <Image
-              src="/team/katie.png"
-              alt="Katie Pendergast, Director of Systems and Experience, smiling in a blue dress"
-              width={900}
-              height={900}
-              className="aspect-[4/5] h-auto w-full object-cover object-top"
-            />
-          </figure>
         </div>
       </section>
 
