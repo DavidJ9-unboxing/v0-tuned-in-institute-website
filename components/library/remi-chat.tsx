@@ -1,7 +1,6 @@
 'use client'
 
 import { useEffect, useMemo, useRef, useState } from 'react'
-import Link from 'next/link'
 import { useChat } from '@ai-sdk/react'
 import {
   ArrowUp,
@@ -26,6 +25,7 @@ import { useSpeechRecognition } from '@/hooks/use-speech-recognition'
 import { useSpeechSynthesis } from '@/hooks/use-speech-synthesis'
 import { useRemiStore } from '@/components/library/remi-store'
 import { MessageActions } from '@/components/library/message-actions'
+import { RemiResourceReader } from '@/components/library/remi-resource-reader'
 
 const CRISIS_RESOURCE_URL =
   'https://988lifeline.org/learn/our-crisis-centers/crisis-centers-by-state-and-u-s-territory/'
@@ -111,15 +111,23 @@ function RemiAvatar() {
   )
 }
 
-function ResourceCards({ resources }: { resources: RemiResource[] }) {
+function ResourceCards({
+  resources,
+  onOpen,
+}: {
+  resources: RemiResource[]
+  /** Open the resource in the in-chat reader so the conversation is preserved. */
+  onOpen: (resource: RemiResource) => void
+}) {
   if (!resources?.length) return null
   return (
     <ul className="mt-3 flex flex-col gap-2">
       {resources.map((r) => (
         <li key={r.id}>
-          <Link
-            href={`/library/${r.sectionSlug}?lesson=${r.id}`}
-            className="flex items-start gap-2.5 rounded-lg border border-stone bg-card px-3.5 py-3 transition-colors hover:border-deep-teal/40"
+          <button
+            type="button"
+            onClick={() => onOpen(r)}
+            className="flex w-full items-start gap-2.5 rounded-lg border border-stone bg-card px-3.5 py-3 text-left transition-colors hover:border-deep-teal/40"
           >
             <span className="mt-0.5">
               <KindIcon kind={r.kind} />
@@ -132,7 +140,7 @@ function ResourceCards({ resources }: { resources: RemiResource[] }) {
                 {r.sectionTitle}
               </span>
             </span>
-          </Link>
+          </button>
         </li>
       ))}
     </ul>
@@ -166,6 +174,10 @@ export function RemiChat({
   const [attachments, setAttachments] = useState<PendingAttachment[]>([])
   const [attachError, setAttachError] = useState<string | null>(null)
   const fileInputRef = useRef<HTMLInputElement>(null)
+  // The resource a member tapped to read inline. When set, the in-chat reader
+  // dialog opens on top of the conversation; closing it returns them exactly
+  // where they were without losing the chat.
+  const [openResource, setOpenResource] = useState<RemiResource | null>(null)
   // In the slide-over the resource list is collapsed by default so it doesn't eat the small
   // mobile screen; members still see a labelled, tappable header telling them links are there.
   const [resourcesOpen, setResourcesOpen] = useState(false)
@@ -420,7 +432,7 @@ export function RemiChat({
         </button>
         {resourcesOpen && (
           <div className="max-h-44 overflow-y-auto px-5 pb-4 pr-1">
-            <ResourceCards resources={sharedResources} />
+            <ResourceCards resources={sharedResources} onOpen={setOpenResource} />
           </div>
         )}
       </section>
@@ -432,7 +444,7 @@ export function RemiChat({
         <h3 className="font-sans text-xs font-semibold uppercase tracking-[0.12em] text-charcoal/55">
           Resources Remi shared
         </h3>
-        <ResourceCards resources={sharedResources} />
+        <ResourceCards resources={sharedResources} onOpen={setOpenResource} />
       </section>
     ))
 
@@ -764,7 +776,7 @@ export function RemiChat({
                         {messageResources.length} resource
                         {messageResources.length > 1 ? 's' : ''} Remi shared
                       </p>
-                      <ResourceCards resources={messageResources} />
+                      <ResourceCards resources={messageResources} onOpen={setOpenResource} />
                     </div>
                   )}
                 </div>
@@ -982,6 +994,14 @@ export function RemiChat({
       {!isPanel && resourcesPanel}
       {!isPanel && safetyNote}
       {!isPanel && privacyNote}
+
+      {/* In-chat reader: opens a cited resource on top of the conversation so
+          closing it returns the member right back to where they were. */}
+      <RemiResourceReader
+        lessonId={openResource?.id ?? null}
+        fallbackTitle={openResource?.title}
+        onClose={() => setOpenResource(null)}
+      />
     </div>
   )
 }
