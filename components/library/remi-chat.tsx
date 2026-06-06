@@ -236,14 +236,15 @@ export function RemiChat({
     container.scrollTo({ top: anchor.offsetTop - 16, behavior: 'smooth' })
   }, [userMessageCount])
 
-  // Grow the input to fit its content (like ChatGPT/Claude), capped at ~6 lines (128px = max-h-32),
-  // after which it scrolls internally. Re-runs whenever the text changes — including dictation
-  // and clearing after send, which snaps it back to a single line.
+  // Grow the input to fit its content (like ChatGPT/Claude) so members can read back what
+  // they've written, capped at ~9 lines (200px = max-h-52), after which it scrolls internally.
+  // Re-runs whenever the text changes — including dictation and clearing after send, which
+  // snaps it back to a single line.
   useEffect(() => {
     const el = inputRef.current
     if (!el) return
     el.style.height = 'auto'
-    const max = 128
+    const max = 200
     el.style.height = `${Math.min(el.scrollHeight, max)}px`
     el.style.overflowY = el.scrollHeight > max ? 'auto' : 'hidden'
   }, [input])
@@ -656,6 +657,22 @@ export function RemiChat({
               .map((p) => (p as { text: string }).text)
               .join('')
               .trim()
+            // Resources this particular reply cited, shown inline directly beneath the
+            // answer so members can simply scroll down to the answer and tap an article —
+            // no separate panel to hunt for.
+            const messageResources: RemiResource[] = []
+            const seenForMessage = new Set<number>()
+            for (const part of message.parts) {
+              if (part.type === 'tool-citeResources' && part.state === 'output-available') {
+                const output = part.output as { resources: RemiResource[] }
+                for (const r of output.resources ?? []) {
+                  if (!seenForMessage.has(r.id)) {
+                    seenForMessage.add(r.id)
+                    messageResources.push(r)
+                  }
+                }
+              }
+            }
             // Only show the action row on Remi's finished replies that have text — never on
             // the member's own messages, and not while the reply is still streaming in.
             const showActions =
@@ -740,6 +757,15 @@ export function RemiChat({
                       isSpeaking={speakingId === message.id}
                       onToggleSpeak={() => speak(message.id, messageText)}
                     />
+                  )}
+                  {!isUser && messageResources.length > 0 && (
+                    <div className="mt-2 w-full">
+                      <p className="mb-1 font-sans text-[11px] font-semibold uppercase tracking-[0.12em] text-charcoal/45">
+                        {messageResources.length} resource
+                        {messageResources.length > 1 ? 's' : ''} Remi shared
+                      </p>
+                      <ResourceCards resources={messageResources} />
+                    </div>
                   )}
                 </div>
               </div>
@@ -909,7 +935,7 @@ export function RemiChat({
               cols={1}
               placeholder="Ask Remi…"
               aria-label="Ask Remi"
-              className="max-h-32 min-h-[2.75rem] w-full min-w-0 flex-1 resize-none rounded-xl border border-stone bg-off-white px-4 py-2.5 font-sans text-[15px] text-charcoal placeholder:text-charcoal/45 focus:border-deep-teal focus:outline-none focus:ring-2 focus:ring-deep-teal/20"
+              className="max-h-52 min-h-[2.75rem] w-full min-w-0 flex-1 resize-none rounded-xl border border-stone bg-off-white px-4 py-2.5 font-sans text-[15px] text-charcoal placeholder:text-charcoal/45 focus:border-deep-teal focus:outline-none focus:ring-2 focus:ring-deep-teal/20"
             />
             {isSupported && (
               <Button
@@ -945,8 +971,9 @@ export function RemiChat({
           </div>
         </form>
 
-        {/* In the slide-over panel, resources + safety stay attached to the chat card. */}
-        {isPanel && resourcesPanel}
+        {/* In the slide-over panel, safety + privacy stay attached to the chat card.
+            Cited resources now render inline beneath each answer, so there's no separate
+            resource strip crowding the bottom of the small mobile panel. */}
         {isPanel && safetyNote}
         {isPanel && privacyNote}
       </div>
