@@ -120,10 +120,24 @@
        overflow its container and clip on the right edge. */
     -webkit-text-size-adjust: 100%;
     text-size-adjust: 100%;
+
+    /* Horizontal-drift fix (reusable across the whole site):
+       On iOS the real scroll container is <html>, not <body>, so putting
+       overflow-x on <body> alone doesn't stop the page from sliding sideways
+       when something is a hair wider than the viewport. When the page can
+       scroll horizontally, the *layout viewport* becomes wider than the
+       *visible* screen — which also makes centered fixed dialogs (e.g. the
+       Remi close modal) center off to the right.
+       `overflow-x: clip` clips the overflow WITHOUT creating a scroll
+       container, so the page (and any centered overlay) can never drift. */
+    overflow-x: clip;
+    max-width: 100%;
   }
   body {
     @apply bg-background text-foreground;
     font-family: var(--font-serif);
+    overflow-x: clip;
+    max-width: 100%;
   }
 }
 
