@@ -120,7 +120,7 @@ export const programs = [
     name: 'Tuned In Tools for Teens',
     modules: 8,
     status: 'Available now',
-    age: 'Teens, ages 12 to 18',
+    age: 'Teens, ages 13 to 17',
     description:
       'For any teen who wants to understand their emotions, their brain, and how to regulate in a world that moves too fast.',
     tagline: 'Your emotions aren\u2019t the problem. They\u2019re information \u2014 and you can learn to work with them.',
@@ -129,7 +129,7 @@ export const programs = [
       'This course does. In eight modules, you\u2019ll learn how your brain and nervous system actually work, why your emotions are information and not problems, and how to build a regulation toolkit that\u2019s yours. It\u2019s honest, practical, and designed to help you understand yourself and feel more in control.',
     ],
     forWho: [
-      'Any teen ages 12 to 18 who wants to understand their emotions',
+      'Any teen ages 13 to 17 who wants to understand their emotions',
       'Anyone who gets overwhelmed, anxious, stressed, or shuts down',
       'Teens who want to feel more in control of their reactions',
       'Anyone who wants real tools, not lectures',
