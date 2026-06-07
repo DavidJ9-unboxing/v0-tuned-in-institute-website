@@ -307,16 +307,16 @@ function RemiPanel({
     <>
     <Sheet open={open} onOpenChange={handleSheetOpenChange}>
       <SheetContent
+        ref={contentRef}
         side="right"
         // Hide the faint default close (the bare `>button` child); we provide a
         // clearer, larger one in the header that's easy to tap on mobile.
-        // Anchor to the TOP only (`top-0 bottom-auto`) and size to the SMALL
-        // viewport height (`svh`) — the height when the mobile browser's address
-        // bar is fully shown. The base `inset-y-0` also sets `bottom:0`, which on
-        // iOS Safari lets the address bar push the fixed sheet upward as it
-        // expands, hiding the "Remi" title behind it. Anchoring to the top and
-        // sizing to `svh` keeps the header on-screen in every address-bar state.
-        className="top-0 bottom-auto flex w-full flex-col gap-0 p-0 !h-[100svh] !max-h-[100svh] sm:max-w-lg lg:max-w-xl [&>button:last-of-type]:hidden"
+        // Base positioning is top-anchored at the SMALL viewport height as a
+        // fallback; on devices with `window.visualViewport` the effect above
+        // overrides `top`/`height` inline to track the visible area live, which
+        // is what actually keeps the header (and Close button) clear of the iOS
+        // address bar when Remi's reply makes the bars reappear.
+        className="top-0 bottom-auto flex h-[100svh] max-h-[100svh] w-full flex-col gap-0 p-0 sm:max-w-lg lg:max-w-xl [&>button:last-of-type]:hidden"
       >
         <SheetHeader className="flex-row items-center gap-3 border-b border-stone bg-card py-4 pl-4 pr-[max(1rem,env(safe-area-inset-right))] pt-[max(1rem,env(safe-area-inset-top))] sm:pl-5">
           <span className="flex size-9 shrink-0 items-center justify-center rounded-full bg-deep-teal">
