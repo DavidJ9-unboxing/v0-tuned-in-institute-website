@@ -1,4 +1,4 @@
-import type { Metadata } from 'next'
+import type { Metadata, Viewport } from 'next'
 import { Lora, Inter } from 'next/font/google'
 import { Analytics } from '@vercel/analytics/next'
 import { SpeedInsights } from '@vercel/speed-insights/next'
@@ -37,6 +37,15 @@ export const metadata: Metadata = {
   },
 }
 
+// `viewport-fit=cover` is what makes `env(safe-area-inset-*)` resolve to real
+// values on iPhones (notch / Dynamic Island / home indicator). Without it those
+// insets read as 0 and the Remi panel padding has nothing to work with.
+export const viewport: Viewport = {
+  width: 'device-width',
+  initialScale: 1,
+  viewportFit: 'cover',
+}
+
 export default function RootLayout({
   children,
 }: Readonly<{
@@ -44,7 +53,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" className={`${lora.variable} ${inter.variable} bg-background`}>
-      <body className="font-serif antialiased">
+      <body className="overflow-x-hidden font-serif antialiased">
         <PostHogProvider>
           <RemiProvider>
             <SiteHeader />

@@ -4,6 +4,7 @@ import {
   createContext,
   useCallback,
   useContext,
+  useEffect,
   useMemo,
   useRef,
   useState,
@@ -180,6 +181,36 @@ function RemiPanel({
   // selection cleared by Radix's focus guard before execCommand can run.
   const copySourceRef = useRef<HTMLTextAreaElement>(null)
 
+  // The persistent iOS bug: a `position:fixed; top:0` element aligns to the
+  // *layout* viewport, which extends underneath the browser's address bar. When
+  // Remi's reply grows the content, iOS re-shows the address bar and it covers
+  // the top of the panel — hiding the Close button. CSS (svh/dvh) can't fully
+  // fix this because it only changes height, not the top offset. So we pin the
+  // panel to the *visual* viewport (the actually-visible area below the address
+  // bar) and track it live as the bars expand/collapse.
+  const contentRef = useRef<HTMLDivElement>(null)
+  useEffect(() => {
+    if (!open) return
+    const vv = typeof window !== 'undefined' ? window.visualViewport : null
+    if (!vv) return
+    const sync = () => {
+      const el = contentRef.current
+      if (!el) return
+      // `offsetTop` is how far the visible area starts from the layout-viewport
+      // top (i.e. the address bar's height when shown). Push the panel down by
+      // that much and size it to the visible height so the header is always in view.
+      el.style.top = `${vv.offsetTop}px`
+      el.style.height = `${vv.height}px`
+    }
+    sync()
+    vv.addEventListener('resize', sync)
+    vv.addEventListener('scroll', sync)
+    return () => {
+      vv.removeEventListener('resize', sync)
+      vv.removeEventListener('scroll', sync)
+    }
+  }, [open])
+
   // While the session is resolving, hold off rendering either surface so we
   // never flash the members-only popup at someone who is actually signed in.
   if (isPending) return null
@@ -276,18 +307,18 @@ function RemiPanel({
     <>
     <Sheet open={open} onOpenChange={handleSheetOpenChange}>
       <SheetContent
+        ref={contentRef}
         side="right"
         // Hide the faint default close (the bare `>button` child); we provide a
         // clearer, larger one in the header that's easy to tap on mobile.
-        // Anchor to the TOP only (`top-0 bottom-auto`) and size to the SMALL
-        // viewport height (`svh`) — the height when the mobile browser's address
-        // bar is fully shown. The base `inset-y-0` also sets `bottom:0`, which on
-        // iOS Safari lets the address bar push the fixed sheet upward as it
-        // expands, hiding the "Remi" title behind it. Anchoring to the top and
-        // sizing to `svh` keeps the header on-screen in every address-bar state.
-        className="top-0 bottom-auto flex w-full flex-col gap-0 p-0 !h-[100svh] !max-h-[100svh] sm:max-w-lg lg:max-w-xl [&>button:last-of-type]:hidden"
+        // Base positioning is top-anchored at the SMALL viewport height as a
+        // fallback; on devices with `window.visualViewport` the effect above
+        // overrides `top`/`height` inline to track the visible area live, which
+        // is what actually keeps the header (and Close button) clear of the iOS
+        // address bar when Remi's reply makes the bars reappear.
+        className="top-0 bottom-auto flex h-[100svh] max-h-[100svh] w-full flex-col gap-0 p-0 sm:max-w-lg lg:max-w-xl [&>button:last-of-type]:hidden"
       >
-        <SheetHeader className="flex-row items-center gap-3 border-b border-stone bg-card px-4 pb-4 pt-[max(1rem,env(safe-area-inset-top))] sm:px-5">
+        <SheetHeader className="flex-row items-center gap-3 border-b border-stone bg-card py-4 pl-4 pr-[max(1rem,env(safe-area-inset-right))] pt-[max(1rem,env(safe-area-inset-top))] sm:pl-5">
           <span className="flex size-9 shrink-0 items-center justify-center rounded-full bg-deep-teal">
             <Sparkles className="size-5 text-off-white" aria-hidden="true" />
             <span className="sr-only">Remi</span>
