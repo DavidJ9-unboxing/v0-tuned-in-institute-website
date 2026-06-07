@@ -120,18 +120,18 @@ export const programs = [
     name: 'Tuned In Tools for Teens',
     modules: 8,
     status: 'Available now',
-    age: 'Sensitive teenagers, ages 12 to 18',
+    age: 'Teens, ages 12 to 18',
     description:
-      'For sensitive teenagers navigating identity, relationships, school, and a world that moves too fast.',
-    tagline: 'You\u2019re not too sensitive. You\u2019re wired to feel deeply \u2014 and that\u2019s a strength once you understand it.',
+      'For any teen who wants to understand their emotions, their brain, and how to regulate in a world that moves too fast.',
+    tagline: 'Your emotions aren\u2019t the problem. They\u2019re information \u2014 and you can learn to work with them.',
     overview: [
-      'Being a teenager is hard. Being a sensitive teenager \u2014 feeling everything more loudly, getting overwhelmed faster, caring more about everything \u2014 can feel like a setting nobody else got stuck with.',
-      'This course is for you. In eight modules, you\u2019ll learn how your brain and nervous system actually work, why your emotions are information and not problems, and how to build a regulation toolkit that\u2019s yours. It\u2019s honest, practical, and designed to help you stop fighting how you\u2019re wired and start working with it.',
+      'Being a teenager is hard. The pressure, the friendships, the feelings that show up out of nowhere and take over \u2014 nobody really sits you down and explains what\u2019s actually happening or what to do about it.',
+      'This course does. In eight modules, you\u2019ll learn how your brain and nervous system actually work, why your emotions are information and not problems, and how to build a regulation toolkit that\u2019s yours. It\u2019s honest, practical, and designed to help you understand yourself and feel more in control.',
     ],
     forWho: [
-      'Sensitive teens ages 12 to 18 who feel things deeply',
-      'Anyone who gets overwhelmed, anxious, or shuts down easily',
-      'Teens tired of being told they\u2019re "too much" or "too sensitive"',
+      'Any teen ages 12 to 18 who wants to understand their emotions',
+      'Anyone who gets overwhelmed, anxious, stressed, or shuts down',
+      'Teens who want to feel more in control of their reactions',
       'Anyone who wants real tools, not lectures',
     ],
     outcomes: [
@@ -144,7 +144,7 @@ export const programs = [
     journey: [
       {
         title: 'Understand yourself',
-        body: 'Start by learning how you\u2019re wired \u2014 your nervous system, your states, and why big feelings make sense. Self-understanding replaces self-criticism.',
+        body: 'Start by learning how you work \u2014 your brain, your nervous system, your states, and why big feelings make sense. Self-understanding replaces self-criticism.',
       },
       {
         title: 'Build your tools',
@@ -160,7 +160,7 @@ export const programs = [
         title: "Understanding How You're Wired",
         points: [
           'Learn how your brain and nervous system work',
-          'Understand sensitivity, emotions, and regulation',
+          'Understand your emotions and how regulation works',
           'Replace self-judgment with self-understanding',
         ],
       },
