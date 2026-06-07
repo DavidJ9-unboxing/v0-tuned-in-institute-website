@@ -201,6 +201,23 @@ function RemiPanel({
       // that much and size it to the visible height so the header is always in view.
       el.style.top = `${vv.offsetTop}px`
       el.style.height = `${vv.height}px`
+      // Horizontal clip fix: when the page has any horizontal overflow, a fixed
+      // element's containing block becomes the (wider) *layout* viewport, so
+      // `right-0 w-full` pushes the right edge (Close button, send arrow) off
+      // the screen and leaves a margin on the left. On mobile (full-width panel)
+      // we pin left/width to the *visual* viewport box so the panel exactly
+      // covers what's actually visible. On >= sm we clear these so the CSS
+      // `right-0 sm:max-w-lg` continues to anchor the panel to the right.
+      const isMobile = window.matchMedia('(max-width: 639px)').matches
+      if (isMobile) {
+        el.style.left = `${vv.offsetLeft}px`
+        el.style.right = 'auto'
+        el.style.width = `${vv.width}px`
+      } else {
+        el.style.left = ''
+        el.style.right = ''
+        el.style.width = ''
+      }
     }
     sync()
     vv.addEventListener('resize', sync)
@@ -318,7 +335,7 @@ function RemiPanel({
         // address bar when Remi's reply makes the bars reappear.
         className="top-0 bottom-auto flex h-[100svh] max-h-[100svh] w-full flex-col gap-0 p-0 sm:max-w-lg lg:max-w-xl [&>button:last-of-type]:hidden"
       >
-        <SheetHeader className="flex-row items-center gap-3 border-b border-stone bg-card py-4 pl-4 pr-[max(1rem,env(safe-area-inset-right))] pt-[max(1rem,env(safe-area-inset-top))] sm:pl-5">
+        <SheetHeader className="flex-row items-center gap-3 border-b border-stone bg-card py-3 pl-4 pr-[max(0.75rem,env(safe-area-inset-right))] pt-[max(0.75rem,env(safe-area-inset-top))] sm:pl-5">
           <span className="flex size-9 shrink-0 items-center justify-center rounded-full bg-deep-teal">
             <Sparkles className="size-5 text-off-white" aria-hidden="true" />
             <span className="sr-only">Remi</span>
