@@ -449,7 +449,7 @@ function RemiPanel({
             readOnly
             tabIndex={-1}
             aria-hidden="true"
-            className="pointer-events-none absolute left-0 top-0 size-px overflow-hidden opacity-0"
+            className="pointer-events-none absolute -left-[9999px] top-0 size-px opacity-0"
           />
 
           <label className="flex cursor-pointer items-center gap-2.5 font-sans text-xs text-charcoal/65">
