@@ -475,8 +475,8 @@ export function RemiChat({
         </span>
         <ChevronDown
           className={cn(
-            'size-4 shrink-0 text-charcoal/55 transition-transform',
-            privacyOpen && 'rotate-180',
+            'size-5 shrink-0 transition-transform',
+            privacyOpen ? 'rotate-180 text-deep-teal' : 'text-charcoal/55',
           )}
           aria-hidden="true"
         />
@@ -485,7 +485,13 @@ export function RemiChat({
         <div
           className={cn(
             'flex flex-col gap-3 font-sans text-xs leading-relaxed text-charcoal/65',
-            isPanel ? 'px-5 pb-4 pl-[2.65rem]' : 'px-4 pb-4 pl-[2.4rem]',
+            // In the panel the expanded note can be taller than the space left
+            // below the conversation + input, so cap it and let it scroll on its
+            // own. The "Show less" toggle lives in the button above this block,
+            // so it always stays visible for an easy close.
+            isPanel
+              ? 'max-h-[42svh] overflow-y-auto overscroll-contain px-5 pb-4 pl-[2.65rem]'
+              : 'px-4 pb-4 pl-[2.4rem]',
           )}
         >
           <p>
@@ -789,7 +795,7 @@ export function RemiChat({
               <RemiAvatar />
               <div className="flex items-center gap-2 rounded-2xl rounded-tl-sm border border-stone bg-card px-4 py-3">
                 <Loader2 className="size-4 animate-spin text-teal-mid" aria-hidden="true" />
-                <span className="font-sans text-sm text-charcoal/55">Remi is thinking���</span>
+                <span className="font-sans text-sm text-charcoal/55">Remi is thinking�����</span>
               </div>
             </div>
           )}
