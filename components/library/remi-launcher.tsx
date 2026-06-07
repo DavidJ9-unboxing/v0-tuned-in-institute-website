@@ -279,9 +279,13 @@ function RemiPanel({
         side="right"
         // Hide the faint default close (the bare `>button` child); we provide a
         // clearer, larger one in the header that's easy to tap on mobile.
-        // Size to the dynamic viewport (`dvh`) so the mobile browser's URL bar
-        // can't overlap and clip the header at the top.
-        className="flex w-full flex-col gap-0 p-0 !h-[100dvh] !max-h-[100dvh] sm:max-w-lg lg:max-w-xl [&>button:last-of-type]:hidden"
+        // Anchor to the TOP only (`top-0 bottom-auto`) and size to the SMALL
+        // viewport height (`svh`) — the height when the mobile browser's address
+        // bar is fully shown. The base `inset-y-0` also sets `bottom:0`, which on
+        // iOS Safari lets the address bar push the fixed sheet upward as it
+        // expands, hiding the "Remi" title behind it. Anchoring to the top and
+        // sizing to `svh` keeps the header on-screen in every address-bar state.
+        className="top-0 bottom-auto flex w-full flex-col gap-0 p-0 !h-[100svh] !max-h-[100svh] sm:max-w-lg lg:max-w-xl [&>button:last-of-type]:hidden"
       >
         <SheetHeader className="flex-row items-center gap-3 border-b border-stone bg-card px-4 pb-4 pt-[max(1rem,env(safe-area-inset-top))] sm:px-5">
           <span className="flex size-9 shrink-0 items-center justify-center rounded-full bg-deep-teal">
