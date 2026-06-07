@@ -287,7 +287,7 @@ function RemiPanel({
         // sizing to `svh` keeps the header on-screen in every address-bar state.
         className="top-0 bottom-auto flex w-full flex-col gap-0 p-0 !h-[100svh] !max-h-[100svh] sm:max-w-lg lg:max-w-xl [&>button:last-of-type]:hidden"
       >
-        <SheetHeader className="flex-row items-center gap-3 border-b border-stone bg-card px-4 pb-4 pt-[max(1rem,env(safe-area-inset-top))] sm:px-5">
+        <SheetHeader className="flex-row items-center gap-3 border-b border-stone bg-card py-4 pl-4 pr-[max(1rem,env(safe-area-inset-right))] pt-[max(1rem,env(safe-area-inset-top))] sm:pl-5">
           <span className="flex size-9 shrink-0 items-center justify-center rounded-full bg-deep-teal">
             <Sparkles className="size-5 text-off-white" aria-hidden="true" />
             <span className="sr-only">Remi</span>

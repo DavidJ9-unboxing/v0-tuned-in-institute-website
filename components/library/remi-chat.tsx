@@ -789,7 +789,7 @@ export function RemiChat({
               <RemiAvatar />
               <div className="flex items-center gap-2 rounded-2xl rounded-tl-sm border border-stone bg-card px-4 py-3">
                 <Loader2 className="size-4 animate-spin text-teal-mid" aria-hidden="true" />
-                <span className="font-sans text-sm text-charcoal/55">Remi is thinking…</span>
+                <span className="font-sans text-sm text-charcoal/55">Remi is thinking��</span>
               </div>
             </div>
           )}
@@ -929,9 +929,9 @@ export function RemiChat({
               onClick={() => fileInputRef.current?.click()}
               disabled={busy || attachments.length >= MAX_FILES_PER_MESSAGE}
               aria-label="Attach a photo or PDF"
-              className="size-11 shrink-0 rounded-xl border-stone text-charcoal/70 hover:text-deep-teal"
+              className="size-9 shrink-0 rounded-xl border-stone text-charcoal/70 hover:text-deep-teal"
             >
-              <Paperclip className="size-5" aria-hidden="true" />
+              <Paperclip className="size-4" aria-hidden="true" />
             </Button>
             <textarea
               ref={inputRef}
@@ -958,13 +958,13 @@ export function RemiChat({
                 aria-label={isListening ? 'Stop voice input' : 'Start voice input'}
                 aria-pressed={isListening}
                 className={cn(
-                  'size-11 shrink-0 rounded-xl border-stone',
+                  'size-9 shrink-0 rounded-xl border-stone',
                   isListening
                     ? 'animate-pulse border-deep-teal bg-deep-teal text-off-white hover:bg-deep-teal hover:text-off-white'
                     : 'text-charcoal/70 hover:text-deep-teal',
                 )}
               >
-                <Mic className="size-5" aria-hidden="true" />
+                <Mic className="size-4" aria-hidden="true" />
               </Button>
             )}
             <Button
@@ -972,12 +972,12 @@ export function RemiChat({
               size="icon"
               disabled={busy || (!input.trim() && attachments.length === 0)}
               aria-label="Send message"
-              className="size-11 shrink-0 rounded-xl"
+              className="size-9 shrink-0 rounded-xl"
             >
               {busy ? (
-                <Loader2 className="size-5 animate-spin" aria-hidden="true" />
+                <Loader2 className="size-4 animate-spin" aria-hidden="true" />
               ) : (
-                <ArrowUp className="size-5" aria-hidden="true" />
+                <ArrowUp className="size-4" aria-hidden="true" />
               )}
             </Button>
           </div>
