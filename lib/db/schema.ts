@@ -99,6 +99,10 @@ export const lesson = pgTable('lesson', {
   // Hidden lessons never appear in the library, but are still fed to Remi as
   // background knowledge for answering questions.
   hidden: boolean('hidden').notNull().default(false),
+  // Sub-items share the previous main item's number with a letter suffix in the
+  // viewer (e.g. a "1b" extended version listed under item "1"). Purely cosmetic
+  // numbering — they're still ordinary lessons.
+  isSubItem: boolean('isSubItem').notNull().default(false),
   position: integer('position').notNull().default(0),
   createdAt: timestamp('createdAt').notNull().defaultNow(),
   updatedAt: timestamp('updatedAt').notNull().defaultNow(),
