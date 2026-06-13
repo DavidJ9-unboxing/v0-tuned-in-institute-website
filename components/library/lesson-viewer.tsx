@@ -53,6 +53,27 @@ export function LessonViewer({
   const active = lessons.find((l) => l.id === activeId) ?? null
   const viewerRef = useRef<HTMLDivElement>(null)
 
+  // Display numbers. Most lessons get a plain incrementing number (1, 2, 3…).
+  // A lesson flagged `isSubItem` instead shares the previous main item's number
+  // with a letter suffix (the main item is implicitly "a", so the first sub is
+  // "b") — e.g. an extended guide listed as "1b" beneath item "1".
+  const lessonLabels = (() => {
+    const labels: string[] = []
+    let mainNum = 0
+    let subLetter = 0
+    for (const l of lessons) {
+      if (l.isSubItem && mainNum > 0) {
+        subLetter += 1
+        labels.push(`${mainNum}${String.fromCharCode(97 + subLetter)}`)
+      } else {
+        mainNum += 1
+        subLetter = 0
+        labels.push(`${mainNum}`)
+      }
+    }
+    return labels
+  })()
+
   // The viewer sits above the lesson list (and on mobile the list is stacked
   // below it), so selecting a lesson would otherwise update content that's off
   // the top of the screen. Bring the viewer back into view on every selection.
@@ -363,6 +384,7 @@ export function LessonViewer({
         <ol className="flex flex-col gap-1.5">
           {lessons.map((l, i) => {
             const isActive = l.id === activeId
+            const label = lessonLabels[i]
             return (
               <li key={l.id}>
                 <button
@@ -389,7 +411,7 @@ export function LessonViewer({
                   </span>
                   <span className="flex flex-col">
                     <span className="font-serif text-[15px] font-semibold leading-snug text-charcoal">
-                      {i + 1}. {l.title}
+                      {label}. {l.title}
                     </span>
                     <span className="font-sans text-[11px] uppercase tracking-wide text-charcoal/45">
                       {l.kind === 'article'
