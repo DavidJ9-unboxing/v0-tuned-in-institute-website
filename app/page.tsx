@@ -362,7 +362,7 @@ export default async function HomePage() {
         <div className="mx-auto max-w-3xl px-5 py-14 sm:px-8">
           <SectionLabel>In-person care</SectionLabel>
           <h2 className="mt-5 font-serif text-3xl font-semibold leading-tight text-deep-teal text-balance sm:text-4xl">
-            Therapy in Dallas, Atlanta and Colorado.
+            Therapy in Dallas, Atlanta, Colorado, and New Jersey.
           </h2>
           <p className="mt-6 font-serif text-lg leading-relaxed text-charcoal/85">
             The Tuned In Institute partners with Rooted Rhythm Therapy, a network of clinicians

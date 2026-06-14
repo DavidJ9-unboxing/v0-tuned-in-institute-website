@@ -357,7 +357,7 @@ export const clinicalFoundations = [
 export const whatWeAre = [
   'A research and education organization grounded in attachment science, polyvagal theory, and Sophie Schauermann\u2019s clinical philosophy of sensitivity.',
   'A publisher of long-form books, course curricula, downloadable resources, and an AI concierge trained on the full body of work.',
-  'A sibling to Rooted Rhythm Therapy, which provides clinical care in Dallas, Atlanta, and Colorado, and virtual coaching worldwide.',
+  'A sibling to Rooted Rhythm Therapy, which provides clinical care in Dallas, Atlanta, Colorado, and New Jersey, and virtual coaching worldwide.',
   'A future home for primary research on sensitivity and nervous-system regulation across the lifespan.',
 ]
 
