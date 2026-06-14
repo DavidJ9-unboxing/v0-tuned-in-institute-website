@@ -18,7 +18,7 @@ export async function generateMetadata({
   const { slug } = await params
   const program = programs.find((p) => p.slug === slug)
   if (!program) return { title: 'Program' }
-  return { title: program.name, description: program.tagline ?? program.description }
+  return { title: program.name, description: program.description }
 }
 
 const includes = [
