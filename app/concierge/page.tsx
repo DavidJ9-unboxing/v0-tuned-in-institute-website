@@ -1,6 +1,6 @@
 import type { Metadata } from 'next'
 import { Clock, BrainCircuit, Baby, ShieldCheck } from 'lucide-react'
-import { AccessCta, SignInCta } from '@/components/site/access-cta'
+import { AccessCta } from '@/components/site/access-cta'
 import { PageHero } from '@/components/site/page-hero'
 import { SectionLabel } from '@/components/site/section-label'
 import { ConciergeExchange, conciergeExamples } from '@/components/site/concierge-exchange'
@@ -152,14 +152,11 @@ export default function ConciergePage() {
           </h2>
           <p className="mx-auto mt-5 max-w-xl font-serif text-lg leading-relaxed text-off-white/85">
             Members get Remi included with library access, at no extra cost. Sign in to start
-            chatting, or request access to join.
+            chatting.
           </p>
-          <div className="mt-8 flex flex-col justify-center gap-3 sm:flex-row">
+          <div className="mt-8 flex justify-center">
             <AccessCta
               className="bg-off-white font-sans font-semibold text-deep-teal hover:bg-off-white/90"
-            />
-            <SignInCta
-              className="border-off-white/40 bg-transparent font-sans font-semibold text-off-white hover:bg-off-white hover:text-deep-teal"
             />
           </div>
         </div>

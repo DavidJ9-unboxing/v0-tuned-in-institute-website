@@ -232,7 +232,7 @@ function RemiPanel({
   // never flash the members-only popup at someone who is actually signed in.
   if (isPending) return null
 
-  // Non-members get a focused, centered popup asking them to sign in / request access.
+  // Non-members get a focused, centered popup asking them to sign in.
   if (!user) {
     return <RemiGate open={open} onOpenChange={onOpenChange} />
   }
@@ -535,7 +535,7 @@ function RemiGate({
             </DialogTitle>
             <DialogDescription className="text-center font-serif text-[15px] leading-relaxed text-charcoal/75">
               Remi is our members-only AI concierge, drawing only on Tuned In Institute and Rooted
-              Rhythm resources. Sign in or request access to start a conversation.
+              Rhythm resources. Sign in to start a conversation.
             </DialogDescription>
           </DialogHeader>
           <p className="font-sans text-xs leading-relaxed text-charcoal/55">
@@ -544,14 +544,6 @@ function RemiGate({
           </p>
           <div className="flex w-full flex-col gap-2.5">
             <Button asChild size="lg" className="font-sans font-semibold">
-              <Link href="/request-access">Request Access</Link>
-            </Button>
-            <Button
-              asChild
-              size="lg"
-              variant="outline"
-              className="border-deep-teal/30 bg-transparent font-sans font-semibold text-deep-teal hover:bg-deep-teal hover:text-off-white"
-            >
               <Link href="/sign-in">Sign In</Link>
             </Button>
           </div>

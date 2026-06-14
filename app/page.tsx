@@ -37,7 +37,7 @@ const membershipFeatures = [
   'All 4 program tracks',
   'Video, audio and transcripts',
   'Full resource library',
-  '24/7 AI Concierge (coming soon)',
+  'Remi, your AI concierge',
 ]
 
 const stats = [
@@ -258,11 +258,12 @@ export default async function HomePage() {
         <div className="mx-auto max-w-5xl px-5 py-14 text-center sm:px-8 md:py-16">
           <p className="section-label section-label-center !text-sage-light">One membership</p>
           <h2 className="mx-auto mt-6 max-w-2xl font-serif text-3xl font-semibold leading-tight text-balance sm:text-4xl">
-            Rooted Rhythm clients unlock the full Tuned In library.
+            Rooted Rhythm and Madrega clients unlock the full Tuned In library.
           </h2>
           <p className="mx-auto mt-6 max-w-2xl font-serif text-lg leading-relaxed text-off-white/85">
             All courses, all resources, all new content, past and future, in one place. Created by
-            the licensed therapists at Rooted Rhythm and available to their clients.
+            the licensed therapists at Rooted Rhythm and available to Rooted Rhythm and Madrega
+            clients, who are granted access by their care team.
           </p>
           <ul className="mx-auto mt-10 flex max-w-3xl flex-wrap items-center justify-center gap-x-8 gap-y-3">
             {membershipFeatures.map((f) => (

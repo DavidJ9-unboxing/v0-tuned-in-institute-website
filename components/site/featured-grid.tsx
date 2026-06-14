@@ -13,7 +13,7 @@ const kindLabel: Record<string, string> = {
 /**
  * Renders the admin-curated featured content as a card grid. Shared by the
  * home page and the resources page. Members deep-link straight into the exact
- * lesson; guests are routed to request access since the library is gated.
+ * lesson; guests are routed to sign in since the library is gated.
  */
 export function FeaturedGrid({
   items,
@@ -25,7 +25,7 @@ export function FeaturedGrid({
   return (
     <div className="grid gap-6 md:grid-cols-2">
       {items.map((f) => {
-        const href = isMember ? `/library/${f.sectionSlug}?lesson=${f.id}` : '/request-access'
+        const href = isMember ? `/library/${f.sectionSlug}?lesson=${f.id}` : '/sign-in'
         return (
           <Link
             key={f.id}
@@ -44,7 +44,7 @@ export function FeaturedGrid({
               </p>
             )}
             <span className="mt-5 inline-flex items-center gap-1 font-sans text-sm font-semibold text-deep-teal">
-              {isMember ? 'Open' : 'Members only — request access'}
+              {isMember ? 'Open' : 'Members only — sign in'}
               <ArrowRight
                 className="size-4 transition-transform group-hover:translate-x-0.5"
                 aria-hidden="true"
