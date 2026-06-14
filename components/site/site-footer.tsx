@@ -51,8 +51,8 @@ export function SiteFooter() {
             Sister Organization
           </h2>
           <p className="mt-5 max-w-xs font-serif text-sm leading-relaxed text-off-white/85">
-            Rooted Rhythm Therapy provides clinical care in Dallas, Atlanta, and Colorado, and
-            virtual coaching worldwide.
+            Rooted Rhythm Therapy provides clinical care in Dallas, Atlanta, Colorado, and New
+            Jersey, and virtual coaching worldwide.
           </p>
           <a
             href="https://www.rootedrhythm.com"
