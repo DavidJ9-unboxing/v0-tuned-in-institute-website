@@ -5,7 +5,7 @@ import { ArrowRight, BookOpen, GraduationCap, MessageCircle, Sparkles } from 'lu
 import { Button } from '@/components/ui/button'
 import { useSession } from '@/lib/auth-client'
 import { useRemi } from '@/components/library/remi-launcher'
-import { AccessCta, SignInCta } from '@/components/site/access-cta'
+import { AccessCta } from '@/components/site/access-cta'
 
 const accessPoints = [
   {
@@ -57,17 +57,11 @@ export function Hero() {
 
             <div className="mt-6 flex flex-col items-center gap-2">
               <div className="flex flex-col items-center justify-center gap-3 sm:flex-row">
-                <SignInCta
-                  label="Sign In to the Library"
+                <AccessCta
+                  requestLabel="Sign In to the Library"
+                  libraryLabel="Go to the Library"
                   variant="default"
                   className="h-12 w-full px-8 text-base font-semibold bg-sage font-sans text-deep-teal shadow-sm transition-shadow hover:bg-sage/90 hover:shadow-md sm:w-auto"
-                />
-                <AccessCta
-                  libraryLabel="Go to the Library"
-                  variant="outline"
-                  className="h-12 w-full border-2 border-off-white/50 bg-transparent px-8 text-base font-semibold text-off-white font-sans transition-colors hover:bg-off-white hover:text-deep-teal sm:w-auto"
-                  libraryVariant="default"
-                  libraryClassName="h-12 w-full px-8 text-base font-semibold bg-sage font-sans text-deep-teal shadow-sm transition-shadow hover:bg-sage/90 hover:shadow-md sm:w-52"
                 />
                 {user && (
                   <Button

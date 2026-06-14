@@ -10,14 +10,18 @@ type ButtonSize = VariantProps<typeof buttonVariants>['size']
 
 /**
  * Primary access call-to-action.
- * - Signed out: "Request Access" -> /request-access
- * - Signed in:  "Go to Library"  -> /library
+ * - Signed out: "Sign In"       -> /sign-in
+ * - Signed in:  "Go to Library" -> /library
+ *
+ * Access to the library is granted directly to Rooted Rhythm and Madrega
+ * clients by their care team, so guests are pointed to sign in rather than to a
+ * public request-access form.
  */
 export function AccessCta({
   className,
   variant,
   size = 'lg',
-  requestLabel = 'Request Access',
+  requestLabel = 'Sign In',
   libraryLabel = 'Go to Library',
   libraryClassName,
   libraryVariant,
@@ -41,7 +45,7 @@ export function AccessCta({
       variant={loggedIn && libraryVariant !== undefined ? libraryVariant : variant}
       className={loggedIn && libraryClassName !== undefined ? libraryClassName : className}
     >
-      <Link href={loggedIn ? '/library' : '/request-access'}>
+      <Link href={loggedIn ? '/library' : '/sign-in'}>
         {loggedIn ? libraryLabel : requestLabel}
       </Link>
     </Button>
@@ -108,7 +112,7 @@ export function MembershipCta({ comingSoon }: { comingSoon?: boolean }) {
 
 /**
  * Footer site-map links.
- * - Signed out: "Request Access" + "Sign In"
+ * - Signed out: a single "Sign In" link
  * - Signed in:  a single "Go to Library" link
  */
 export function FooterAccessLinks() {
@@ -117,28 +121,11 @@ export function FooterAccessLinks() {
   const linkClass =
     'font-serif text-sm text-off-white/85 transition-colors hover:text-sage-light'
 
-  if (loggedIn) {
-    return (
-      <li>
-        <Link href="/library" className={linkClass}>
-          Go to Library
-        </Link>
-      </li>
-    )
-  }
-
   return (
-    <>
-      <li>
-        <Link href="/request-access" className={linkClass}>
-          Request Access
-        </Link>
-      </li>
-      <li>
-        <Link href="/sign-in" className={linkClass}>
-          Sign In
-        </Link>
-      </li>
-    </>
+    <li>
+      <Link href={loggedIn ? '/library' : '/sign-in'} className={linkClass}>
+        {loggedIn ? 'Go to Library' : 'Sign In'}
+      </Link>
+    </li>
   )
 }

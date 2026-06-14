@@ -1,5 +1,4 @@
 import type { Metadata } from 'next'
-import Link from 'next/link'
 import Image from 'next/image'
 import { redirect } from 'next/navigation'
 import { headers } from 'next/headers'
@@ -41,11 +40,8 @@ export default async function SignInPage() {
         <div className="mt-6 flex w-full items-start gap-3 rounded-xl border border-deep-teal/20 bg-sage-light px-5 py-4">
           <Lock className="mt-0.5 size-5 shrink-0 text-deep-teal" aria-hidden="true" />
           <p className="font-serif text-[14px] leading-relaxed text-charcoal/85">
-            Accounts are reserved for Rooted Rhythm clients. Not a client yet?{' '}
-            <Link href="/request-access" className="font-semibold text-deep-teal underline">
-              Request access
-            </Link>
-            .
+            Accounts are reserved for Rooted Rhythm and Madrega clients, who are granted access by
+            their care team. Questions? Email admin@tunedininstitute.org.
           </p>
         </div>
 

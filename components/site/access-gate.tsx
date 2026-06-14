@@ -1,10 +1,10 @@
 import { Lock } from 'lucide-react'
 import { cn } from '@/lib/utils'
-import { AccessCta, SignInCta } from '@/components/site/access-cta'
+import { AccessCta } from '@/components/site/access-cta'
 
 export function AccessGate({
   title = 'Members-only content',
-  description = 'This content is available only to Rooted Rhythm clients. Contact Rooted Rhythm to request access, or sign in if you already have an account.',
+  description = 'This content is available only to Rooted Rhythm and Madrega clients, who are granted access by their care team. Sign in if you already have an account.',
   className,
 }: {
   title?: string
@@ -25,9 +25,8 @@ export function AccessGate({
       <p className="max-w-md font-serif text-[16px] leading-relaxed text-charcoal/80">
         {description}
       </p>
-      <div className="flex flex-col gap-3 sm:flex-row">
+      <div className="flex justify-center">
         <AccessCta className="font-sans font-semibold" />
-        <SignInCta className="border-deep-teal/30 bg-transparent font-sans font-semibold text-deep-teal hover:bg-deep-teal hover:text-off-white" />
       </div>
     </div>
   )

@@ -115,23 +115,13 @@ export function SiteHeader() {
               />
             </>
           ) : (
-            <>
-              <Button
-                asChild
-                variant="ghost"
-                className="hidden font-sans font-semibold text-deep-teal hover:bg-sage-light sm:inline-flex"
-                size="lg"
-              >
-                <Link href="/sign-in">Sign In</Link>
-              </Button>
-              <Button
-                asChild
-                className="hidden font-sans font-semibold sm:inline-flex"
-                size="lg"
-              >
-                <Link href="/request-access">Request Access</Link>
-              </Button>
-            </>
+            <Button
+              asChild
+              className="hidden font-sans font-semibold sm:inline-flex"
+              size="lg"
+            >
+              <Link href="/sign-in">Sign In</Link>
+            </Button>
           )}
           <button
             type="button"
@@ -185,23 +175,11 @@ export function SiteHeader() {
                 </Link>
               </Button>
             ) : (
-              <>
-                <Button asChild className="mt-4 font-sans font-semibold" size="lg">
-                  <Link href="/request-access" onClick={() => setOpen(false)}>
-                    Request Access
-                  </Link>
-                </Button>
-                <Button
-                  asChild
-                  variant="outline"
-                  className="mt-2 border-deep-teal/30 bg-transparent font-sans font-semibold text-deep-teal"
-                  size="lg"
-                >
-                  <Link href="/sign-in" onClick={() => setOpen(false)}>
-                    Sign In
-                  </Link>
-                </Button>
-              </>
+              <Button asChild className="mt-4 font-sans font-semibold" size="lg">
+                <Link href="/sign-in" onClick={() => setOpen(false)}>
+                  Sign In
+                </Link>
+              </Button>
             )}
           </nav>
         </div>

@@ -9,7 +9,7 @@ import {
   ListChecks,
   ArrowRight,
 } from 'lucide-react'
-import { AccessCta, SignInCta } from '@/components/site/access-cta'
+import { AccessCta } from '@/components/site/access-cta'
 import { PageHero } from '@/components/site/page-hero'
 import { SectionLabel } from '@/components/site/section-label'
 import { SearchBar } from '@/components/site/search-bar'
@@ -35,8 +35,8 @@ const resourceTypes = [
 export default async function ResourcesPage() {
   const user = await getCurrentUser()
   const featured = await getFeaturedLessons(4)
-  // Members go straight into the library; guests are routed to request access.
-  const browseHref = user ? '/library' : '/request-access'
+  // Members go straight into the library; guests are routed to sign in.
+  const browseHref = user ? '/library' : '/sign-in'
   return (
     <>
       <PageHero
@@ -79,7 +79,7 @@ export default async function ResourcesPage() {
                   {r.body}
                 </p>
                 <span className="mt-5 inline-flex items-center gap-1 font-sans text-sm font-semibold text-deep-teal">
-                  {user ? 'Browse in library' : 'Request access'}
+                  {user ? 'Browse in library' : 'Sign in'}
                   <ArrowRight
                     className="size-4 transition-transform group-hover:translate-x-0.5"
                     aria-hidden="true"
@@ -116,12 +116,9 @@ export default async function ResourcesPage() {
             Access opens every article, worksheet, and video, plus all four program tracks, for
             Rooted Rhythm clients.
           </p>
-          <div className="mt-8 flex flex-col justify-center gap-3 sm:flex-row">
+          <div className="mt-8 flex justify-center">
             <AccessCta
               className="bg-off-white font-sans font-semibold text-deep-teal hover:bg-off-white/90"
-            />
-            <SignInCta
-              className="border-off-white/40 bg-transparent font-sans font-semibold text-off-white hover:bg-off-white hover:text-deep-teal"
             />
           </div>
         </div>
