@@ -26,6 +26,7 @@ import { useSpeechSynthesis } from '@/hooks/use-speech-synthesis'
 import { useRemiStore } from '@/components/library/remi-store'
 import { MessageActions } from '@/components/library/message-actions'
 import { RemiResourceReader } from '@/components/library/remi-resource-reader'
+import { RemiMarkdown } from '@/components/library/remi-markdown'
 
 const CRISIS_RESOURCE_URL =
   'https://988lifeline.org/learn/our-crisis-centers/crisis-centers-by-state-and-u-s-territory/'
@@ -716,16 +717,20 @@ export function RemiChat({
                   >
                     {message.parts.map((part, i) => {
                       if (part.type === 'text') {
-                        return (
-                          <p
-                            key={i}
-                            className={`whitespace-pre-wrap break-words font-serif text-[15px] leading-relaxed ${
-                              isUser ? 'text-off-white' : 'text-charcoal/85'
-                            }`}
-                          >
-                            {part.text}
-                          </p>
-                        )
+                        // Remi's replies are rendered as markdown so **bold**, lists, and links
+                        // display properly. The member's own messages stay plain pre-wrapped text
+                        // so nothing they typed is reinterpreted as formatting.
+                        if (isUser) {
+                          return (
+                            <p
+                              key={i}
+                              className="whitespace-pre-wrap break-words font-serif text-[15px] leading-relaxed text-off-white"
+                            >
+                              {part.text}
+                            </p>
+                          )
+                        }
+                        return <RemiMarkdown key={i}>{part.text}</RemiMarkdown>
                       }
                       // Files the member attached: show images inline, other files (PDFs)
                       // as a labelled chip. Nothing is stored — this is just a render of
