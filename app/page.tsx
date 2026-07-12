@@ -9,6 +9,7 @@ import { ProgramCard } from '@/components/site/program-card'
 import { AskRemiButton } from '@/components/library/remi-launcher'
 import { FeaturedGrid } from '@/components/site/featured-grid'
 import { Hero } from '@/components/home/hero'
+import { BookCover3D } from '@/components/home/book-cover-3d'
 import { ScrollToTopOnLoad } from '@/components/home/scroll-to-top-on-load'
 import { programs, clinicalFoundations, whatWeAre, whatWeAreNot } from '@/lib/site'
 import { getFeaturedLessons } from '@/lib/content'
@@ -205,49 +206,102 @@ export default async function HomePage() {
         </section>
       )}
 
-      {/* The book */}
+      {/* The book series */}
       <section className="border-y border-stone bg-paper">
-        <div className="mx-auto grid max-w-6xl items-center gap-12 px-5 py-14 sm:px-8 md:grid-cols-2">
-          <div className="order-2 md:order-1">
-            <Image
-              src="/images/tuned-in-book.webp"
-              alt="Tuned In: A Guide for Parents of Sensitive Children by Sophie Schauermann, LCSW"
-              width={800}
-              height={1000}
-              className="mx-auto h-auto w-full max-w-sm object-contain drop-shadow-[0_24px_40px_rgba(27,80,90,0.25)]"
-            />
-          </div>
-          <div className="order-1 md:order-2">
-            <SectionLabel>Now available</SectionLabel>
-            <h2 className="mt-5 font-serif text-3xl font-semibold leading-tight text-deep-teal text-balance sm:text-4xl">
-              The book that started everything.
+        <div className="mx-auto max-w-6xl px-5 py-14 sm:px-8 md:py-16">
+          <div className="text-center">
+            <SectionLabel center>The book series</SectionLabel>
+            <h2 className="mx-auto mt-5 max-w-2xl font-serif text-3xl font-semibold leading-tight text-deep-teal text-balance sm:text-4xl">
+              Tuned In, from the page to your nervous system.
             </h2>
-            <p className="mt-6 font-serif text-lg leading-relaxed text-charcoal/85">
-              <em>Tuned In: A Guide for Parents of Sensitive Children</em> by Sophie Schauermann,
-              MSW, LCSW. The research-backed foundation behind every program at the Institute.
-              Available now in paperback and on Kindle.
+            <p className="mx-auto mt-4 max-w-2xl font-serif text-lg leading-relaxed text-charcoal/85">
+              Two companion guides by Sophie Schauermann, LCSW — the research-backed foundation
+              behind every program at the Institute.
             </p>
-            <div className="mt-8 flex flex-col gap-3 sm:flex-row">
-              <Button
-                asChild
-                size="lg"
-                variant="outline"
-                className="border-deep-teal font-sans font-semibold text-deep-teal hover:bg-deep-teal hover:text-off-white"
-              >
-                <a href="https://www.amazon.com/dp/B0FFZ8N7N6" target="_blank" rel="noopener noreferrer">
-                  Buy Paperback on Amazon
-                </a>
-              </Button>
-              <Button
-                asChild
-                size="lg"
-                variant="outline"
-                className="border-deep-teal font-sans font-semibold text-deep-teal hover:bg-deep-teal hover:text-off-white"
-              >
-                <a href="https://www.amazon.com/dp/B0FFNGD6VH" target="_blank" rel="noopener noreferrer">
-                  Buy on Kindle
-                </a>
-              </Button>
+          </div>
+
+          <div className="mt-14 grid gap-12 md:grid-cols-2 md:gap-10">
+            {/* Book One — Parenting */}
+            <div className="flex flex-col items-center text-center">
+              <div className="w-full max-w-[240px]">
+                <BookCover3D
+                  src="/images/tuned-in-book-cover.png"
+                  alt="Tuned In: A Guide for Parents of Sensitive Children by Sophie Schauermann, LCSW"
+                />
+              </div>
+              <p className="mt-10 font-sans text-xs font-semibold uppercase tracking-[0.18em] text-sage-dark">
+                Book One
+              </p>
+              <h3 className="mt-3 font-serif text-2xl font-semibold leading-tight text-deep-teal text-balance">
+                A Guide for Parents of Sensitive Children
+              </h3>
+              <p className="mt-4 max-w-md font-serif text-[15px] leading-relaxed text-charcoal/85">
+                The book that started everything — how to understand, support, and raise a sensitive
+                child. Available now in paperback and on Kindle.
+              </p>
+              <div className="mt-7 flex flex-col gap-3 sm:flex-row">
+                <Button
+                  asChild
+                  size="lg"
+                  variant="outline"
+                  className="border-deep-teal font-sans font-semibold text-deep-teal hover:bg-deep-teal hover:text-off-white"
+                >
+                  <a
+                    href="https://www.amazon.com/dp/B0FFZ8N7N6"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                  >
+                    Buy Paperback
+                  </a>
+                </Button>
+                <Button
+                  asChild
+                  size="lg"
+                  variant="outline"
+                  className="border-deep-teal font-sans font-semibold text-deep-teal hover:bg-deep-teal hover:text-off-white"
+                >
+                  <a
+                    href="https://www.amazon.com/dp/B0FFNGD6VH"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                  >
+                    Buy on Kindle
+                  </a>
+                </Button>
+              </div>
+            </div>
+
+            {/* Book Two — Adults */}
+            <div className="flex flex-col items-center text-center">
+              <div className="w-full max-w-[240px]">
+                <BookCover3D
+                  src="/images/tuned-in-adults-book-cover.png"
+                  alt="Tuned In: A Guide to Reconnecting with Yourself by Sophie Schauermann, LCSW"
+                />
+              </div>
+              <p className="mt-10 font-sans text-xs font-semibold uppercase tracking-[0.18em] text-sage-dark">
+                Book Two
+              </p>
+              <h3 className="mt-3 font-serif text-2xl font-semibold leading-tight text-deep-teal text-balance">
+                A Guide to Reconnecting with Yourself
+              </h3>
+              <p className="mt-4 max-w-md font-serif text-[15px] leading-relaxed text-charcoal/85">
+                Regulation tools to help you understand your nervous system and find your way back to
+                steady. Read the complete book free with your library access.
+              </p>
+              <div className="mt-7 flex flex-col gap-3 sm:flex-row">
+                <Button asChild size="lg" className="font-sans font-semibold">
+                  <Link
+                    href={
+                      user
+                        ? '/library/tuned-in-regulation-tools-for-adults?lesson=220'
+                        : '/sign-in'
+                    }
+                  >
+                    {user ? 'Read in the library' : 'Sign in to read'}
+                  </Link>
+                </Button>
+              </div>
             </div>
           </div>
         </div>
