@@ -52,7 +52,6 @@ const HIDE_FAB_PREFIXES = [
   '/forgot-password',
   '/reset-password',
   '/setup',
-  '/rooted-rhythm',
 ]
 
 export function RemiProvider({ children }: { children: ReactNode }) {

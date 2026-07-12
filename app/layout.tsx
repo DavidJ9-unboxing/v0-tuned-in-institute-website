@@ -1,10 +1,9 @@
 import type { Metadata, Viewport } from 'next'
-import { Lora, Inter, Fraunces } from 'next/font/google'
+import { Lora, Inter } from 'next/font/google'
 import { Analytics } from '@vercel/analytics/next'
 import { SpeedInsights } from '@vercel/speed-insights/next'
 import { SiteHeader } from '@/components/site/site-header'
 import { SiteFooter } from '@/components/site/site-footer'
-import { SiteChrome } from '@/components/site/site-chrome'
 import { RemiProvider } from '@/components/library/remi-launcher'
 import { PostHogProvider } from '@/components/analytics/posthog-provider'
 import './globals.css'
@@ -21,15 +20,6 @@ const inter = Inter({
   subsets: ['latin'],
   weight: ['400', '500', '600'],
   variable: '--font-inter',
-  display: 'swap',
-})
-
-// Display serif for the standalone Rooted Rhythm home page (matches its brand).
-const fraunces = Fraunces({
-  subsets: ['latin'],
-  weight: ['400', '500', '600', '700'],
-  style: ['normal', 'italic'],
-  variable: '--font-fraunces',
   display: 'swap',
 })
 
@@ -62,16 +52,13 @@ export default function RootLayout({
   children: React.ReactNode
 }>) {
   return (
-    <html
-      lang="en"
-      className={`${lora.variable} ${inter.variable} ${fraunces.variable} bg-background`}
-    >
+    <html lang="en" className={`${lora.variable} ${inter.variable} bg-background`}>
       <body className="overflow-x-hidden font-serif antialiased">
         <PostHogProvider>
           <RemiProvider>
-            <SiteChrome header={<SiteHeader />} footer={<SiteFooter />}>
-              <main id="main">{children}</main>
-            </SiteChrome>
+            <SiteHeader />
+            <main id="main">{children}</main>
+            <SiteFooter />
           </RemiProvider>
         </PostHogProvider>
         {process.env.NODE_ENV === 'production' && <Analytics />}

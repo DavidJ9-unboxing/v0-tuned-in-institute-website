@@ -18,18 +18,6 @@
   --stone: #d8d2c5;
   --amber: #c4894a;
 
-  /* Rooted Rhythm palette (isolated to the /rooted-rhythm home page) */
-  --rr-cream: #fbf8f1;
-  --rr-linen: #f3eae0;
-  --rr-navy: #33415a;
-  --rr-navy-deep: #2a3446;
-  --rr-teal: #1b505a;
-  --rr-terracotta: #c46b37;
-  --rr-terracotta-deep: #a9542a;
-  --rr-gold: #a2854f;
-  --rr-ink: #57534c;
-  --rr-line: #e6ddce;
-
   /* Semantic tokens */
   --background: var(--off-white);
   --foreground: var(--charcoal);
@@ -69,19 +57,6 @@
 @theme inline {
   --font-sans: var(--font-inter), -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif;
   --font-serif: var(--font-lora), 'Source Serif Pro', Georgia, 'Times New Roman', serif;
-  --font-display: var(--font-fraunces), 'Fraunces', Georgia, 'Times New Roman', serif;
-
-  /* Rooted Rhythm color utilities (bg-rr-cream, text-rr-navy, etc.) */
-  --color-rr-cream: var(--rr-cream);
-  --color-rr-linen: var(--rr-linen);
-  --color-rr-navy: var(--rr-navy);
-  --color-rr-navy-deep: var(--rr-navy-deep);
-  --color-rr-teal: var(--rr-teal);
-  --color-rr-terracotta: var(--rr-terracotta);
-  --color-rr-terracotta-deep: var(--rr-terracotta-deep);
-  --color-rr-gold: var(--rr-gold);
-  --color-rr-ink: var(--rr-ink);
-  --color-rr-line: var(--rr-line);
 
   --color-background: var(--background);
   --color-foreground: var(--foreground);
