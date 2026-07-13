@@ -291,13 +291,17 @@ export default async function HomePage() {
                 your library access.
               </p>
               <div className="mt-7 flex flex-col items-center gap-3">
-                {user && (
-                  <Button asChild size="lg" className="font-sans font-semibold">
-                    <Link href="/library/tuned-in-regulation-tools-for-adults?lesson=220">
-                      Read in the library
-                    </Link>
-                  </Button>
-                )}
+                <Button asChild size="lg" className="font-sans font-semibold">
+                  <Link
+                    href={
+                      user
+                        ? '/library/tuned-in-regulation-tools-for-adults?lesson=220'
+                        : '/sign-in'
+                    }
+                  >
+                    {user ? 'Read in the library' : 'Sign in to read'}
+                  </Link>
+                </Button>
                 <div className="flex flex-col gap-3 sm:flex-row">
                   <Button
                     asChild
