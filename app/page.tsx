@@ -287,9 +287,10 @@ export default async function HomePage() {
               </h3>
               <p className="mt-4 max-w-md font-serif text-[15px] leading-relaxed text-charcoal/85">
                 Regulation tools to help you understand your nervous system and find your way back to
-                steady. Read the complete book free with your library access.
+                steady. Now available in paperback and on Kindle, or read the complete book free with
+                your library access.
               </p>
-              <div className="mt-7 flex flex-col gap-3 sm:flex-row">
+              <div className="mt-7 flex flex-col items-center gap-3">
                 <Button asChild size="lg" className="font-sans font-semibold">
                   <Link
                     href={
@@ -301,6 +302,36 @@ export default async function HomePage() {
                     {user ? 'Read in the library' : 'Sign in to read'}
                   </Link>
                 </Button>
+                <div className="flex flex-col gap-3 sm:flex-row">
+                  <Button
+                    asChild
+                    size="lg"
+                    variant="outline"
+                    className="border-deep-teal font-sans font-semibold text-deep-teal hover:bg-deep-teal hover:text-off-white"
+                  >
+                    <a
+                      href="https://www.amazon.com/dp/B0H8Q4M1P4"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                    >
+                      Buy Paperback
+                    </a>
+                  </Button>
+                  <Button
+                    asChild
+                    size="lg"
+                    variant="outline"
+                    className="border-deep-teal font-sans font-semibold text-deep-teal hover:bg-deep-teal hover:text-off-white"
+                  >
+                    <a
+                      href="https://www.amazon.com/dp/B0H8Q7G27L"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                    >
+                      Buy on Kindle
+                    </a>
+                  </Button>
+                </div>
               </div>
             </div>
           </div>
