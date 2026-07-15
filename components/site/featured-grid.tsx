@@ -44,7 +44,7 @@ export function FeaturedGrid({
               </p>
             )}
             <span className="mt-5 inline-flex items-center gap-1 font-sans text-sm font-semibold text-deep-teal">
-              {isMember ? 'Open' : 'Members only — sign in'}
+              {isMember ? 'Open' : 'Sign in to read'}
               <ArrowRight
                 className="size-4 transition-transform group-hover:translate-x-0.5"
                 aria-hidden="true"
