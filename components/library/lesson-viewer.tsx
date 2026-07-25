@@ -21,6 +21,7 @@ function getDocumentCover(fileName?: string | null) {
   return DOCUMENT_COVERS[fileName] ?? null
 }
 import { toEmbedUrl } from '@/lib/video'
+import { ArticleMarkdown } from '@/components/library/article-markdown'
 import {
   Dialog,
   DialogContent,
@@ -367,9 +368,9 @@ export function LessonViewer({
                 </p>
               )}
               {active.kind === 'article' && active.body && (
-                <article className="mt-2 whitespace-pre-wrap font-serif text-[16px] leading-relaxed text-charcoal/85">
-                  {active.body}
-                </article>
+                <div className="mt-2">
+                  <ArticleMarkdown>{active.body}</ArticleMarkdown>
+                </div>
               )}
             </div>
           </>

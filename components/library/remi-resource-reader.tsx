@@ -17,6 +17,7 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog'
 import { toEmbedUrl } from '@/lib/video'
+import { ArticleMarkdown } from '@/components/library/article-markdown'
 
 // Some PDFs are full books with a real cover we can show as the tappable
 // preview instead of a generic icon. Keyed by stored file name.
@@ -221,9 +222,7 @@ export function RemiResourceReader({
 
               {/* Article body */}
               {lesson.kind === 'article' && lesson.body && (
-                <article className="whitespace-pre-wrap font-serif text-[16px] leading-relaxed text-charcoal/85">
-                  {lesson.body}
-                </article>
+                <ArticleMarkdown>{lesson.body}</ArticleMarkdown>
               )}
 
               {lesson.kind === 'document' && (
