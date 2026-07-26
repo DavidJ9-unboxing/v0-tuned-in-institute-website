@@ -42,6 +42,51 @@ export async function GET(
   const download = new URL(request.url).searchParams.get('download') === '1'
 
   try {
+    // Documents (PDFs) are embedded in an <iframe>. Private Blob signed URLs are
+    // served with a strict `content-security-policy: default-src 'none'`, which
+    // makes Chrome's PDF viewer refuse to render them in a frame ("This page has
+    // been blocked by Chrome"). So we proxy document bytes back through this
+    // same-origin route with our own headers instead of redirecting. Range
+    // requests are forwarded so the PDF viewer can page/seek efficiently.
+    if (row.kind === 'document') {
+      const signedUrl = await signBlobUrl(blobUrl)
+      const range = request.headers.get('range')
+      const upstream = await fetch(signedUrl, {
+        headers: range ? { Range: range } : {},
+        cache: 'no-store',
+      })
+      if (!upstream.ok && upstream.status !== 206) {
+        return NextResponse.json({ error: 'Could not load this file.' }, { status: 502 })
+      }
+
+      const name = (row.fileName ?? 'document').replace(/["\\\r\n]/g, '')
+      const isPdf =
+        name.toLowerCase().endsWith('.pdf') ||
+        (upstream.headers.get('content-type') ?? '').includes('application/pdf')
+
+      const headers = new Headers()
+      headers.set(
+        'Content-Type',
+        isPdf ? 'application/pdf' : (upstream.headers.get('content-type') ?? 'application/octet-stream'),
+      )
+      headers.set(
+        'Content-Disposition',
+        `${download ? 'attachment' : 'inline'}; filename="${name}"`,
+      )
+      headers.set('Accept-Ranges', 'bytes')
+      const contentLength = upstream.headers.get('content-length')
+      if (contentLength) headers.set('Content-Length', contentLength)
+      const contentRange = upstream.headers.get('content-range')
+      if (contentRange) headers.set('Content-Range', contentRange)
+      headers.set('Cache-Control', 'private, no-store')
+
+      return new NextResponse(upstream.body, { status: upstream.status, headers })
+    }
+
+    // Video and audio play via native <video>/<audio> elements, which load the
+    // blob as a media sub-resource governed by our page (not the blob's CSP),
+    // so a lightweight redirect to the signed URL is fine and avoids proxying
+    // large media through the function.
     const signedUrl = await signBlobUrl(blobUrl, { download })
     return NextResponse.redirect(signedUrl)
   } catch (err) {
