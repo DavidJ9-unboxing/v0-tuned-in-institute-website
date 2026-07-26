@@ -561,6 +561,8 @@ const UPLOAD_KINDS: readonly LessonKind[] = ['video', 'document', 'audio']
 // when the browser reports an empty or generic one (common for .m4a audio).
 const EXT_CONTENT_TYPES: Record<string, string> = {
   mp3: 'audio/mpeg',
+  mpa: 'audio/mpeg',
+  mpga: 'audio/mpeg',
   m4a: 'audio/mp4',
   aac: 'audio/aac',
   wav: 'audio/wav',
@@ -699,9 +701,12 @@ function AddLessonForm({ sectionId, onDone }: { sectionId: number; onDone: () =>
             type="file"
             accept={
               kind === 'video'
-                ? 'video/*'
+                ? 'video/*,.mp4,.m4v,.mov,.webm'
                 : kind === 'audio'
-                  ? 'audio/*'
+                  ? // Explicit extensions in addition to audio/* — some browsers
+                    // don't map extensions like .mpa/.mpga/.m4a to an audio MIME
+                    // type, which greys them out in the file picker.
+                    'audio/*,.mp3,.mpa,.mpga,.m4a,.aac,.wav,.ogg,.oga,.flac'
                   : '.pdf,.doc,.docx,.ppt,.pptx,.xls,.xlsx,.txt,.csv'
             }
             onChange={handleFile}
