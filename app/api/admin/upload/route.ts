@@ -24,6 +24,16 @@ export async function POST(request: Request): Promise<NextResponse> {
             'video/quicktime',
             'video/webm',
             'video/x-m4v',
+            // Audio (meditations, lectures)
+            'audio/mpeg',
+            'audio/mp3',
+            'audio/mp4',
+            'audio/x-m4a',
+            'audio/m4a',
+            'audio/aac',
+            'audio/wav',
+            'audio/x-wav',
+            'audio/ogg',
             // Documents
             'application/pdf',
             'application/msword',

@@ -542,15 +542,20 @@ function BulkImport({ sections, onDone }: { sections: Section[]; onDone: () => v
   )
 }
 
-type LessonKind = 'video' | 'embed' | 'document' | 'article' | 'link'
+type LessonKind = 'video' | 'embed' | 'document' | 'article' | 'link' | 'audio'
 
 const KIND_LABELS: Record<LessonKind, string> = {
   video: 'Upload video',
   embed: 'Video link',
+  audio: 'Audio',
   document: 'Document',
   article: 'Article',
   link: 'Link',
 }
+
+// Kinds whose content is an uploaded file (stored in private Blob) rather than
+// a link, embed, or inline text.
+const UPLOAD_KINDS: readonly LessonKind[] = ['video', 'document', 'audio']
 
 function AddLessonForm({ sectionId, onDone }: { sectionId: number; onDone: () => void }) {
   const [kind, setKind] = useState<LessonKind>('embed')
@@ -619,11 +624,19 @@ function AddLessonForm({ sectionId, onDone }: { sectionId: number; onDone: () =>
       <input type="hidden" name="sectionId" value={sectionId} />
       <input type="hidden" name="kind" value={kind} />
       <input type="hidden" name="videoUrl" value={kind === 'video' ? uploadedUrl : ''} />
-      <input type="hidden" name="fileUrl" value={kind === 'document' ? uploadedUrl : ''} />
-      <input type="hidden" name="fileName" value={kind === 'document' ? fileName : ''} />
+      <input
+        type="hidden"
+        name="fileUrl"
+        value={kind === 'document' || kind === 'audio' ? uploadedUrl : ''}
+      />
+      <input
+        type="hidden"
+        name="fileName"
+        value={kind === 'document' || kind === 'audio' ? fileName : ''}
+      />
 
       <div className="flex flex-wrap gap-2">
-        {(['embed', 'video', 'document', 'article', 'link'] as const).map((k) => (
+        {(['embed', 'video', 'audio', 'document', 'article', 'link'] as const).map((k) => (
           <button
             type="button"
             key={k}
@@ -646,18 +659,25 @@ function AddLessonForm({ sectionId, onDone }: { sectionId: number; onDone: () =>
         className={inputClass}
       />
 
-      {kind === 'video' || kind === 'document' ? (
+      {UPLOAD_KINDS.includes(kind) ? (
         <div className="flex flex-col gap-2">
           <input
             type="file"
             accept={
               kind === 'video'
                 ? 'video/*'
-                : '.pdf,.doc,.docx,.ppt,.pptx,.xls,.xlsx,.txt,.csv'
+                : kind === 'audio'
+                  ? 'audio/*'
+                  : '.pdf,.doc,.docx,.ppt,.pptx,.xls,.xlsx,.txt,.csv'
             }
             onChange={handleFile}
             className="block w-full font-sans text-sm text-muted-foreground file:mr-3 file:rounded-md file:border-0 file:bg-sage-light file:px-3 file:py-2 file:font-sans file:text-sm file:font-semibold file:text-deep-teal"
           />
+          {kind === 'audio' && (
+            <p className="font-sans text-xs text-muted-foreground">
+              MP3, M4A, WAV, AAC, or OGG — meditations and audio lectures.
+            </p>
+          )}
           {kind === 'document' && (
             <p className="font-sans text-xs text-muted-foreground">
               PDF, Word, PowerPoint, Excel, or text files.
@@ -724,11 +744,7 @@ function AddLessonForm({ sectionId, onDone }: { sectionId: number; onDone: () =>
       <div className="flex items-center gap-3">
         <Button
           type="submit"
-          disabled={
-            pending ||
-            uploading ||
-            ((kind === 'video' || kind === 'document') && !uploadedUrl)
-          }
+          disabled={pending || uploading || (UPLOAD_KINDS.includes(kind) && !uploadedUrl)}
           className="font-sans font-semibold"
         >
           {pending ? 'Saving…' : 'Add lesson'}
