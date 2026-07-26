@@ -1,10 +1,17 @@
 'use client'
 
 import { useEffect, useRef, useState } from 'react'
-import Image from 'next/image'
+import dynamic from 'next/dynamic'
 import { Download, ExternalLink, FileText, Headphones, Lock, Maximize, PlayCircle } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import type { Lesson } from '@/lib/content'
+
+// PDF.js renders on <canvas> and touches browser-only globals, so it must load
+// client-side only (never during SSR).
+const PdfCanvas = dynamic(
+  () => import('@/components/library/pdf-canvas').then((m) => m.PdfCanvas),
+  { ssr: false },
+)
 
 // Some PDF documents are full books/guides and have a real cover image we can
 // show (clickable) instead of a generic file icon. Keyed by the stored file
@@ -371,77 +378,25 @@ export function LessonViewer({
             {active.kind === 'document' && active.fileUrl && (
               <div className="flex flex-col gap-4">
                 {isPdf(active.fileUrl, active.fileName) && (
-                  <>
-                    {/* Tablet / desktop: inline PDF preview. Hidden on phones,
-                        where embedded PDFs render oversized and can't be
-                        pinch-zoomed — those get the preview card below instead. */}
-                    <div
-                      ref={docWrapRef}
-                      className={cn(
-                        'overflow-hidden border border-stone bg-card',
-                        isFullscreen
-                          ? 'flex h-screen w-screen flex-col rounded-none'
-                          : 'hidden rounded-2xl md:block',
-                      )}
-                    >
-                      {/* view=Fit shows the whole page within the frame, so wide
-                          landscape pages fit fully (just smaller) instead of
-                          overflowing. The viewer scrolls internally between pages. */}
-                      <iframe
-                        key={active.id}
-                        src={`/api/library/file/${active.id}#toolbar=1&navpanes=0&view=Fit`}
-                        title={active.title}
-                        className={cn('w-full', isFullscreen ? 'flex-1' : 'h-[75vh]')}
-                      />
-                    </div>
-
-                    {/* Phones: a compact card that opens the document in the
-                        device's native reader (proper pinch-to-zoom + scroll)
-                        rather than an oversized inline iframe. When the document
-                        has a cover image (e.g. a book), show it as the tappable
-                        preview so it's clear what you're opening. */}
-                    {(() => {
-                      const cover = getDocumentCover(active.fileName)
-                      return (
-                        <div className="flex flex-col items-center gap-4 rounded-2xl border border-stone bg-sage-light px-5 py-6 md:hidden">
-                          {cover ? (
-                            <a
-                              href={`/api/library/file/${active.id}`}
-                              target="_blank"
-                              rel="noopener noreferrer"
-                              className="block w-40 overflow-hidden rounded-lg border border-stone shadow-sm transition-transform active:scale-[0.98]"
-                            >
-                              <Image
-                                src={cover.src || '/placeholder.svg'}
-                                alt={`Cover of ${cover.label}`}
-                                width={460}
-                                height={655}
-                                className="h-auto w-full"
-                              />
-                            </a>
-                          ) : (
-                            <span className="flex size-11 items-center justify-center rounded-full bg-deep-teal/10">
-                              <FileText className="size-5 text-deep-teal" aria-hidden="true" />
-                            </span>
-                          )}
-                          <p className="text-center font-serif text-[15px] leading-relaxed text-charcoal/75">
-                            {cover
-                              ? 'Tap the cover to read it in your phone\u2019s reader, where you can pinch to zoom and scroll comfortably \u2014 or download a copy below.'
-                              : 'This document opens in your phone\u2019s reader, where you can pinch to zoom and scroll comfortably.'}
-                          </p>
-                          <a
-                            href={`/api/library/file/${active.id}`}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="inline-flex items-center gap-2 rounded-full bg-deep-teal px-5 py-2.5 font-sans text-sm font-semibold text-off-white transition-colors hover:bg-deep-teal/90"
-                          >
-                            {cover ? 'Read in reader' : 'Open document'}
-                            <ExternalLink className="size-4" aria-hidden="true" />
-                          </a>
-                        </div>
-                      )
-                    })()}
-                  </>
+                  // Canvas-based PDF.js viewer. Works inline on desktop, mobile,
+                  // and inside sandboxed iframes — unlike a native <iframe> PDF,
+                  // which mobile browsers force to download and sandboxes block.
+                  <div
+                    ref={docWrapRef}
+                    className={cn(
+                      'overflow-hidden border border-stone bg-card',
+                      isFullscreen
+                        ? 'flex h-screen w-screen flex-col rounded-none'
+                        : 'rounded-2xl',
+                    )}
+                  >
+                    <PdfCanvas
+                      key={active.id}
+                      fileId={active.id}
+                      title={active.title}
+                      fullscreen={isFullscreen}
+                    />
+                  </div>
                 )}
                 <div className="flex flex-wrap items-center gap-3">
                   {isPdf(active.fileUrl, active.fileName) && (
@@ -494,9 +449,9 @@ export function LessonViewer({
                 </p>
                 {isPdf(active.fileUrl, active.fileName) && (
                   <p className="font-sans text-xs leading-relaxed text-charcoal/55">
-                    Tip: on a phone, tap &ldquo;Open document&rdquo; to read it in your device&apos;s
-                    reader with pinch-to-zoom. On a laptop or desktop you can tap &ldquo;View
-                    fullscreen&rdquo; for a larger view — many documents are easiest to read there.
+                    Tip: on a laptop or desktop you can tap &ldquo;View fullscreen&rdquo; for a
+                    larger view — many documents are easiest to read there. You can also download a
+                    copy to read offline.
                   </p>
                 )}
               </div>
