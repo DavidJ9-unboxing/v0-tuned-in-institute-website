@@ -6,7 +6,7 @@ import remarkGfm from 'remark-gfm'
 /**
  * Renders Remi's reply as formatted markdown so **bold**, *italics*, lists, and
  * links display properly instead of showing raw asterisks. Element styling is
- * kept in step with the surrounding chat bubble (serif, 15px, relaxed leading,
+ * kept in step with the surrounding chat bubble (sans, 15px, relaxed leading,
  * muted charcoal) so formatted text sits naturally in the conversation.
  *
  * Only used for Remi's (assistant) replies — the member's own messages stay as
@@ -14,7 +14,7 @@ import remarkGfm from 'remark-gfm'
  */
 export function RemiMarkdown({ children }: { children: string }) {
   return (
-    <div className="font-serif text-[15px] leading-relaxed text-charcoal/85 [&>*:first-child]:mt-0 [&>*:last-child]:mb-0">
+    <div className="font-sans text-[15px] leading-relaxed text-charcoal/85 [&>*:first-child]:mt-0 [&>*:last-child]:mb-0">
       <ReactMarkdown
         remarkPlugins={[remarkGfm]}
         components={{
