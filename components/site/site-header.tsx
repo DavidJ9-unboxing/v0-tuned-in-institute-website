@@ -112,7 +112,13 @@ export function SiteHeader() {
                 name={user.name}
                 email={user.email}
                 isAdmin={user.role === 'admin'}
-                isTherapist={user.role === 'therapist'}
+                isTherapist={
+                  user.role !== 'admin' &&
+                  (user.role === 'therapist' ||
+                    // Anyone on the Rooted Rhythm staff email domain gets
+                    // client-onboarding access automatically.
+                    user.email.toLowerCase().endsWith('@rootedrhythm.com'))
+                }
               />
             </>
           ) : (

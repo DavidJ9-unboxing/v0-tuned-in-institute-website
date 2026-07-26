@@ -1,7 +1,7 @@
 import type { ReactNode } from 'react'
 import Link from 'next/link'
 import { redirect } from 'next/navigation'
-import { requireStaff } from '@/lib/session'
+import { requireStaff, hasTherapistAccess } from '@/lib/session'
 import { AccountMenu } from '@/components/library/account-menu'
 
 export default async function TherapistLayout({ children }: { children: ReactNode }) {
@@ -27,7 +27,7 @@ export default async function TherapistLayout({ children }: { children: ReactNod
               name={staff.name}
               email={staff.email}
               isAdmin={staff.role === 'admin'}
-              isTherapist={staff.role === 'therapist'}
+              isTherapist={staff.role !== 'admin' && hasTherapistAccess(staff)}
             />
           </div>
         </div>
