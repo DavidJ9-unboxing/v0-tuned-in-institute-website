@@ -724,7 +724,7 @@ export function RemiChat({
                           return (
                             <p
                               key={i}
-                              className="whitespace-pre-wrap break-words font-serif text-[15px] leading-relaxed text-off-white"
+                              className="whitespace-pre-wrap break-words font-sans text-[15px] leading-relaxed text-off-white"
                             >
                               {part.text}
                             </p>
