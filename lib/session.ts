@@ -42,3 +42,22 @@ export async function requireAdmin(): Promise<SessionUser> {
   if (user.role !== 'admin') redirect('/library')
   return user
 }
+
+/** Roles that can create and manage client accounts. */
+export const STAFF_ROLES = ['admin', 'therapist'] as const
+
+export function isStaffRole(role: string): boolean {
+  return (STAFF_ROLES as readonly string[]).includes(role)
+}
+
+/**
+ * Require a staff member (admin or therapist). Both can onboard clients;
+ * admins additionally get the full admin dashboard. Redirects clients to the
+ * library and guests to sign-in.
+ */
+export async function requireStaff(): Promise<SessionUser> {
+  const user = await getCurrentUser()
+  if (!user) redirect('/sign-in')
+  if (!isStaffRole(user.role)) redirect('/library')
+  return user
+}

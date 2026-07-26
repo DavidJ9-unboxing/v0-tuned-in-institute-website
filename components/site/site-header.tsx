@@ -112,6 +112,7 @@ export function SiteHeader() {
                 name={user.name}
                 email={user.email}
                 isAdmin={user.role === 'admin'}
+                isTherapist={user.role === 'therapist'}
               />
             </>
           ) : (

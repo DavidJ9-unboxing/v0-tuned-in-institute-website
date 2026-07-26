@@ -48,8 +48,15 @@ export function SignInForm() {
     if (sessionUser?.mustChangePassword) {
       router.push('/account/password?first=1')
     } else {
-      // Send admins straight to the dashboard; everyone else to the library.
-      router.push(sessionUser?.role === 'admin' ? '/admin' : '/library')
+      // Send admins to the dashboard, therapists to their client page, and
+      // everyone else to the library.
+      router.push(
+        sessionUser?.role === 'admin'
+          ? '/admin'
+          : sessionUser?.role === 'therapist'
+            ? '/therapist'
+            : '/library',
+      )
     }
     router.refresh()
   }
