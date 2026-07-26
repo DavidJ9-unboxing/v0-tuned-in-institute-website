@@ -650,7 +650,7 @@ export function RemiChat({
             <div className="flex items-start gap-3">
               <RemiAvatar />
               <div className="max-w-[85%] rounded-2xl rounded-tl-sm border border-stone bg-card px-4 py-3">
-                <p className="font-serif text-[15px] leading-relaxed text-charcoal/85">
+                <p className="font-sans text-[15px] leading-relaxed text-charcoal/85">
                   {intro ?? (
                     <>
                       Hi, I&apos;m Remi. I&apos;m here to talk things through with you — a hard
@@ -809,7 +809,7 @@ export function RemiChat({
             <div className="flex items-start gap-3">
               <RemiAvatar />
               <div className="max-w-[85%] rounded-2xl rounded-tl-sm border border-stone bg-card px-4 py-3">
-                <p className="font-serif text-[15px] leading-relaxed text-charcoal/70">
+                <p className="font-sans text-[15px] leading-relaxed text-charcoal/70">
                   {isBusyError(error)
                     ? 'Remi is helping a lot of families right now and needs a moment to catch up. Please try again shortly — your message wasn’t lost.'
                     : 'Sorry, I had trouble responding just then. Please try again in a moment.'}
