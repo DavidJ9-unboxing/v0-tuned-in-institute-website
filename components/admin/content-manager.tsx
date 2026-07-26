@@ -542,14 +542,50 @@ function BulkImport({ sections, onDone }: { sections: Section[]; onDone: () => v
   )
 }
 
-type LessonKind = 'video' | 'embed' | 'document' | 'article' | 'link'
+type LessonKind = 'video' | 'embed' | 'document' | 'article' | 'link' | 'audio'
 
 const KIND_LABELS: Record<LessonKind, string> = {
   video: 'Upload video',
   embed: 'Video link',
+  audio: 'Audio',
   document: 'Document',
   article: 'Article',
   link: 'Link',
+}
+
+// Kinds whose content is an uploaded file (stored in private Blob) rather than
+// a link, embed, or inline text.
+const UPLOAD_KINDS: readonly LessonKind[] = ['video', 'document', 'audio']
+
+// Map file extensions to content types so uploads still get a correct MIME type
+// when the browser reports an empty or generic one (common for .m4a audio).
+const EXT_CONTENT_TYPES: Record<string, string> = {
+  mp3: 'audio/mpeg',
+  mpa: 'audio/mpeg',
+  mpga: 'audio/mpeg',
+  m4a: 'audio/mp4',
+  aac: 'audio/aac',
+  wav: 'audio/wav',
+  ogg: 'audio/ogg',
+  oga: 'audio/ogg',
+  flac: 'audio/flac',
+  mp4: 'video/mp4',
+  m4v: 'video/x-m4v',
+  mov: 'video/quicktime',
+  webm: 'video/webm',
+}
+
+/**
+ * Returns a reliable content type for an upload. Prefers the browser-provided
+ * type, but falls back to one derived from the file extension when the browser
+ * gives nothing useful (empty or the generic application/octet-stream) — which
+ * happens often for audio files, especially .m4a.
+ */
+function resolveContentType(file: File): string | undefined {
+  const browserType = file.type?.trim()
+  if (browserType && browserType !== 'application/octet-stream') return browserType
+  const ext = file.name.split('.').pop()?.toLowerCase() ?? ''
+  return EXT_CONTENT_TYPES[ext]
 }
 
 function AddLessonForm({ sectionId, onDone }: { sectionId: number; onDone: () => void }) {
@@ -598,6 +634,11 @@ function AddLessonForm({ sectionId, onDone }: { sectionId: number; onDone: () =>
         access: 'public',
         handleUploadUrl: '/api/admin/upload',
         multipart: useMultipart,
+        // Browsers often report an empty or generic MIME type for audio files
+        // (especially .m4a), which would upload as application/octet-stream and
+        // get rejected. Fall back to a type derived from the file extension so
+        // audio always lands with a proper audio/* content type.
+        contentType: resolveContentType(file),
         onUploadProgress: ({ percentage }) => setProgress(Math.round(percentage)),
       })
       setUploadedUrl(blob.url)
@@ -619,11 +660,19 @@ function AddLessonForm({ sectionId, onDone }: { sectionId: number; onDone: () =>
       <input type="hidden" name="sectionId" value={sectionId} />
       <input type="hidden" name="kind" value={kind} />
       <input type="hidden" name="videoUrl" value={kind === 'video' ? uploadedUrl : ''} />
-      <input type="hidden" name="fileUrl" value={kind === 'document' ? uploadedUrl : ''} />
-      <input type="hidden" name="fileName" value={kind === 'document' ? fileName : ''} />
+      <input
+        type="hidden"
+        name="fileUrl"
+        value={kind === 'document' || kind === 'audio' ? uploadedUrl : ''}
+      />
+      <input
+        type="hidden"
+        name="fileName"
+        value={kind === 'document' || kind === 'audio' ? fileName : ''}
+      />
 
       <div className="flex flex-wrap gap-2">
-        {(['embed', 'video', 'document', 'article', 'link'] as const).map((k) => (
+        {(['embed', 'video', 'audio', 'document', 'article', 'link'] as const).map((k) => (
           <button
             type="button"
             key={k}
@@ -646,18 +695,28 @@ function AddLessonForm({ sectionId, onDone }: { sectionId: number; onDone: () =>
         className={inputClass}
       />
 
-      {kind === 'video' || kind === 'document' ? (
+      {UPLOAD_KINDS.includes(kind) ? (
         <div className="flex flex-col gap-2">
           <input
             type="file"
             accept={
               kind === 'video'
-                ? 'video/*'
-                : '.pdf,.doc,.docx,.ppt,.pptx,.xls,.xlsx,.txt,.csv'
+                ? 'video/*,.mp4,.m4v,.mov,.webm'
+                : kind === 'audio'
+                  ? // Explicit extensions in addition to audio/* — some browsers
+                    // don't map extensions like .mpa/.mpga/.m4a to an audio MIME
+                    // type, which greys them out in the file picker.
+                    'audio/*,.mp3,.mpa,.mpga,.m4a,.aac,.wav,.ogg,.oga,.flac'
+                  : '.pdf,.doc,.docx,.ppt,.pptx,.xls,.xlsx,.txt,.csv'
             }
             onChange={handleFile}
             className="block w-full font-sans text-sm text-muted-foreground file:mr-3 file:rounded-md file:border-0 file:bg-sage-light file:px-3 file:py-2 file:font-sans file:text-sm file:font-semibold file:text-deep-teal"
           />
+          {kind === 'audio' && (
+            <p className="font-sans text-xs text-muted-foreground">
+              MP3, M4A, WAV, AAC, or OGG — meditations and audio lectures.
+            </p>
+          )}
           {kind === 'document' && (
             <p className="font-sans text-xs text-muted-foreground">
               PDF, Word, PowerPoint, Excel, or text files.
@@ -724,11 +783,7 @@ function AddLessonForm({ sectionId, onDone }: { sectionId: number; onDone: () =>
       <div className="flex items-center gap-3">
         <Button
           type="submit"
-          disabled={
-            pending ||
-            uploading ||
-            ((kind === 'video' || kind === 'document') && !uploadedUrl)
-          }
+          disabled={pending || uploading || (UPLOAD_KINDS.includes(kind) && !uploadedUrl)}
           className="font-sans font-semibold"
         >
           {pending ? 'Saving…' : 'Add lesson'}

@@ -17,24 +17,12 @@ export async function POST(request: Request): Promise<NextResponse> {
         if (!user || user.role !== 'admin') {
           throw new Error('Only admins can upload content.')
         }
+        // Only authenticated admins reach this point, so we don't restrict by
+        // content type: browsers report inconsistent (or empty) MIME types for
+        // audio files — especially .m4a, which often arrives as
+        // application/octet-stream — and an allow-list wrongly rejected them.
+        // The lesson form controls which file types are offered per lesson kind.
         return {
-          allowedContentTypes: [
-            // Video
-            'video/mp4',
-            'video/quicktime',
-            'video/webm',
-            'video/x-m4v',
-            // Documents
-            'application/pdf',
-            'application/msword',
-            'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
-            'application/vnd.ms-powerpoint',
-            'application/vnd.openxmlformats-officedocument.presentationml.presentation',
-            'application/vnd.ms-excel',
-            'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
-            'text/plain',
-            'text/csv',
-          ],
           maximumSizeInBytes: 2 * 1024 * 1024 * 1024, // 2 GB
           addRandomSuffix: true,
         }

@@ -382,6 +382,9 @@ export async function createLesson(
   if (kind === 'document' && !fileUrl) {
     return { status: 'error', message: 'Please upload a document before saving.' }
   }
+  if (kind === 'audio' && !fileUrl) {
+    return { status: 'error', message: 'Please upload an audio file before saving.' }
+  }
 
   const normalizedKind =
     kind === 'article'
@@ -392,7 +395,9 @@ export async function createLesson(
           ? 'embed'
           : kind === 'document'
             ? 'document'
-            : 'video'
+            : kind === 'audio'
+              ? 'audio'
+              : 'video'
 
   try {
     const existing = await db.select().from(lesson).where(eq(lesson.sectionId, sectionId))
@@ -405,8 +410,8 @@ export async function createLesson(
       videoUrl: kind === 'video' ? videoUrl : null,
       body: kind === 'article' ? body : null,
       externalUrl: kind === 'link' || kind === 'embed' ? externalUrl : null,
-      fileUrl: kind === 'document' ? fileUrl : null,
-      fileName: kind === 'document' ? fileName || null : null,
+      fileUrl: kind === 'document' || kind === 'audio' ? fileUrl : null,
+      fileName: kind === 'document' || kind === 'audio' ? fileName || null : null,
       hidden,
       position,
     })

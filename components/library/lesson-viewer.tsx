@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, useState } from 'react'
 import Image from 'next/image'
-import { Download, ExternalLink, FileText, Lock, Maximize, PlayCircle } from 'lucide-react'
+import { Download, ExternalLink, FileText, Headphones, Lock, Maximize, PlayCircle } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import type { Lesson } from '@/lib/content'
 
@@ -207,6 +207,8 @@ export function LessonViewer({
                     <ExternalLink className="size-4 text-sage-deep" aria-hidden="true" />
                   ) : l.kind === 'document' ? (
                     <Download className="size-4 text-sage-deep" aria-hidden="true" />
+                  ) : l.kind === 'audio' ? (
+                    <Headphones className="size-4 text-deep-teal" aria-hidden="true" />
                   ) : (
                     <PlayCircle className="size-4 text-deep-teal" aria-hidden="true" />
                   )}
@@ -223,7 +225,9 @@ export function LessonViewer({
                         ? 'Link'
                         : l.kind === 'document'
                           ? 'Document'
-                          : 'Video'}
+                          : l.kind === 'audio'
+                            ? 'Audio'
+                            : 'Video'}
                     {/* "video" and "embed" both display as Video */}
                   </span>
                 </span>
@@ -285,6 +289,47 @@ export function LessonViewer({
                 </p>
               </div>
             ) : null}
+
+            {active.kind === 'audio' &&
+              (active.fileUrl ? (
+                <div className="flex flex-col gap-4 rounded-2xl border border-stone bg-sage-light px-5 py-6 sm:px-6">
+                  <div className="flex items-center gap-3">
+                    <span className="flex size-11 shrink-0 items-center justify-center rounded-full bg-deep-teal/10">
+                      <Headphones className="size-5 text-deep-teal" aria-hidden="true" />
+                    </span>
+                    <div className="flex flex-col">
+                      <span className="font-sans text-[11px] font-semibold uppercase tracking-wide text-charcoal/45">
+                        Audio
+                      </span>
+                      <span className="font-serif text-lg leading-snug text-charcoal">
+                        {active.title}
+                      </span>
+                    </div>
+                  </div>
+                  {/* eslint-disable-next-line jsx-a11y/media-has-caption */}
+                  <audio
+                    key={active.id}
+                    src={`/api/library/file/${active.id}`}
+                    controls
+                    controlsList="nodownload"
+                    preload="metadata"
+                    className="w-full"
+                  />
+                  <p className="flex items-start gap-2 rounded-lg border border-stone bg-off-white px-3.5 py-2.5 font-sans text-xs leading-relaxed text-charcoal/65">
+                    <Lock className="mt-0.5 size-3.5 shrink-0 text-deep-teal" aria-hidden="true" />
+                    <span>
+                      For members only. This recording is copyrighted by The Tuned In Institute and
+                      provided for your personal use. Please don&apos;t share it publicly.
+                    </span>
+                  </p>
+                </div>
+              ) : (
+                <div className="flex w-full items-center justify-center rounded-2xl border border-stone bg-sage-light px-6 py-12">
+                  <p className="font-serif text-[15px] text-charcoal/60">
+                    This audio is not available yet.
+                  </p>
+                </div>
+              ))}
 
             {active.kind === 'embed' &&
               (toEmbedUrl(active.externalUrl ?? '') ? (
@@ -425,6 +470,17 @@ export function LessonViewer({
                         : 'Open document'}
                     <Download className="size-4" aria-hidden="true" />
                   </a>
+                  {getDocumentCover(active.fileName) && (
+                    <a
+                      href="https://www.amazon.com/Tuned-guide-parents-sensitive-children/dp/B0FFZ8N7N6/"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="inline-flex items-center gap-2 rounded-full border border-deep-teal/40 px-5 py-2.5 font-sans text-sm font-semibold text-deep-teal transition-colors hover:bg-sage-light"
+                    >
+                      Buy Kindle or paperback on Amazon
+                      <ExternalLink className="size-4" aria-hidden="true" />
+                    </a>
+                  )}
                 </div>
 
                 <p className="flex items-start gap-2 rounded-lg border border-stone bg-off-white px-3.5 py-2.5 font-sans text-xs leading-relaxed text-charcoal/65">
