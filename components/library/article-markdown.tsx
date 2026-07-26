@@ -60,6 +60,22 @@ export function ArticleMarkdown({ children }: { children: string }) {
               {children}
             </a>
           ),
+          table: ({ children }) => (
+            <div className="my-5 overflow-x-auto rounded-xl border border-stone">
+              <table className="w-full border-collapse text-left text-[15px]">{children}</table>
+            </div>
+          ),
+          thead: ({ children }) => <thead className="bg-sage-light">{children}</thead>,
+          th: ({ children }) => (
+            <th className="border-b border-stone px-4 py-2.5 font-sans text-sm font-semibold text-deep-teal">
+              {children}
+            </th>
+          ),
+          td: ({ children }) => (
+            <td className="border-b border-stone/60 px-4 py-2.5 align-top text-charcoal/85">
+              {children}
+            </td>
+          ),
           hr: () => <hr className="my-6 border-stone" />,
         }}
       >
