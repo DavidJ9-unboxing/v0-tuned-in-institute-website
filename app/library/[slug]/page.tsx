@@ -2,7 +2,7 @@ import type { Metadata } from 'next'
 import Link from 'next/link'
 import { notFound } from 'next/navigation'
 import { ChevronLeft } from 'lucide-react'
-import { getLessonsForSection, getSectionBySlug } from '@/lib/content'
+import { getCollectionById, getLessonsForSection, getSectionBySlug } from '@/lib/content'
 import { LessonViewer } from '@/components/library/lesson-viewer'
 
 export async function generateMetadata({
@@ -30,14 +30,22 @@ export default async function SectionPage({
   const lessons = await getLessonsForSection(section.id)
   const initialLessonId = lessonParam ? Number(lessonParam) : undefined
 
+  // If this section belongs to a collection, the back-link returns to the
+  // collection page; otherwise it returns to the library home.
+  const parentCollection = section.collectionId
+    ? await getCollectionById(section.collectionId)
+    : null
+  const backHref = parentCollection ? `/library/collection/${parentCollection.slug}` : '/library'
+  const backLabel = parentCollection ? parentCollection.title : 'All collections'
+
   return (
     <div className="mx-auto max-w-5xl px-5 py-10 sm:px-8 sm:py-14">
       <Link
-        href="/library"
+        href={backHref}
         className="inline-flex items-center gap-1 font-sans text-sm font-semibold text-deep-teal hover:underline"
       >
         <ChevronLeft className="size-4" aria-hidden="true" />
-        All collections
+        {backLabel}
       </Link>
 
       <header className="mt-4 flex flex-col gap-2 border-b border-stone pb-8">

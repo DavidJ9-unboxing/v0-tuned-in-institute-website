@@ -1,12 +1,123 @@
-import { and, asc, eq, ilike, or, sql } from 'drizzle-orm'
+import { and, asc, eq, ilike, isNull, or, sql } from 'drizzle-orm'
 import { db } from '@/lib/db'
-import { featured, lesson, section } from '@/lib/db/schema'
+import { collection, featured, lesson, section } from '@/lib/db/schema'
 
 export type Section = typeof section.$inferSelect
 export type Lesson = typeof lesson.$inferSelect
 export type Featured = typeof featured.$inferSelect
+export type Collection = typeof collection.$inferSelect
 
 export type SectionWithCount = Section & { lessonCount: number }
+
+/**
+ * The library home shows a mix of standalone sections and collections (a
+ * collection groups several sections, e.g. the multi-module Tuned In Parenting
+ * course). These two entry shapes are merged and ordered by `position`.
+ */
+export type LibraryCollectionEntry = {
+  type: 'collection'
+  id: number
+  slug: string
+  title: string
+  description: string | null
+  position: number
+  sectionCount: number
+  lessonCount: number
+}
+export type LibrarySectionEntry = SectionWithCount & { type: 'section' }
+export type LibraryEntry = LibraryCollectionEntry | LibrarySectionEntry
+
+/**
+ * Top-level library entries: every visible collection plus every visible
+ * standalone section (those with no parent collection), merged and ordered by
+ * position. Sections that belong to a collection are hidden here — they live
+ * inside their collection's page instead.
+ */
+export async function getLibraryEntries(): Promise<LibraryEntry[]> {
+  const collectionRows = await db
+    .select({
+      id: collection.id,
+      slug: collection.slug,
+      title: collection.title,
+      description: collection.description,
+      position: collection.position,
+      sectionCount: sql<number>`cast(count(distinct ${section.id}) as int)`,
+      lessonCount: sql<number>`cast(count(distinct ${lesson.id}) as int)`,
+    })
+    .from(collection)
+    .leftJoin(section, and(eq(section.collectionId, collection.id), eq(section.hidden, false)))
+    .leftJoin(lesson, and(eq(lesson.sectionId, section.id), eq(lesson.hidden, false)))
+    .where(eq(collection.hidden, false))
+    .groupBy(collection.id)
+
+  const standaloneRows = await db
+    .select({
+      id: section.id,
+      slug: section.slug,
+      title: section.title,
+      description: section.description,
+      collectionId: section.collectionId,
+      collectionPosition: section.collectionPosition,
+      hidden: section.hidden,
+      position: section.position,
+      createdAt: section.createdAt,
+      updatedAt: section.updatedAt,
+      lessonCount: sql<number>`cast(count(${lesson.id}) filter (where ${lesson.hidden} = false) as int)`,
+    })
+    .from(section)
+    .leftJoin(lesson, eq(lesson.sectionId, section.id))
+    .where(and(eq(section.hidden, false), isNull(section.collectionId)))
+    .groupBy(section.id)
+
+  const entries: LibraryEntry[] = [
+    ...collectionRows.map((c) => ({ type: 'collection' as const, ...c })),
+    ...standaloneRows.map((s) => ({ type: 'section' as const, ...s })),
+  ]
+  entries.sort((a, b) => a.position - b.position || a.title.localeCompare(b.title))
+  return entries
+}
+
+/** Look up a visible collection by slug. Hidden collections return null. */
+export async function getCollectionBySlug(slug: string): Promise<Collection | null> {
+  const [row] = await db
+    .select()
+    .from(collection)
+    .where(and(eq(collection.slug, slug), eq(collection.hidden, false)))
+    .limit(1)
+  return row ?? null
+}
+
+/** Look up a collection by id (used for a section's back-link breadcrumb). */
+export async function getCollectionById(id: number): Promise<Collection | null> {
+  const [row] = await db.select().from(collection).where(eq(collection.id, id)).limit(1)
+  return row ?? null
+}
+
+/**
+ * Visible sections inside a collection, ordered by their position within the
+ * collection, each with a count of visible lessons.
+ */
+export async function getSectionsForCollection(collectionId: number): Promise<SectionWithCount[]> {
+  return db
+    .select({
+      id: section.id,
+      slug: section.slug,
+      title: section.title,
+      description: section.description,
+      collectionId: section.collectionId,
+      collectionPosition: section.collectionPosition,
+      hidden: section.hidden,
+      position: section.position,
+      createdAt: section.createdAt,
+      updatedAt: section.updatedAt,
+      lessonCount: sql<number>`cast(count(${lesson.id}) filter (where ${lesson.hidden} = false) as int)`,
+    })
+    .from(section)
+    .leftJoin(lesson, eq(lesson.sectionId, section.id))
+    .where(and(eq(section.hidden, false), eq(section.collectionId, collectionId)))
+    .groupBy(section.id)
+    .orderBy(asc(section.collectionPosition), asc(section.id))
+}
 
 /**
  * All visible sections ordered by position, with a count of their visible
@@ -20,6 +131,8 @@ export async function getSections(): Promise<SectionWithCount[]> {
       slug: section.slug,
       title: section.title,
       description: section.description,
+      collectionId: section.collectionId,
+      collectionPosition: section.collectionPosition,
       hidden: section.hidden,
       position: section.position,
       createdAt: section.createdAt,

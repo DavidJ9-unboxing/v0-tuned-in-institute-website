@@ -1,9 +1,10 @@
 import type { Metadata } from 'next'
 import { BookOpen } from 'lucide-react'
 import { getCurrentUser } from '@/lib/session'
-import { getSections } from '@/lib/content'
+import { getLibraryEntries } from '@/lib/content'
 import { LibrarySearch } from '@/components/library/library-search'
 import { SectionCard } from '@/components/library/section-card'
+import { CollectionCard } from '@/components/library/collection-card'
 
 export const metadata: Metadata = {
   title: 'Content Library',
@@ -16,7 +17,7 @@ export default async function LibraryPage({
   searchParams: Promise<{ q?: string }>
 }) {
   const user = await getCurrentUser()
-  const sections = await getSections()
+  const entries = await getLibraryEntries()
   const { q } = await searchParams
   const initialQuery = typeof q === 'string' ? q : ''
 
@@ -44,7 +45,7 @@ export default async function LibraryPage({
         </p>
       </div>
 
-      {sections.length === 0 ? (
+      {entries.length === 0 ? (
         <div className="mt-12 flex flex-col items-center gap-4 rounded-2xl border border-dashed border-stone bg-card px-8 py-16 text-center">
           <BookOpen className="size-10 text-charcoal/30" aria-hidden="true" />
           <h2 className="font-serif text-xl font-semibold text-deep-teal">
@@ -61,9 +62,13 @@ export default async function LibraryPage({
             Browse all collections
           </h2>
           <div className="mt-5 grid gap-5 sm:grid-cols-2">
-            {sections.map((s) => (
-              <SectionCard key={s.id} section={s} />
-            ))}
+            {entries.map((entry) =>
+              entry.type === 'collection' ? (
+                <CollectionCard key={`c-${entry.id}`} collection={entry} />
+              ) : (
+                <SectionCard key={`s-${entry.id}`} section={entry} />
+              ),
+            )}
           </div>
         </section>
       )}

@@ -70,12 +70,32 @@ export const verification = pgTable('verification', {
 // --- App tables ------------------------------------------------------------
 // Content library: sections (e.g. "Tuned In Teens") contain ordered lessons.
 // A lesson is either a video (Blob URL) or an article (rich text body).
+//
+// Sections can optionally be grouped under a collection (e.g. the multi-part
+// "Tuned In Parenting (2–12)" course, whose Introduction + Modules are each a
+// section). Sections with a null collectionId are standalone and appear as
+// their own top-level card in the library.
+
+export const collection = pgTable('collection', {
+  id: serial('id').primaryKey(),
+  slug: text('slug').notNull().unique(),
+  title: text('title').notNull(),
+  description: text('description'),
+  hidden: boolean('hidden').notNull().default(false),
+  position: integer('position').notNull().default(0),
+  createdAt: timestamp('createdAt').notNull().defaultNow(),
+  updatedAt: timestamp('updatedAt').notNull().defaultNow(),
+})
 
 export const section = pgTable('section', {
   id: serial('id').primaryKey(),
   slug: text('slug').notNull().unique(),
   title: text('title').notNull(),
   description: text('description'),
+  // Optional parent collection. Null = standalone top-level section.
+  collectionId: integer('collectionId'),
+  // Order within the parent collection (used on the collection page).
+  collectionPosition: integer('collectionPosition').notNull().default(0),
   // Hidden sections (and their lessons) never appear in the library, but their
   // content is still fed to Remi as background knowledge for answering questions.
   hidden: boolean('hidden').notNull().default(false),

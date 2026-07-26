@@ -2,7 +2,14 @@ import Link from 'next/link'
 import { ArrowRight, PlayCircle } from 'lucide-react'
 import type { SectionWithCount } from '@/lib/content'
 
-export function SectionCard({ section }: { section: SectionWithCount }) {
+export function SectionCard({
+  section,
+  displayTitle,
+}: {
+  section: SectionWithCount
+  /** Optional override for the shown title (e.g. a shortened label inside a collection). */
+  displayTitle?: string
+}) {
   return (
     <Link
       href={`/library/${section.slug}`}
@@ -10,7 +17,7 @@ export function SectionCard({ section }: { section: SectionWithCount }) {
     >
       <div className="flex flex-col gap-3">
         <h3 className="font-serif text-xl font-semibold text-deep-teal text-balance">
-          {section.title}
+          {displayTitle ?? section.title}
         </h3>
         {section.description && (
           <p className="font-serif text-[15px] leading-relaxed text-charcoal/75">
