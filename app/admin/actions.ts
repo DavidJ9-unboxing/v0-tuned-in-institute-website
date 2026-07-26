@@ -2,16 +2,28 @@
 
 import { revalidatePath } from 'next/cache'
 import { headers } from 'next/headers'
-import { eq, sql } from 'drizzle-orm'
+import { and, eq, sql } from 'drizzle-orm'
 import { del } from '@vercel/blob'
+import { hashPassword } from 'better-auth/crypto'
 import { auth } from '@/lib/auth'
 import { db } from '@/lib/db'
-import { featured, lesson, section, user } from '@/lib/db/schema'
-import { requireAdmin } from '@/lib/session'
+import { account, featured, lesson, section, user } from '@/lib/db/schema'
+import { requireAdmin, requireStaff } from '@/lib/session'
 import { toEmbedUrl } from '@/lib/video'
 import { sendWelcomeEmail } from '@/lib/email'
 
-export type ActionState = { status: 'idle' | 'success' | 'error'; message: string }
+export type Credentials = { email: string; password: string }
+export type ActionState = {
+  status: 'idle' | 'success' | 'error'
+  message: string
+  /**
+   * Present on success when a temporary password was generated, so the UI can
+   * show it to whoever created/reset the account with a copy button. Email is a
+   * backup delivery path, not the only one — this removes the "missed invite"
+   * failure mode where a client never receives access.
+   */
+  credentials?: Credentials | null
+}
 
 /** Absolute base URL of the app, used to build links in emails. */
 function appBaseUrl() {
@@ -45,6 +57,31 @@ function generateTempPassword(fullName: string) {
   return password
 }
 
+/**
+ * Generates a fresh temporary password for an existing member and writes it
+ * directly to their credential account (Better Auth's own hashing), then flags
+ * the account so they must choose a new password on next sign-in. Returns the
+ * plaintext temp password so it can be shown/emailed once.
+ *
+ * We set the hash directly rather than calling the admin plugin's
+ * setUserPassword endpoint so this works for therapists too (that endpoint
+ * requires an admin session, which a therapist doesn't have).
+ */
+async function assignTempPassword(userId: string, name: string): Promise<string> {
+  const password = generateTempPassword(name)
+  const hash = await hashPassword(password)
+  const updated = await db
+    .update(account)
+    .set({ password: hash, updatedAt: new Date() })
+    .where(and(eq(account.userId, userId), eq(account.providerId, 'credential')))
+    .returning({ id: account.id })
+  if (updated.length === 0) {
+    throw new Error('This member has no password login to reset.')
+  }
+  await db.update(user).set({ mustChangePassword: true }).where(eq(user.id, userId))
+  return password
+}
+
 function slugify(input: string) {
   return input
     .toLowerCase()
@@ -59,16 +96,19 @@ export async function createClientAccount(
   _prev: ActionState,
   formData: FormData,
 ): Promise<ActionState> {
-  await requireAdmin()
+  // Both admins and therapists can onboard clients.
+  const staff = await requireStaff()
   const name = String(formData.get('name') ?? '').trim()
   const email = String(formData.get('email') ?? '').trim().toLowerCase()
-  const role = String(formData.get('role') ?? 'client')
+  const requestedRole = String(formData.get('role') ?? 'client')
+  // Only admins may create elevated accounts. Therapists always create clients.
+  const role = staff.role === 'admin' && requestedRole === 'admin' ? 'admin' : 'client'
 
   if (!name || !email) {
     return { status: 'error', message: 'A name and email are required.' }
   }
 
-  // Auto-generate a temporary password — the admin never types one.
+  // Auto-generate a temporary password — staff never type one.
   const password = generateTempPassword(name)
 
   try {
@@ -80,27 +120,29 @@ export async function createClientAccount(
         // The admin plugin's static types only know the built-in roles, but at
         // runtime our custom "client" role is valid (it's the configured
         // defaultRole). Cast to satisfy the type checker.
-        role: (role === 'admin' ? 'admin' : 'client') as 'admin',
+        role: role as 'admin',
       },
     })
-    // Admin-created accounts are trusted, so mark the email as verified, and
-    // flag the account so the member is prompted to choose their own password
-    // after their first sign-in with the temporary one.
+    // Staff-created accounts are trusted, so mark the email as verified, flag
+    // the account so the member chooses their own password after first sign-in,
+    // and record who onboarded them (so therapists can see their own clients).
     await db
       .update(user)
-      .set({ emailVerified: true, mustChangePassword: true })
+      .set({ emailVerified: true, mustChangePassword: true, createdById: staff.id })
       .where(eq(user.email, email))
 
-    // Email the new member their credentials automatically.
+    // Email the new member their credentials automatically (backup delivery).
     const signInUrl = `${appBaseUrl()}/sign-in`
     const sent = await sendWelcomeEmail({ to: email, name, email, tempPassword: password, signInUrl })
 
     revalidatePath('/admin/accounts')
+    revalidatePath('/therapist')
     return {
       status: 'success',
       message: sent.ok
-        ? `Account created. A welcome email with the temporary password was sent to ${email}.`
-        : `Account created, but the welcome email could not be sent (${sent.error}). Temporary password: ${password}`,
+        ? `Account created for ${name}. A welcome email was also sent to ${email} as a backup.`
+        : `Account created for ${name}, but the welcome email could not be sent (${sent.error}). Share the credentials below directly.`,
+      credentials: { email, password },
     }
   } catch (err) {
     const message = err instanceof Error ? err.message : 'Could not create the account.'
@@ -108,7 +150,7 @@ export async function createClientAccount(
   }
 }
 
-export async function changeUserRole(userId: string, role: 'admin' | 'client') {
+export async function changeUserRole(userId: string, role: 'admin' | 'client' | 'therapist') {
   await requireAdmin()
   await auth.api.setRole({
     body: { userId, role: role as 'admin' },
@@ -155,10 +197,10 @@ export async function removeUser(userId: string): Promise<ActionState> {
  * credentials (the same welcome email used at account creation).
  */
 export async function resetClientPassword(userId: string): Promise<ActionState> {
-  await requireAdmin()
+  const staff = await requireStaff()
 
   const [member] = await db
-    .select({ name: user.name, email: user.email })
+    .select({ name: user.name, email: user.email, createdById: user.createdById })
     .from(user)
     .where(eq(user.id, userId))
     .limit(1)
@@ -167,16 +209,14 @@ export async function resetClientPassword(userId: string): Promise<ActionState> 
     return { status: 'error', message: 'That account no longer exists.' }
   }
 
-  const password = generateTempPassword(member.name)
+  // Therapists may only reset passwords for clients they onboarded. Admins can
+  // reset anyone.
+  if (staff.role !== 'admin' && member.createdById !== staff.id) {
+    return { status: 'error', message: 'You can only reset passwords for your own clients.' }
+  }
 
   try {
-    // The admin plugin authorizes from the request session, so forward headers.
-    await auth.api.setUserPassword({
-      body: { userId, newPassword: password },
-      headers: await headers(),
-    })
-
-    await db.update(user).set({ mustChangePassword: true }).where(eq(user.id, userId))
+    const password = await assignTempPassword(userId, member.name)
 
     const signInUrl = `${appBaseUrl()}/sign-in`
     const sent = await sendWelcomeEmail({
@@ -188,11 +228,13 @@ export async function resetClientPassword(userId: string): Promise<ActionState> 
     })
 
     revalidatePath('/admin/accounts')
+    revalidatePath('/therapist')
     return {
       status: 'success',
       message: sent.ok
-        ? `A new temporary password was emailed to ${member.email}.`
-        : `Password reset, but the email could not be sent (${sent.error}). Temporary password: ${password}`,
+        ? `New temporary password created for ${member.name}. It was also emailed to ${member.email} as a backup.`
+        : `Password reset for ${member.name}, but the email could not be sent (${sent.error}). Share the credentials below directly.`,
+      credentials: { email: member.email, password },
     }
   } catch (err) {
     const message = err instanceof Error ? err.message : 'Could not reset the password.'

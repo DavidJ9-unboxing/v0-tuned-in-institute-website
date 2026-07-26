@@ -5,12 +5,14 @@ import { useRouter } from 'next/navigation'
 import { Search } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { CredentialsCallout } from '@/components/admin/credentials-callout'
 import {
   createClientAccount,
   changeUserRole,
   removeUser,
   resetClientPassword,
   type ActionState,
+  type Credentials,
 } from '@/app/admin/actions'
 
 type Account = {
@@ -44,6 +46,10 @@ export function AccountManager({
   const lastStatus = useRef(state.status)
   const [query, setQuery] = useState('')
   const [resettingId, setResettingId] = useState<string | null>(null)
+  const [resetResult, setResetResult] = useState<{
+    message: string
+    credentials: Credentials | null
+  } | null>(null)
 
   // Sort alphabetically by last name (then first name), and filter by the
   // search term across name and email.
@@ -100,6 +106,7 @@ export function AccountManager({
                 </label>
                 <select name="role" className={inputClass} defaultValue="client">
                   <option value="client">Client</option>
+                  <option value="therapist">Therapist</option>
                   <option value="admin">Admin</option>
                 </select>
               </div>
@@ -118,10 +125,14 @@ export function AccountManager({
                 </span>
               )}
             </div>
+            {state.status === 'success' && state.credentials && (
+              <CredentialsCallout credentials={state.credentials} />
+            )}
             <p className="font-sans text-xs leading-relaxed text-muted-foreground">
-              A temporary password is generated automatically and emailed to the member along
-              with their sign-in link. They&apos;ll be prompted to choose their own password the
-              first time they sign in.
+              A temporary password is generated automatically and shown above so you can share it
+              directly with the member. It&apos;s also emailed to them with their sign-in link as a
+              backup. They&apos;ll be prompted to choose their own password the first time they sign
+              in.
             </p>
           </form>
         </CardContent>
@@ -148,6 +159,23 @@ export function AccountManager({
           </div>
         </CardHeader>
         <CardContent>
+          {resetResult && (
+            <div className="mb-5 flex flex-col gap-3">
+              <div className="flex items-start justify-between gap-3">
+                <p className="font-sans text-sm text-deep-teal">{resetResult.message}</p>
+                <button
+                  type="button"
+                  onClick={() => setResetResult(null)}
+                  className="shrink-0 font-sans text-xs font-medium text-muted-foreground hover:text-charcoal hover:underline"
+                >
+                  Dismiss
+                </button>
+              </div>
+              {resetResult.credentials && (
+                <CredentialsCallout credentials={resetResult.credentials} />
+              )}
+            </div>
+          )}
           {visibleAccounts.length === 0 ? (
             <p className="py-6 font-sans text-sm text-muted-foreground">
               No members match &ldquo;{query}&rdquo;.
@@ -179,12 +207,16 @@ export function AccountManager({
                     defaultValue={a.role}
                     disabled={a.id === currentUserId}
                     onChange={async (e) => {
-                      await changeUserRole(a.id, e.target.value as 'admin' | 'client')
+                      await changeUserRole(
+                        a.id,
+                        e.target.value as 'admin' | 'client' | 'therapist',
+                      )
                       router.refresh()
                     }}
                     className="rounded-md border border-input bg-background px-2 py-1 font-sans text-xs text-foreground disabled:opacity-50"
                   >
                     <option value="client">Client</option>
+                    <option value="therapist">Therapist</option>
                     <option value="admin">Admin</option>
                   </select>
                   <button
@@ -192,19 +224,23 @@ export function AccountManager({
                     onClick={async () => {
                       if (
                         confirm(
-                          `Send ${a.email} a new temporary password? Their current password will stop working.`,
+                          `Create a new temporary password for ${a.email}? Their current password will stop working.`,
                         )
                       ) {
                         setResettingId(a.id)
+                        setResetResult(null)
                         const result = await resetClientPassword(a.id)
                         setResettingId(null)
-                        alert(result.message)
+                        setResetResult({
+                          message: result.message,
+                          credentials: result.credentials ?? null,
+                        })
                         router.refresh()
                       }
                     }}
                     className="font-sans text-xs font-medium text-deep-teal hover:underline disabled:opacity-50"
                   >
-                    {resettingId === a.id ? 'Sending…' : 'Reset password'}
+                    {resettingId === a.id ? 'Resetting…' : 'Reset password'}
                   </button>
                   {a.id !== currentUserId && (
                     <button

@@ -43,13 +43,22 @@ export function SignInForm() {
     // Members still on their temporary password are prompted to set their own.
     const { data: session } = await authClient.getSession()
     const sessionUser = session?.user as
-      | { role?: string; mustChangePassword?: boolean }
+      | { role?: string; email?: string; mustChangePassword?: boolean }
       | undefined
+    const isStaffEmail = (sessionUser?.email ?? '')
+      .toLowerCase()
+      .endsWith('@rootedrhythm.com')
     if (sessionUser?.mustChangePassword) {
       router.push('/account/password?first=1')
+    } else if (sessionUser?.role === 'admin') {
+      // Admins go to the full dashboard.
+      router.push('/admin')
+    } else if (sessionUser?.role === 'therapist' || isStaffEmail) {
+      // Therapists and anyone on the staff email domain go to client onboarding.
+      router.push('/therapist')
     } else {
-      // Send admins straight to the dashboard; everyone else to the library.
-      router.push(sessionUser?.role === 'admin' ? '/admin' : '/library')
+      // Everyone else to the library.
+      router.push('/library')
     }
     router.refresh()
   }

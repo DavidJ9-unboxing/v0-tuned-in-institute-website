@@ -17,6 +17,10 @@ export const user = pgTable('user', {
   // True for admin-created accounts using a temporary password. When set, the
   // member is prompted to choose their own password after signing in.
   mustChangePassword: boolean('mustChangePassword').notNull().default(false),
+  // The staff member (admin or therapist) who created this account. Lets a
+  // therapist see the clients they onboarded. Null for the original admin and
+  // any self-created/seed accounts.
+  createdById: text('createdById'),
   createdAt: timestamp('createdAt').notNull().defaultNow(),
   updatedAt: timestamp('updatedAt').notNull().defaultNow(),
 })

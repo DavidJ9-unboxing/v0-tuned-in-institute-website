@@ -3,7 +3,7 @@
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
-import { LogOut, ChevronDown, Shield, KeyRound, Settings } from 'lucide-react'
+import { LogOut, ChevronDown, Shield, KeyRound, Settings, UserPlus } from 'lucide-react'
 import { authClient } from '@/lib/auth-client'
 import {
   DropdownMenu,
@@ -18,10 +18,12 @@ export function AccountMenu({
   name,
   email,
   isAdmin,
+  isTherapist = false,
 }: {
   name: string
   email: string
   isAdmin: boolean
+  isTherapist?: boolean
 }) {
   const router = useRouter()
   const [pending, setPending] = useState(false)
@@ -60,6 +62,14 @@ export function AccountMenu({
             <Link href="/admin" className="cursor-pointer font-sans">
               <Shield className="size-4" aria-hidden="true" />
               Admin dashboard
+            </Link>
+          </DropdownMenuItem>
+        )}
+        {isTherapist && (
+          <DropdownMenuItem asChild>
+            <Link href="/therapist" className="cursor-pointer font-sans">
+              <UserPlus className="size-4" aria-hidden="true" />
+              Add clients
             </Link>
           </DropdownMenuItem>
         )}

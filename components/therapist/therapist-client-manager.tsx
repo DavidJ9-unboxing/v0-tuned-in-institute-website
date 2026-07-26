@@ -1,0 +1,201 @@
+'use client'
+
+import { useActionState, useMemo, useRef, useState } from 'react'
+import { useRouter } from 'next/navigation'
+import { Search } from 'lucide-react'
+import { Button } from '@/components/ui/button'
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { CredentialsCallout } from '@/components/admin/credentials-callout'
+import {
+  createClientAccount,
+  resetClientPassword,
+  type ActionState,
+  type Credentials,
+} from '@/app/admin/actions'
+
+type Client = {
+  id: string
+  name: string
+  email: string
+  emailVerified: boolean
+}
+
+const initial: ActionState = { status: 'idle', message: '' }
+const inputClass =
+  'w-full rounded-md border border-input bg-background px-3 py-2 font-sans text-sm text-foreground outline-none focus:border-deep-teal focus:ring-2 focus:ring-deep-teal/20'
+
+export function TherapistClientManager({ clients }: { clients: Client[] }) {
+  const router = useRouter()
+  const [state, formAction, pending] = useActionState(createClientAccount, initial)
+  const formRef = useRef<HTMLFormElement>(null)
+  const lastStatus = useRef(state.status)
+  const [query, setQuery] = useState('')
+  const [resettingId, setResettingId] = useState<string | null>(null)
+  const [resetResult, setResetResult] = useState<{
+    message: string
+    credentials: Credentials | null
+  } | null>(null)
+
+  const visibleClients = useMemo(() => {
+    const q = query.trim().toLowerCase()
+    if (!q) return clients
+    return clients.filter(
+      (c) => c.name.toLowerCase().includes(q) || c.email.toLowerCase().includes(q),
+    )
+  }, [clients, query])
+
+  if (state.status === 'success' && lastStatus.current !== 'success') {
+    lastStatus.current = 'success'
+    formRef.current?.reset()
+    router.refresh()
+  } else if (state.status !== 'success') {
+    lastStatus.current = state.status
+  }
+
+  return (
+    <div className="flex flex-col gap-8">
+      <Card>
+        <CardHeader>
+          <CardTitle className="font-serif text-xl text-deep-teal">Add a client</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <form ref={formRef} action={formAction} className="flex flex-col gap-3">
+            <div className="grid gap-3 sm:grid-cols-2">
+              <div suppressHydrationWarning>
+                <label className="mb-1 block font-sans text-sm font-medium text-foreground">
+                  Name
+                </label>
+                <input name="name" placeholder="Jane Doe" className={inputClass} required />
+              </div>
+              <div suppressHydrationWarning>
+                <label className="mb-1 block font-sans text-sm font-medium text-foreground">
+                  Email
+                </label>
+                <input
+                  name="email"
+                  type="email"
+                  placeholder="jane@example.com"
+                  className={inputClass}
+                  required
+                />
+              </div>
+            </div>
+            <div className="flex items-center gap-3">
+              <Button type="submit" disabled={pending} className="font-sans font-semibold">
+                {pending ? 'Creating…' : 'Add client'}
+              </Button>
+              {state.status === 'error' && (
+                <span className="font-sans text-sm text-destructive">{state.message}</span>
+              )}
+              {state.status === 'success' && !state.credentials && (
+                <span className="font-sans text-sm text-deep-teal">{state.message}</span>
+              )}
+            </div>
+            {state.status === 'success' && state.credentials && (
+              <>
+                <p className="font-sans text-sm text-deep-teal">{state.message}</p>
+                <CredentialsCallout credentials={state.credentials} />
+              </>
+            )}
+          </form>
+        </CardContent>
+      </Card>
+
+      <Card>
+        <CardHeader className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+          <CardTitle className="font-serif text-xl text-deep-teal">
+            Your clients ({clients.length})
+          </CardTitle>
+          <div className="relative w-full sm:max-w-xs" suppressHydrationWarning>
+            <Search
+              className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground"
+              aria-hidden="true"
+            />
+            <input
+              type="search"
+              value={query}
+              onChange={(e) => setQuery(e.target.value)}
+              placeholder="Search by name or email"
+              aria-label="Search your clients"
+              className={`${inputClass} pl-9`}
+            />
+          </div>
+        </CardHeader>
+        <CardContent>
+          {resetResult && (
+            <div className="mb-5 flex flex-col gap-3">
+              <div className="flex items-start justify-between gap-3">
+                <p className="font-sans text-sm text-deep-teal">{resetResult.message}</p>
+                <button
+                  type="button"
+                  onClick={() => setResetResult(null)}
+                  className="shrink-0 font-sans text-xs font-medium text-muted-foreground hover:text-charcoal hover:underline"
+                >
+                  Dismiss
+                </button>
+              </div>
+              {resetResult.credentials && (
+                <CredentialsCallout credentials={resetResult.credentials} />
+              )}
+            </div>
+          )}
+          {clients.length === 0 ? (
+            <p className="py-6 font-sans text-sm text-muted-foreground">
+              You haven&apos;t added any clients yet. Use the form above to create your first
+              account.
+            </p>
+          ) : visibleClients.length === 0 ? (
+            <p className="py-6 font-sans text-sm text-muted-foreground">
+              No clients match &ldquo;{query}&rdquo;.
+            </p>
+          ) : (
+            <ul className="flex flex-col divide-y divide-border">
+              {visibleClients.map((c) => (
+                <li key={c.id} className="flex flex-wrap items-center justify-between gap-3 py-3">
+                  <div>
+                    <p className="font-sans text-sm font-semibold text-foreground">{c.name}</p>
+                    <p className="font-sans text-sm text-muted-foreground">{c.email}</p>
+                  </div>
+                  <div className="flex items-center gap-3">
+                    <span
+                      className={`rounded px-2 py-0.5 font-sans text-xs font-medium ${
+                        c.emailVerified
+                          ? 'bg-sage-light text-deep-teal'
+                          : 'bg-amber/20 text-charcoal'
+                      }`}
+                    >
+                      {c.emailVerified ? 'active' : 'pending'}
+                    </span>
+                    <button
+                      disabled={resettingId === c.id}
+                      onClick={async () => {
+                        if (
+                          confirm(
+                            `Create a new temporary password for ${c.email}? Their current password will stop working.`,
+                          )
+                        ) {
+                          setResettingId(c.id)
+                          setResetResult(null)
+                          const result = await resetClientPassword(c.id)
+                          setResettingId(null)
+                          setResetResult({
+                            message: result.message,
+                            credentials: result.credentials ?? null,
+                          })
+                          router.refresh()
+                        }
+                      }}
+                      className="font-sans text-xs font-medium text-deep-teal hover:underline disabled:opacity-50"
+                    >
+                      {resettingId === c.id ? 'Resetting…' : 'Reset password'}
+                    </button>
+                  </div>
+                </li>
+              ))}
+            </ul>
+          )}
+        </CardContent>
+      </Card>
+    </div>
+  )
+}

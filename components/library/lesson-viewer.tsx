@@ -21,6 +21,7 @@ function getDocumentCover(fileName?: string | null) {
   return DOCUMENT_COVERS[fileName] ?? null
 }
 import { toEmbedUrl } from '@/lib/video'
+import { ArticleMarkdown } from '@/components/library/article-markdown'
 import {
   Dialog,
   DialogContent,
@@ -43,12 +44,21 @@ function isPdf(url: string, fileName?: string | null) {
 export function LessonViewer({
   lessons,
   initialLessonId,
+  indexFirst = false,
 }: {
   lessons: Lesson[]
   initialLessonId?: number
+  /**
+   * When true, landing on the collection without a specific lesson in the URL
+   * shows the full list of items at the top (like a table of contents) instead
+   * of auto-opening the first one. Best for reference collections such as the
+   * handouts library, where members browse and pick rather than work through
+   * items in order.
+   */
+  indexFirst?: boolean
 }) {
-  const initial =
-    lessons.find((l) => l.id === initialLessonId) ?? lessons[0] ?? null
+  const explicitInitial = lessons.find((l) => l.id === initialLessonId)
+  const initial = explicitInitial ?? (indexFirst ? null : (lessons[0] ?? null))
   const [activeId, setActiveId] = useState<number | null>(initial?.id ?? null)
   const active = lessons.find((l) => l.id === activeId) ?? null
   const viewerRef = useRef<HTMLDivElement>(null)
@@ -164,11 +174,90 @@ export function LessonViewer({
     }
   }
 
+  // The item list is used both as the sidebar (alongside an open item) and as
+  // the full-width index shown before anything is selected in `indexFirst`
+  // collections. The `index` layout flows into two columns on wider screens.
+  function renderLessonList(layout: 'sidebar' | 'index') {
+    return (
+      <ol
+        className={cn(
+          'gap-1.5',
+          layout === 'index' ? 'grid sm:grid-cols-2' : 'flex flex-col',
+        )}
+      >
+        {lessons.map((l, i) => {
+          const isActive = l.id === activeId
+          const label = lessonLabels[i]
+          return (
+            <li key={l.id}>
+              <button
+                type="button"
+                onClick={() => selectLesson(l.id)}
+                className={cn(
+                  'flex w-full items-start gap-3 rounded-xl border px-4 py-3 text-left transition-colors',
+                  isActive
+                    ? 'border-deep-teal/40 bg-sage-light'
+                    : 'border-stone bg-card hover:border-deep-teal/30',
+                )}
+              >
+                <span className="mt-0.5 shrink-0">
+                  {l.kind === 'article' ? (
+                    <FileText className="size-4 text-sage-deep" aria-hidden="true" />
+                  ) : l.kind === 'link' ? (
+                    <ExternalLink className="size-4 text-sage-deep" aria-hidden="true" />
+                  ) : l.kind === 'document' ? (
+                    <Download className="size-4 text-sage-deep" aria-hidden="true" />
+                  ) : (
+                    <PlayCircle className="size-4 text-deep-teal" aria-hidden="true" />
+                  )}
+                  {/* video + embed both use the play icon above */}
+                </span>
+                <span className="flex flex-col">
+                  <span className="font-serif text-[15px] font-semibold leading-snug text-charcoal">
+                    {label}. {l.title}
+                  </span>
+                  <span className="font-sans text-[11px] uppercase tracking-wide text-charcoal/45">
+                    {l.kind === 'article'
+                      ? 'Article'
+                      : l.kind === 'link'
+                        ? 'Link'
+                        : l.kind === 'document'
+                          ? 'Document'
+                          : 'Video'}
+                    {/* "video" and "embed" both display as Video */}
+                  </span>
+                </span>
+              </button>
+            </li>
+          )
+        })}
+      </ol>
+    )
+  }
+
   if (lessons.length === 0) {
     return (
       <p className="rounded-2xl border border-dashed border-stone bg-card px-6 py-12 text-center font-serif text-[15px] text-charcoal/70">
         No lessons have been added to this collection yet.
       </p>
+    )
+  }
+
+  // Index-first collections: before a member picks anything, show the whole
+  // list at the top as a browsable table of contents.
+  if (indexFirst && !active) {
+    return (
+      <div className="flex flex-col gap-4">
+        <div className="flex flex-col gap-1">
+          <h3 className="font-sans text-xs font-semibold uppercase tracking-[0.12em] text-charcoal/55">
+            All {lessons.length} handouts
+          </h3>
+          <p className="font-serif text-[15px] leading-relaxed text-charcoal/70">
+            Choose a handout below to start reading.
+          </p>
+        </div>
+        {renderLessonList('index')}
+      </div>
     )
   }
 
@@ -367,9 +456,9 @@ export function LessonViewer({
                 </p>
               )}
               {active.kind === 'article' && active.body && (
-                <article className="mt-2 whitespace-pre-wrap font-serif text-[16px] leading-relaxed text-charcoal/85">
-                  {active.body}
-                </article>
+                <div className="mt-2">
+                  <ArticleMarkdown>{active.body}</ArticleMarkdown>
+                </div>
               )}
             </div>
           </>
@@ -381,54 +470,7 @@ export function LessonViewer({
         <h3 className="mb-1 font-sans text-xs font-semibold uppercase tracking-[0.12em] text-charcoal/55">
           {lessons.length} {lessons.length === 1 ? 'lesson' : 'lessons'}
         </h3>
-        <ol className="flex flex-col gap-1.5">
-          {lessons.map((l, i) => {
-            const isActive = l.id === activeId
-            const label = lessonLabels[i]
-            return (
-              <li key={l.id}>
-                <button
-                  type="button"
-                  onClick={() => selectLesson(l.id)}
-                  className={cn(
-                    'flex w-full items-start gap-3 rounded-xl border px-4 py-3 text-left transition-colors',
-                    isActive
-                      ? 'border-deep-teal/40 bg-sage-light'
-                      : 'border-stone bg-card hover:border-deep-teal/30',
-                  )}
-                >
-                  <span className="mt-0.5 shrink-0">
-                    {l.kind === 'article' ? (
-                      <FileText className="size-4 text-sage-deep" aria-hidden="true" />
-                    ) : l.kind === 'link' ? (
-                      <ExternalLink className="size-4 text-sage-deep" aria-hidden="true" />
-                    ) : l.kind === 'document' ? (
-                      <Download className="size-4 text-sage-deep" aria-hidden="true" />
-                    ) : (
-                      <PlayCircle className="size-4 text-deep-teal" aria-hidden="true" />
-                    )}
-                    {/* video + embed both use the play icon above */}
-                  </span>
-                  <span className="flex flex-col">
-                    <span className="font-serif text-[15px] font-semibold leading-snug text-charcoal">
-                      {label}. {l.title}
-                    </span>
-                    <span className="font-sans text-[11px] uppercase tracking-wide text-charcoal/45">
-                      {l.kind === 'article'
-                        ? 'Article'
-                        : l.kind === 'link'
-                          ? 'Link'
-                          : l.kind === 'document'
-                            ? 'Document'
-                            : 'Video'}
-                      {/* "video" and "embed" both display as Video */}
-                    </span>
-                  </span>
-                </button>
-              </li>
-            )
-          })}
-        </ol>
+        {renderLessonList('sidebar')}
       </aside>
 
       <Dialog open={ackOpen} onOpenChange={setAckOpen}>

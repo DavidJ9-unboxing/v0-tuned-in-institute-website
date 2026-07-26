@@ -52,7 +52,11 @@ export default async function SectionPage({
       </header>
 
       <div className="mt-8">
-        <LessonViewer lessons={lessons} initialLessonId={initialLessonId} />
+        <LessonViewer
+          lessons={lessons}
+          initialLessonId={initialLessonId}
+          indexFirst={slug === 'caregiver-handouts'}
+        />
       </div>
     </div>
   )

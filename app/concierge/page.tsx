@@ -1,5 +1,6 @@
 import type { Metadata } from 'next'
-import { Clock, BrainCircuit, Baby, ShieldCheck } from 'lucide-react'
+import Link from 'next/link'
+import { Clock, BrainCircuit, Baby, ShieldCheck, ArrowRight } from 'lucide-react'
 import { AccessCta } from '@/components/site/access-cta'
 import { PageHero } from '@/components/site/page-hero'
 import { SectionLabel } from '@/components/site/section-label'
@@ -58,7 +59,16 @@ export default function ConciergePage() {
         title="Meet Remi, a concierge that knows the science, available 24/7."
         intro="Remi is a knowledgeable, calm guide in your pocket, trained on every module and resource across the Tuned In Institute and Rooted Rhythm. She is ready the moment a sensitive child melts down or a sensitive adult hits a wall."
       >
-        <AskRemiButton label="Talk to Remi now" />
+        <div className="flex flex-col items-center gap-3 sm:flex-row">
+          <AskRemiButton label="Talk to Remi now" />
+          <Link
+            href="/concierge/chat"
+            className="inline-flex items-center gap-1.5 font-sans text-sm font-semibold text-deep-teal underline-offset-4 hover:underline"
+          >
+            Open the full chat page
+            <ArrowRight className="size-4" aria-hidden="true" />
+          </Link>
+        </div>
       </PageHero>
 
       {/* Meet Remi — name meaning */}
