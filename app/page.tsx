@@ -237,37 +237,47 @@ export default async function HomePage() {
               </h3>
               <p className="mt-4 max-w-md font-serif text-[15px] leading-relaxed text-charcoal/85">
                 The book that started everything — how to understand, support, and raise a sensitive
-                child. Available now in paperback and on Kindle.
+                child. Available now in paperback and on Kindle, or read the complete book free with
+                your library access.
               </p>
-              <div className="mt-7 flex flex-col gap-3 sm:flex-row">
-                <Button
-                  asChild
-                  size="lg"
-                  variant="outline"
-                  className="border-deep-teal font-sans font-semibold text-deep-teal hover:bg-deep-teal hover:text-off-white"
-                >
-                  <a
-                    href="https://www.amazon.com/dp/B0FFZ8N7N6"
-                    target="_blank"
-                    rel="noopener noreferrer"
+              <div className="mt-7 flex flex-col items-center gap-3">
+                <Button asChild size="lg" className="font-sans font-semibold">
+                  <Link
+                    href={user ? '/library/tuned-in-parenting-2-12-intro?lesson=237' : '/sign-in'}
                   >
-                    Buy Paperback
-                  </a>
+                    {user ? 'Read in the library' : 'Sign in to read'}
+                  </Link>
                 </Button>
-                <Button
-                  asChild
-                  size="lg"
-                  variant="outline"
-                  className="border-deep-teal font-sans font-semibold text-deep-teal hover:bg-deep-teal hover:text-off-white"
-                >
-                  <a
-                    href="https://www.amazon.com/dp/B0FFNGD6VH"
-                    target="_blank"
-                    rel="noopener noreferrer"
+                <div className="flex flex-col gap-3 sm:flex-row">
+                  <Button
+                    asChild
+                    size="lg"
+                    variant="outline"
+                    className="border-deep-teal font-sans font-semibold text-deep-teal hover:bg-deep-teal hover:text-off-white"
                   >
-                    Buy on Kindle
-                  </a>
-                </Button>
+                    <a
+                      href="https://www.amazon.com/dp/B0FFZ8N7N6"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                    >
+                      Buy Paperback
+                    </a>
+                  </Button>
+                  <Button
+                    asChild
+                    size="lg"
+                    variant="outline"
+                    className="border-deep-teal font-sans font-semibold text-deep-teal hover:bg-deep-teal hover:text-off-white"
+                  >
+                    <a
+                      href="https://www.amazon.com/dp/B0FFNGD6VH"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                    >
+                      Buy on Kindle
+                    </a>
+                  </Button>
+                </div>
               </div>
             </div>
 
