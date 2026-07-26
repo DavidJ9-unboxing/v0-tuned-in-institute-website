@@ -96,6 +96,9 @@ export const section = pgTable('section', {
   collectionId: integer('collectionId'),
   // Order within the parent collection (used on the collection page).
   collectionPosition: integer('collectionPosition').notNull().default(0),
+  // Course sections show a "Course" badge and count their items as "lessons";
+  // non-course sections count their items as "resources" instead.
+  isCourse: boolean('isCourse').notNull().default(false),
   // Hidden sections (and their lessons) never appear in the library, but their
   // content is still fed to Remi as background knowledge for answering questions.
   hidden: boolean('hidden').notNull().default(false),

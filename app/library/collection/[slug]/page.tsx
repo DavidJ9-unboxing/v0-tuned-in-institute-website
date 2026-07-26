@@ -72,6 +72,8 @@ export default async function CollectionPage({
                 key={s.id}
                 section={s}
                 displayTitle={shortTitle(s.title, collection.title)}
+                countNoun="lesson"
+                showBadge={false}
               />
             ))}
           </div>
