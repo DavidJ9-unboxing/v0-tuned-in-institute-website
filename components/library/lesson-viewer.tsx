@@ -470,6 +470,17 @@ export function LessonViewer({
                         : 'Open document'}
                     <Download className="size-4" aria-hidden="true" />
                   </a>
+                  {getDocumentCover(active.fileName) && (
+                    <a
+                      href="https://www.amazon.com/Tuned-guide-parents-sensitive-children/dp/B0FFZ8N7N6/"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="inline-flex items-center gap-2 rounded-full border border-deep-teal/40 px-5 py-2.5 font-sans text-sm font-semibold text-deep-teal transition-colors hover:bg-sage-light"
+                    >
+                      Buy Kindle or paperback on Amazon
+                      <ExternalLink className="size-4" aria-hidden="true" />
+                    </a>
+                  )}
                 </div>
 
                 <p className="flex items-start gap-2 rounded-lg border border-stone bg-off-white px-3.5 py-2.5 font-sans text-xs leading-relaxed text-charcoal/65">
