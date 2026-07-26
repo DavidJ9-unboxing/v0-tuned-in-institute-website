@@ -1,3 +1,5 @@
+import Link from 'next/link'
+import { LifeBuoy } from 'lucide-react'
 import { and, desc, eq } from 'drizzle-orm'
 import { db } from '@/lib/db'
 import { user } from '@/lib/db/schema'
@@ -30,6 +32,13 @@ export default async function TherapistPage() {
           in session. They&apos;ll be prompted to choose their own password the first time they sign
           in, and can always use &ldquo;Forgot password?&rdquo; if they get locked out.
         </p>
+        <Link
+          href="/therapist/help"
+          className="mt-3 inline-flex items-center gap-1.5 font-sans text-sm font-medium text-deep-teal hover:underline"
+        >
+          <LifeBuoy className="size-4" aria-hidden="true" />
+          Client can&apos;t get in? See the quick guide
+        </Link>
       </div>
       <TherapistClientManager clients={clients} />
     </div>

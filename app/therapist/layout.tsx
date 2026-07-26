@@ -11,12 +11,18 @@ export default async function TherapistLayout({ children }: { children: ReactNod
 
   return (
     <div className="min-h-screen bg-background">
-      <header className="border-b border-border bg-card">
+      <header className="border-b border-border bg-card print:hidden">
         <div className="mx-auto flex max-w-4xl items-center justify-between gap-4 px-4 py-4 sm:px-6">
           <Link href="/therapist" className="font-serif text-lg font-semibold text-deep-teal">
             Client onboarding
           </Link>
           <div className="flex items-center gap-3">
+            <Link
+              href="/therapist/help"
+              className="hidden font-sans text-sm font-medium text-deep-teal hover:underline sm:inline"
+            >
+              Help
+            </Link>
             <Link
               href="/library"
               className="hidden font-sans text-sm font-medium text-deep-teal hover:underline sm:inline"
