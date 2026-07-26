@@ -557,6 +557,35 @@ const KIND_LABELS: Record<LessonKind, string> = {
 // a link, embed, or inline text.
 const UPLOAD_KINDS: readonly LessonKind[] = ['video', 'document', 'audio']
 
+// Map file extensions to content types so uploads still get a correct MIME type
+// when the browser reports an empty or generic one (common for .m4a audio).
+const EXT_CONTENT_TYPES: Record<string, string> = {
+  mp3: 'audio/mpeg',
+  m4a: 'audio/mp4',
+  aac: 'audio/aac',
+  wav: 'audio/wav',
+  ogg: 'audio/ogg',
+  oga: 'audio/ogg',
+  flac: 'audio/flac',
+  mp4: 'video/mp4',
+  m4v: 'video/x-m4v',
+  mov: 'video/quicktime',
+  webm: 'video/webm',
+}
+
+/**
+ * Returns a reliable content type for an upload. Prefers the browser-provided
+ * type, but falls back to one derived from the file extension when the browser
+ * gives nothing useful (empty or the generic application/octet-stream) — which
+ * happens often for audio files, especially .m4a.
+ */
+function resolveContentType(file: File): string | undefined {
+  const browserType = file.type?.trim()
+  if (browserType && browserType !== 'application/octet-stream') return browserType
+  const ext = file.name.split('.').pop()?.toLowerCase() ?? ''
+  return EXT_CONTENT_TYPES[ext]
+}
+
 function AddLessonForm({ sectionId, onDone }: { sectionId: number; onDone: () => void }) {
   const [kind, setKind] = useState<LessonKind>('embed')
   const [uploading, setUploading] = useState(false)
@@ -603,6 +632,11 @@ function AddLessonForm({ sectionId, onDone }: { sectionId: number; onDone: () =>
         access: 'public',
         handleUploadUrl: '/api/admin/upload',
         multipart: useMultipart,
+        // Browsers often report an empty or generic MIME type for audio files
+        // (especially .m4a), which would upload as application/octet-stream and
+        // get rejected. Fall back to a type derived from the file extension so
+        // audio always lands with a proper audio/* content type.
+        contentType: resolveContentType(file),
         onUploadProgress: ({ percentage }) => setProgress(Math.round(percentage)),
       })
       setUploadedUrl(blob.url)

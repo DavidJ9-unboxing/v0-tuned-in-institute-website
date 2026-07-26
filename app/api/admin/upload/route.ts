@@ -19,21 +19,10 @@ export async function POST(request: Request): Promise<NextResponse> {
         }
         return {
           allowedContentTypes: [
-            // Video
-            'video/mp4',
-            'video/quicktime',
-            'video/webm',
-            'video/x-m4v',
-            // Audio (meditations, lectures)
-            'audio/mpeg',
-            'audio/mp3',
-            'audio/mp4',
-            'audio/x-m4a',
-            'audio/m4a',
-            'audio/aac',
-            'audio/wav',
-            'audio/x-wav',
-            'audio/ogg',
+            // Video (any subtype — files vary by browser/OS)
+            'video/*',
+            // Audio (meditations, lectures) — any subtype
+            'audio/*',
             // Documents
             'application/pdf',
             'application/msword',
