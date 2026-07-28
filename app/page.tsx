@@ -285,7 +285,7 @@ export default async function HomePage() {
             <div className="flex flex-col items-center text-center">
               <div className="w-full max-w-[240px]">
                 <BookCover3D
-                  src="/images/tuned-in-teens-book-cover.png"
+                  src="/images/tuned-in-teens-book-cover-v2.png"
                   alt="Tuned In: A Guide for Parents of Sensitive Teens by Sophie Schauermann, LCSW"
                 />
               </div>
