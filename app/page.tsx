@@ -215,12 +215,12 @@ export default async function HomePage() {
               Tuned In, from the page to your nervous system.
             </h2>
             <p className="mx-auto mt-4 max-w-2xl font-serif text-lg leading-relaxed text-charcoal/85">
-              Two companion guides by Sophie Schauermann, LCSW — the research-backed foundation
+              Three companion guides by Sophie Schauermann, LCSW — the research-backed foundation
               behind every program at the Institute.
             </p>
           </div>
 
-          <div className="mt-14 grid gap-12 md:grid-cols-2 md:gap-10">
+          <div className="mt-14 grid gap-12 md:grid-cols-3 md:gap-8">
             {/* Book One — Parenting */}
             <div className="flex flex-col items-center text-center">
               <div className="w-full max-w-[240px]">
@@ -281,7 +281,41 @@ export default async function HomePage() {
               </div>
             </div>
 
-            {/* Book Two — Adults */}
+            {/* Book Two — Parenting Teens */}
+            <div className="flex flex-col items-center text-center">
+              <div className="w-full max-w-[240px]">
+                <BookCover3D
+                  src="/images/tuned-in-teens-book-cover.png"
+                  alt="Tuned In: A Guide for Parents of Sensitive Teens by Sophie Schauermann, LCSW"
+                />
+              </div>
+              <p className="mt-10 font-sans text-xs font-semibold uppercase tracking-[0.18em] text-sage-dark">
+                Book Two
+              </p>
+              <h3 className="mt-3 font-serif text-2xl font-semibold leading-tight text-deep-teal text-balance">
+                A Guide for Parents of Sensitive Teens
+              </h3>
+              <p className="mt-4 max-w-md font-serif text-[15px] leading-relaxed text-charcoal/85">
+                Support for the adolescent years (12–18) — navigating bigger emotions, growing
+                independence, and staying connected to your sensitive teen. Read the complete book
+                free with your library access.
+              </p>
+              <div className="mt-7 flex flex-col items-center gap-3">
+                <Button asChild size="lg" className="font-sans font-semibold">
+                  <Link
+                    href={
+                      user
+                        ? '/library/tuned-in-parenting-for-teens-12-18-course?lesson=319'
+                        : '/sign-in'
+                    }
+                  >
+                    {user ? 'Read in the library' : 'Sign in to read'}
+                  </Link>
+                </Button>
+              </div>
+            </div>
+
+            {/* Book Three — Adults */}
             <div className="flex flex-col items-center text-center">
               <div className="w-full max-w-[240px]">
                 <BookCover3D
@@ -290,7 +324,7 @@ export default async function HomePage() {
                 />
               </div>
               <p className="mt-10 font-sans text-xs font-semibold uppercase tracking-[0.18em] text-sage-dark">
-                Book Two
+                Book Three
               </p>
               <h3 className="mt-3 font-serif text-2xl font-semibold leading-tight text-deep-teal text-balance">
                 A Guide to Reconnecting with Yourself
