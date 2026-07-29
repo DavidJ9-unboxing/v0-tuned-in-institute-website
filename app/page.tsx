@@ -376,6 +376,36 @@ export default async function HomePage() {
                     {user ? 'Read in the library' : 'Sign in to read'}
                   </Link>
                 </Button>
+                <div className="flex flex-col gap-3 sm:flex-row">
+                  <Button
+                    asChild
+                    size="lg"
+                    variant="outline"
+                    className="border-deep-teal font-sans font-semibold text-deep-teal hover:bg-deep-teal hover:text-off-white"
+                  >
+                    <a
+                      href="https://www.amazon.com/dp/B0HBW4P19H"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                    >
+                      Buy Paperback
+                    </a>
+                  </Button>
+                  <Button
+                    asChild
+                    size="lg"
+                    variant="outline"
+                    className="border-deep-teal font-sans font-semibold text-deep-teal hover:bg-deep-teal hover:text-off-white"
+                  >
+                    <a
+                      href="https://www.amazon.com/dp/B0H6XFSM4R"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                    >
+                      Buy on Kindle
+                    </a>
+                  </Button>
+                </div>
               </div>
             </div>
           </div>
