@@ -21,13 +21,23 @@ exists so that conversation can start from facts.
 
 This matters more than anything else in this document, for three reasons.
 
-**Rooted Rhythm is a therapy provider.** A practice providing therapy to
-fee-paying clients is a *healthcare provider*. Under HIPAA it becomes a
-**covered entity** if it transmits any "standard electronic transaction" —
-in practice, electronic insurance billing, eligibility checks, or claims. A
-strictly cash-pay practice that never does any of that is often *not* a covered
-entity. **This is the single question that decides everything below, and only
-Rooted Rhythm's team can answer it.**
+**Rooted Rhythm is a therapy provider, and it takes insurance.** A practice
+providing therapy to fee-paying clients is a *healthcare provider*. Under HIPAA
+it becomes a **covered entity** if it transmits any "standard electronic
+transaction" — in practice, electronic insurance billing, eligibility checks, or
+claims. A strictly cash-pay practice that never does any of that is often *not*
+a covered entity.
+
+**Rooted Rhythm's team has now confirmed that it takes insurance.** That
+effectively answers the question: the practice is almost certainly a covered
+entity, and the analysis below should be read on that basis rather than as a
+hypothetical. A lawyer should still confirm formally, but planning should now
+assume HIPAA applies.
+
+**The practical consequence: this platform is very likely already in scope
+today — before any memory feature is built.** The obligations described in this
+document are not triggered by adding memory. They already exist, and they
+already apply to 640 existing client records.
 
 **Tuned In is not a vendor — it is the same organisation.** Because Rooted
 Rhythm *owns* Tuned In, there is no Business Associate Agreement to lean on
@@ -54,6 +64,33 @@ Verified against the live schema.
 | `createdById` — the staff member who onboarded them | `user` table | **Links a named client to a specific therapist** |
 | Password hash, sessions, IP address, user agent | `account`, `session` | Standard auth data |
 | Content library (287 lessons) | `lesson`, `section` | Not personal data |
+
+**Actual account numbers, as of this assessment:**
+
+| Role | Count |
+| --- | --- |
+| `client` | 640 |
+| `admin` | 10 |
+| `therapist` | 1 |
+
+Two things stand out, and both are more urgent than the memory question:
+
+**1. Ten admin accounts can see all 640 client records.** HIPAA's *minimum
+necessary* principle expects access to be limited to what each person needs to
+do their job. Ten full-access administrators for a single therapy practice is
+very likely more than that standard allows — especially when the client list is
+itself protected information. Note also that `admin` is a single all-or-nothing
+tier: there is no "can edit library content but cannot see the client list"
+role, so anyone who needs to manage lessons is given access to every member
+record as a side effect.
+
+**2. There is no audit logging anywhere in the codebase.** No record of which
+admin viewed, changed, or exported which member's data. Under HIPAA this is not
+optional — it is required, and it is also the only way to answer "whose data was
+affected?" after an incident. Right now that question would be unanswerable.
+
+Neither of these is caused by Remi, and neither would be fixed by declining to
+build memory.
 
 **Remi conversations are not stored anywhere.** There is no message or
 conversation table. Remi's own privacy statement to members — *"this chat is
@@ -152,20 +189,50 @@ Fixed in `components/analytics/posthog-provider.tsx`:
 **Remaining:** purge historical PostHog data (see §3), which the code fix does
 not do.
 
-### Priority 2 — Confirm whether HIPAA applies at all
-A lawyer question, driven by: does Rooted Rhythm bill insurance or transmit
-electronic healthcare transactions? Everything else depends on the answer, and
-it is cheap to establish.
+### Priority 2 — Formal legal confirmation ⚠️ LARGELY ANSWERED
+Rooted Rhythm takes insurance, so it is almost certainly a covered entity and
+this platform is almost certainly in scope. A lawyer should confirm formally and
+define the boundary, but this is no longer an open question for planning
+purposes — **assume HIPAA applies.**
 
-### Priority 3 — Put BAAs in place for what remains
-If in scope: Neon, Vercel, OpenAI, Resend. Most offer BAAs on paid tiers. Note
-that a BAA with OpenAI also requires configuring **zero data retention** for
-API traffic.
+### Priority 3 — Put BAAs in place
+Required for every vendor that touches member data. Based on the code, that
+means at minimum:
 
-### Priority 4 — Access controls and audit logging
-There is currently no audit log of which staff member viewed which client's
-record. HIPAA's Security Rule expects that. Worth confirming that therapists can
-only see clients they onboarded, and that admin access is logged.
+| Vendor | What it handles |
+| --- | --- |
+| Neon | The database — all 640 client records |
+| Vercel | Hosting, logs, AI Gateway |
+| OpenAI (`openai/gpt-5.4-mini`, via AI Gateway) | Remi conversation content |
+| Resend | Transactional email to members |
+| PostHog | Product analytics |
+
+BAAs are generally available on paid/enterprise tiers, but **the specific tier
+requirements need confirming per vendor — do not assume your current plans
+qualify.** For model traffic, a BAA also needs to be paired with **zero data
+retention**; check how that is configured when routing through the AI Gateway
+rather than calling OpenAI directly.
+
+PostHog is the one to question rather than paper over: now that it no longer
+receives names or emails, consider whether it needs a BAA or whether the
+pseudonymised data puts it outside the boundary. That is a lawyer call, and it
+is cheaper than an enterprise upgrade.
+
+### Priority 4 — Access controls and audit logging ⬆️ MORE URGENT THAN ASSESSED
+This is now the largest *engineering* gap, and the audit found it is worse than
+a missing log file:
+
+- **10 admin accounts with full access to 640 client records.** Review whether
+  all ten need it. This is the single fastest risk reduction available and costs
+  nothing to implement — it is an operational decision.
+- **`admin` is all-or-nothing.** Splitting it into a content-management role
+  (library, no client list) and a true administrator role would let most of
+  those ten keep working with far less access.
+- **No audit logging at all.** Needs to record which staff member viewed,
+  modified, or exported which member's record, with a timestamp. Required by the
+  Security Rule, and the only way to scope an incident afterwards.
+- **Confirm therapist scoping.** `createdById` links clients to the staff member
+  who onboarded them; verify a therapist cannot see clients who are not theirs.
 
 ### Priority 5 — Encryption, retention, and breach process
 Data is encrypted in transit and at rest by Neon and Vercel by default. What is
@@ -202,41 +269,74 @@ discoverable in litigation and reportable in a breach.
 - **Never written during a crisis exchange.** If the safety protocol triggers,
   nothing from that turn should be persisted.
 
-**Recommended sequencing:** build it behind a flag that stays **off** until
-Priority 1 is fixed and Priority 2 is answered. That way the feature is ready
-and reviewable, but no sensitive record accumulates before the compliance
-position is understood.
+**Recommended sequencing — and the key point of this whole document:**
+
+Memory should **not** be enabled yet. But the reason is not that memory is
+uniquely dangerous. It is that **the foundations it depends on are not in place,
+and those foundations are already required without it.**
+
+Concretely, do not enable memory until:
+
+1. **BAAs are signed** (Priority 3) — otherwise conversation-derived notes flow
+   to vendors with no legal cover.
+2. **Audit logging exists** (Priority 4) — otherwise you cannot answer "whose
+   memory was accessed?" after an incident.
+3. **Admin access is narrowed** (Priority 4) — otherwise you are handing ten
+   accounts a readable history of 640 families' mental-health concerns.
+
+Every one of those is needed **anyway**, for the 640 records that already exist.
+Memory does not create the obligation; it raises the cost of not having met it.
+
+The healthy way to read this: the blocker is not the feature, it is the
+infrastructure around it. Do items 1–3 and memory becomes a small, safe
+increment. Skip them and memory is the change that converts a paperwork gap into
+a breach-notification event.
+
+Building it now behind an **off-by-default flag** is still worthwhile — the code
+gets written and reviewed while the compliance work proceeds in parallel, and
+nothing accumulates until someone deliberately turns it on.
 
 ---
 
 ## 6. The honest summary
 
-Tuned In is in a **better position than most platforms handling this kind of
-data**, largely because Remi stores nothing. The architecture has been cautious,
-and Remi's framing — explicitly not a therapist, not a clinical record, with a
-real crisis protocol — is the right defensive posture.
+Remi itself is in **good shape**. It stores nothing, its framing is careful
+(explicitly not a therapist, not a clinical record, with a real crisis
+protocol), and the analytics leak that did exist has been closed in code. The
+remaining item there is purging historical PostHog data — an operational task in
+their dashboard, not a code change.
 
-The one live gap — identifiable member data flowing to third-party analytics —
-**has now been closed in code**. The outstanding piece is purging the historical
-data already sent, which is an operational task in the PostHog dashboard rather
-than a code change, and is worth doing regardless of how the HIPAA question
-resolves.
+**The finding that matters most is not about Remi or about memory.** Rooted
+Rhythm takes insurance, which means this platform is very likely already inside
+a HIPAA boundary — today, with 640 client records, 10 full-access admin
+accounts, and no audit logging. That gap exists right now and would still exist
+if the memory feature were never built.
 
-The memory feature is the real decision point. It is the moment the platform
-stops being stateless and starts holding sensitive records. Building it inside
-Tuned In rather than in ChatGPT keeps you in control of that — but the honest
-trade is that you are choosing to take on obligations you do not currently have,
-in exchange for a genuinely better member experience. That is a reasonable
-trade to make deliberately, and a bad one to make by accident.
+So the answer to *"should we therefore not enable memory?"* is: **correct, not
+yet — but memory is not the problem to solve first.** The prerequisites are
+required regardless. The realistic order is: narrow admin access (free, this
+week), add audit logging, get BAAs signed, then turn memory on as a small
+increment on solid ground.
+
+Declining to build memory would not make the platform compliant. It would only
+leave the existing gap unaddressed while also giving up the member experience
+Sophie is asking for. Both are worth having — in the right order.
 
 ---
 
 ## 7. Questions for the lawyer
 
-1. Does Rooted Rhythm transmit any electronic healthcare transactions
-   (insurance billing, eligibility, claims)? I.e. is it a HIPAA covered entity?
+1. ~~Does Rooted Rhythm transmit electronic healthcare transactions?~~
+   **Answered: yes, it takes insurance.** Please confirm formally that this makes
+   it a covered entity, and identify the effective date from which the
+   obligations applied.
 2. Given Rooted Rhythm owns Tuned In, is the platform inside the practice's
    compliance boundary, or separable as a wellness/education product?
+2b. **If in scope, what is our position on the period already elapsed?**
+   Member names and emails were being sent to PostHog alongside records of which
+   mental-health resources they viewed. That has been stopped, but historical
+   data was collected. Does this require notification, and should the historical
+   PostHog data be purged?
 3. Does restricting access to fee-paying clients make the membership list itself
    PHI?
 4. If members opt in to storing their own conversation summaries, does that
