@@ -79,11 +79,14 @@ relationship, and it exists today, independent of Remi.
 | **Vercel Blob** (files) | Library media only — no member data | Yes, with Vercel |
 | **PostHog** (analytics) | **See below — this is the main gap** | Yes, on paid plans |
 
-### The PostHog finding
+### The PostHog finding — now fixed
 
-This is the most significant issue found, and it has nothing to do with Remi.
+This was the most significant issue found, and it had nothing to do with Remi.
+**It has been remediated in this change set** (details in §4, Priority 1). The
+description below is what the code did beforehand, kept as a record of what was
+exposed and for how long.
 
-`components/analytics/posthog-provider.tsx` calls `posthog.identify()` for every
+`components/analytics/posthog-provider.tsx` called `posthog.identify()` for every
 signed-in member, sending:
 
 - their **user id**
@@ -106,17 +109,48 @@ third-party analytics tool. If Rooted Rhythm is a covered entity, this is
 very likely a disclosure of PHI without a BAA.
 
 **It is also the cheapest thing on this list to fix**, and unlike everything
-else it is a live exposure rather than a hypothetical one.
+else it was a live exposure rather than a hypothetical one.
+
+### Two further leaks found in the same file
+
+While fixing the above, two more were found in the page-view capture, which
+appended the full query string to every recorded URL:
+
+1. **Password-reset tokens.** `/reset-password?token=…` was sent to PostHog
+   verbatim. This is a **security issue, not just a privacy one**: a live
+   single-use credential for taking over a member's account was being copied to
+   a third-party vendor and stored in its event log.
+2. **Free-text library searches.** `/library?q=…` was captured verbatim. Search
+   text is written by the member about their own family and is often more
+   revealing than anything else on the platform.
+
+Both are now redacted at the point of capture.
+
+**Recommended follow-up:** because reset tokens were logged externally, they
+should be treated as potentially exposed. Consider shortening reset-token
+lifetime and, with the lawyer, whether historical PostHog event data should be
+purged. Deleting the historical PostHog data is worth doing regardless — the
+code fix stops new collection but does not remove what was already sent.
 
 ---
 
 ## 4. The gaps, in priority order
 
-### Priority 1 — Stop sending identifiable member data to analytics
-Remove `email` and `name` from the `identify()` call. The pseudonymous user id
-alone preserves essentially all the product analytics value. Consider also not
-sending full library URLs for authenticated pages, or excluding member-facing
-routes from analytics entirely. **Low effort, high impact, no product cost.**
+### Priority 1 — Stop sending identifiable member data to analytics ✅ DONE
+Fixed in `components/analytics/posthog-provider.tsx`:
+
+- **`email` and `name` removed** from `identify()`. Only the opaque user id and
+  role are sent, which preserves essentially all product analytics value.
+- **`q` and `token` query params redacted** before capture.
+- **Session recording explicitly disabled in code.** It was not enabled, but it
+  could have been switched on remotely from the PostHog dashboard at any time,
+  which would have captured the text of Remi conversations. Disabling it in code
+  makes that reviewable rather than a dashboard setting nobody is watching.
+- Lesson paths are deliberately **still captured** — knowing which resources get
+  used is legitimate product analytics, and it is no longer tied to a name.
+
+**Remaining:** purge historical PostHog data (see §3), which the code fix does
+not do.
 
 ### Priority 2 — Confirm whether HIPAA applies at all
 A lawyer question, driven by: does Rooted Rhythm bill insurance or transmit
@@ -182,9 +216,11 @@ data**, largely because Remi stores nothing. The architecture has been cautious,
 and Remi's framing — explicitly not a therapist, not a clinical record, with a
 real crisis protocol — is the right defensive posture.
 
-There is **one live gap that should be closed regardless** of how the HIPAA
-question resolves: identifiable member data flowing to third-party analytics.
-That is worth fixing this week, and it is a small change.
+The one live gap — identifiable member data flowing to third-party analytics —
+**has now been closed in code**. The outstanding piece is purging the historical
+data already sent, which is an operational task in the PostHog dashboard rather
+than a code change, and is worth doing regardless of how the HIPAA question
+resolves.
 
 The memory feature is the real decision point. It is the moment the platform
 stops being stateless and starts holding sensitive records. Building it inside
