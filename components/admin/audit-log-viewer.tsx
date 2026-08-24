@@ -165,7 +165,10 @@ export function AuditLogViewer({ rows, total, actions, query, action, offset, li
                   <dd className="break-all font-medium text-foreground">
                     {row.actorEmail ?? 'system'}
                     {row.actorRole ? (
-                      <span className="ml-1 font-normal text-muted-foreground">
+                      // `break-all` on the parent is needed so long emails wrap
+                      // inside a 300px card, but it also splits this short role
+                      // into "(ad min)". Opt this span out of that.
+                      <span className="ml-1 whitespace-nowrap font-normal text-muted-foreground">
                         ({row.actorRole})
                       </span>
                     ) : null}

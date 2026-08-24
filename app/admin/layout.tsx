@@ -45,12 +45,19 @@ export default async function AdminLayout({ children }: { children: ReactNode })
             <AccountMenu name={admin.name} email={admin.email} isAdmin />
           </div>
         </div>
-        <nav className="flex items-center gap-1 border-t border-border px-4 py-2 sm:hidden">
+        {/*
+          Wraps rather than scrolling. A single non-wrapping flex row of these
+          six labels is ~480px wide, which pushed the whole page 221px wider
+          than a 300px viewport and dragged every section of every admin page
+          sideways with it. Wrapping keeps all six reachable without hiding any
+          behind a scroll affordance that is easy to miss on a small screen.
+        */}
+        <nav className="flex flex-wrap items-center gap-1 border-t border-border px-4 py-2 sm:hidden">
           {adminNav.map((item) => (
             <Link
               key={item.href}
               href={item.href}
-              className="rounded-md px-3 py-2 font-sans text-sm font-medium text-muted-foreground hover:text-deep-teal"
+              className="rounded-md px-2.5 py-2 font-sans text-sm font-medium text-muted-foreground hover:text-deep-teal"
             >
               {item.label}
             </Link>

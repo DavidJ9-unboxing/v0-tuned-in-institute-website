@@ -218,21 +218,92 @@ receives names or emails, consider whether it needs a BAA or whether the
 pseudonymised data puts it outside the boundary. That is a lawyer call, and it
 is cheaper than an enterprise upgrade.
 
-### Priority 4 — Access controls and audit logging ⬆️ MORE URGENT THAN ASSESSED
-This is now the largest *engineering* gap, and the audit found it is worse than
-a missing log file:
+### Priority 4 — Access controls and audit logging
+The largest *engineering* gap, and the audit found it was worse than a missing
+log file.
 
-- **10 admin accounts with full access to 640 client records.** Review whether
-  all ten need it. This is the single fastest risk reduction available and costs
-  nothing to implement — it is an operational decision.
+**✅ DONE — Audit logging is now implemented.** See "Audit logging" below for
+what it covers. This was the piece that blocked everything else, and it is in
+place.
+
+**Still outstanding — and these are decisions, not code:**
+
+- **⚠️ 56 accounts have effective staff access, not 11.** This is the most
+  important finding in this document. `isStaffEmail()` in `lib/session.ts`
+  grants therapist-level powers to *any* `@rootedrhythm.com` address,
+  independent of the `role` column. So the real count of people who can onboard
+  members and reset passwords is:
+
+  | Path to staff access | Count |
+  | --- | --- |
+  | `role = 'admin'` | 10 |
+  | `role = 'therapist'` | 1 |
+  | `role = 'client'` but staff email domain | 45 |
+  | **Effective total** | **56** |
+
+  Those 45 are almost certainly staff who signed up as ordinary members and were
+  never given an elevated role — but the email-domain check grants it anyway.
+  Under *minimum necessary*, 56 people with access to member accounts at a
+  practice this size is very hard to defend. **Recommend removing the
+  email-domain fallback and granting staff access only through an explicit
+  role.** That is a small code change gated on an operational decision about who
+  genuinely needs access.
+
+- **10 admin accounts can see all 640 client records.** Review whether all ten
+  need it. Costs nothing and is the fastest risk reduction available.
+
 - **`admin` is all-or-nothing.** Splitting it into a content-management role
   (library, no client list) and a true administrator role would let most of
   those ten keep working with far less access.
-- **No audit logging at all.** Needs to record which staff member viewed,
-  modified, or exported which member's record, with a timestamp. Required by the
-  Security Rule, and the only way to scope an incident afterwards.
-- **Confirm therapist scoping.** `createdById` links clients to the staff member
-  who onboarded them; verify a therapist cannot see clients who are not theirs.
+
+- **✅ Therapist scoping verified.** `app/therapist/page.tsx` filters on
+  `createdById = staff.id`, so a therapist sees only clients they onboarded, and
+  `resetMemberPassword` refuses cross-caseload resets. Confirmed correct; the
+  refusal is now logged as a `denied` event.
+
+### Audit logging — what was built
+`audit_log` table (`lib/db/schema.ts`), helper (`lib/audit.ts`), viewer at
+`/admin/audit` → "Activity" in the admin nav, admin-only.
+
+Currently records:
+
+| Event | Trigger |
+| --- | --- |
+| `member_list.view` | An admin loads the full member list |
+| `member_list.view_scoped` | A therapist loads their own caseload |
+| `member.create` | Account created (success and failure) |
+| `member.role_change` | Role changed, with `old -> new` |
+| `member.delete` | Account removed |
+| `member.password_reset` | Reset performed, **or denied** |
+
+Design decisions worth knowing:
+
+- **No foreign keys on `actorId`/`targetId`.** A cascade would erase a member's
+  audit trail at the exact moment their account is deleted — the event most
+  worth keeping. Email and role are snapshotted onto the row instead.
+  *Verified:* after deleting a test account through the real UI, the `user` row
+  was gone but the log still named who was deleted and by whom.
+- **Never contains PHI.** The log records *that* an access happened, never the
+  sensitive content. `detail` holds only non-sensitive context like
+  `role: client -> admin`.
+- **Failures never break the request.** A logging error is caught and reported
+  to the server console rather than blocking a password reset.
+- **Denied attempts are logged.** A therapist repeatedly probing clients who
+  aren't theirs is only visible if refusals are recorded.
+- **List views dedupe within 30s; mutations never do.** `revalidatePath` re-runs
+  server components, which produced 2+ identical view rows per visit and four
+  rows for one delete. Mutations and denials are always written — two password
+  resets are two real events.
+
+Not yet covered: sign-in/sign-out, and Remi conversation access (nothing is
+stored yet). **When memory ships, reads and writes of member memory must be
+added here** — that is the point of having built this first.
+
+### Remaining gap — log retention and tamper-resistance
+The table is append-only *by convention* (no update or delete path exists in the
+app), but a database-level actor could still alter it. HIPAA expects a six-year
+retention period. Worth deciding: periodic export to write-once storage, and
+whether a DB-level rule should block `UPDATE`/`DELETE` outright.
 
 ### Priority 5 — Encryption, retention, and breach process
 Data is encrypted in transit and at rest by Neon and Vercel by default. What is
@@ -278,11 +349,12 @@ and those foundations are already required without it.**
 Concretely, do not enable memory until:
 
 1. **BAAs are signed** (Priority 3) — otherwise conversation-derived notes flow
-   to vendors with no legal cover.
-2. **Audit logging exists** (Priority 4) — otherwise you cannot answer "whose
-   memory was accessed?" after an incident.
-3. **Admin access is narrowed** (Priority 4) — otherwise you are handing ten
-   accounts a readable history of 640 families' mental-health concerns.
+   to vendors with no legal cover. *Still outstanding.*
+2. ~~**Audit logging exists**~~ — **✅ done.** Member access is now logged, and
+   memory reads/writes must be added to it when the feature is built.
+3. **Staff access is narrowed** (Priority 4) — otherwise you are handing **56
+   accounts** a readable history of 640 families' mental-health concerns. *Still
+   outstanding, and larger than first assessed.*
 
 Every one of those is needed **anyway**, for the 640 records that already exist.
 Memory does not create the obligation; it raises the cost of not having met it.
@@ -314,9 +386,17 @@ if the memory feature were never built.
 
 So the answer to *"should we therefore not enable memory?"* is: **correct, not
 yet — but memory is not the problem to solve first.** The prerequisites are
-required regardless. The realistic order is: narrow admin access (free, this
-week), add audit logging, get BAAs signed, then turn memory on as a small
-increment on solid ground.
+required regardless.
+
+**Audit logging is now built** (`/admin/audit`), which removes the largest
+engineering blocker and means an access question is now answerable. Two things
+remain, and both are decisions rather than code:
+
+1. **Narrow staff access.** The audit surfaced that **56 accounts**, not 11,
+   have effective staff access — `isStaffEmail()` grants it by email domain, so
+   45 accounts with `role = 'client'` can onboard members and reset passwords.
+   This is free to fix and the highest-value item on the list.
+2. **Get BAAs signed** with Neon, Vercel, OpenAI, and Resend.
 
 Declining to build memory would not make the platform compliant. It would only
 leave the existing gap unaddressed while also giving up the member experience

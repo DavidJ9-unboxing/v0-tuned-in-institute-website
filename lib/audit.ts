@@ -232,11 +232,17 @@ export async function listAuditEvents(
   return { rows, total: counted[0]?.n ?? 0 }
 }
 
-/** Distinct action keys present in the log, for the filter dropdown. */
-export async function listAuditActions(): Promise<string[]> {
-  const rows = await db
-    .selectDistinct({ action: auditLog.action })
-    .from(auditLog)
-    .orderBy(auditLog.action)
-  return rows.map((r) => r.action)
+/**
+ * The event types offered in the filter dropdown.
+ *
+ * Deliberately the full known set from AUDIT_ACTIONS, rather than
+ * `SELECT DISTINCT action FROM audit_log`. Deriving the options from rows that
+ * happen to exist means you cannot filter for an event type until it has
+ * already occurred — so "show me every account deletion" is unavailable
+ * precisely when the answer is "none", which is the reassuring answer you were
+ * looking for. It also made bookmarked filter URLs silently fall back to
+ * "All events", because the selected option was never rendered.
+ */
+export function listAuditActions(): string[] {
+  return Object.values(AUDIT_ACTIONS).slice().sort()
 }

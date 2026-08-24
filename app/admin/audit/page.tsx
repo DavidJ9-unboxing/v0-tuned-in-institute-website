@@ -19,10 +19,8 @@ export default async function AdminAuditPage({
   const parsedOffset = Number.parseInt(params.offset ?? '0', 10)
   const offset = Number.isFinite(parsedOffset) && parsedOffset > 0 ? parsedOffset : 0
 
-  const [{ rows, total }, actions] = await Promise.all([
-    listAuditEvents({ query, action, limit: PAGE_SIZE, offset }),
-    listAuditActions(),
-  ])
+  const { rows, total } = await listAuditEvents({ query, action, limit: PAGE_SIZE, offset })
+  const actions = listAuditActions()
 
   return (
     <div className="flex flex-col gap-6">
