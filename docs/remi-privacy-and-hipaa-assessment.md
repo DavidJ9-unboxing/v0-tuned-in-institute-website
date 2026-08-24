@@ -116,12 +116,20 @@ relationship, and it exists today, independent of Remi.
 | **Vercel Blob** (files) | Library media only — no member data | Yes, with Vercel |
 | **PostHog** (analytics) | **See below — this is the main gap** | Yes, on paid plans |
 
-### The PostHog finding — now fixed
+### The PostHog finding — FIXED IN BRANCH, STILL LIVE IN PRODUCTION
 
 This was the most significant issue found, and it had nothing to do with Remi.
-**It has been remediated in this change set** (details in §4, Priority 1). The
-description below is what the code did beforehand, kept as a record of what was
-exposed and for how long.
+
+> **⚠️ Correction.** An earlier version of this document said "now fixed."
+> That was wrong and is corrected here. The fix exists **only on the `remi`
+> branch**. Verified against `main` (what production serves today): the live
+> `posthog.init` block contains only `capture_pageview`, `capture_pageleave`,
+> and `person_profiles` — no `maskAllInputs`, no `disable_session_recording` —
+> and `posthog.identify()` still sends email and name. **This leak is ongoing
+> until the branch ships.** Of everything in this document, it is the only item
+> where *not* deploying carries an active cost.
+
+The description below is what the code does today, and continues to do.
 
 `components/analytics/posthog-provider.tsx` called `posthog.identify()` for every
 signed-in member, sending:
@@ -173,8 +181,13 @@ code fix stops new collection but does not remove what was already sent.
 
 ## 4. The gaps, in priority order
 
-### Priority 1 — Stop sending identifiable member data to analytics ✅ DONE
-Fixed in `components/analytics/posthog-provider.tsx`:
+### Priority 1 — Stop sending identifiable member data to analytics
+**⚠️ WRITTEN, NOT DEPLOYED — the leak is live right now.** The changes below
+exist on the `remi` branch only; `main` still ships the unfixed file. This is
+the single highest-priority deploy, and it is a one-file change that can go out
+independently of everything else in this document.
+
+Fixed in `components/analytics/posthog-provider.tsx` (on branch):
 
 - **`email` and `name` removed** from `identify()`. Only the opaque user id and
   role are sent, which preserves essentially all product analytics value.
@@ -370,13 +383,116 @@ nothing accumulates until someone deliberately turns it on.
 
 ---
 
+## 5b. Remi is a staff tool too — and that was not in the original analysis
+
+This document was written on the assumption that Remi is a parent-facing
+resource guide. That assumption was wrong, and it materially changes several
+conclusions above. Known staff uses, all of them unplanned:
+
+| Who | Use |
+| --- | --- |
+| Therapists | Case planning and review against the "Rooted Rhythm way" |
+| Clinical director | Testing clinical ideas about **specific children**, as a challenge partner |
+| CEO / clinical director | Reviewing **therapist résumés** for suitability |
+| Various | Generating spreadsheets and other operational artifacts |
+
+The team reportedly found "all kinds of unexpected ways" to use it, so this list
+should be treated as incomplete.
+
+### What this changes
+
+1. **Staff type sensitive content into Remi as a matter of routine.** Not
+   hypothetically — the challenge-partner use involves details of identifiable
+   children, and the résumé use involves candidate personal data. §3's flow
+   analysis assumed member-authored parenting questions.
+
+2. **The BAA gap (Priority 3) is no longer theoretical.** Clinical detail about
+   named children reaches the model provider through the AI Gateway on a regular
+   basis. This moves BAAs from prudent to pressing.
+
+3. **⚠️ The PostHog session-recording risk is now acute.** Remi's input is a
+   normal text field, and PostHog's default masking covers passwords but **not**
+   other text inputs. Production has no `maskAllInputs` and no
+   `disable_session_recording` (verified against `main`). So if session
+   recording is ever switched on in the PostHog dashboard, staff-typed clinical
+   detail about specific children would be captured verbatim. **Someone with
+   dashboard access must confirm the current setting** — this cannot be
+   determined from the codebase. The code fix on the `remi` branch closes the
+   risk regardless of the dashboard state, which is why it belongs in code.
+
+4. **There is no record of any of this.** Remi conversations are not persisted
+   (confirmed: no message or conversation table exists), which limits exposure —
+   but it also means there is no data on staff usage. These workflows surfaced
+   anecdotally. The audit log added in Priority 4 covers member-record access
+   only, not Remi use.
+
+5. **One persona is serving two very different audiences.** Remi's system prompt
+   is written for parents — it refers to "the member's latest message", and
+   instructs the model to *"never make a child (or parent) wrong"* and to
+   *"avoid diagnostic or labeling language entirely"*. Those rules are correct
+   for a worried parent and counterproductive for a clinical director explicitly
+   asking to have her thinking challenged. This is pre-existing behaviour, not a
+   defect introduced by any recent change, but it means the challenge-partner
+   use is running against a persona designed to reassure. Worth investigating
+   before adding a staff mode.
+
+### Consequence for the retrieval work
+
+A keyword-retrieval layer was built to reduce Remi's time-to-first-token, then
+**reverted** once these uses came to light. Reasons, all verified by testing
+against the real library rather than reasoned about:
+
+- **It had no relevance threshold.** It always returned its top 6 matches
+  however weak, under a header telling the model these passages were selected
+  as relevant. A spreadsheet request pulled in ~4,600 characters of
+  `Supporting Confidence in Kids` and `No-Drama Discipline`; a résumé matched
+  `Play Therapy vs. Occupational Therapy` on the word "development". Full
+  context is *safer* here, because the model can simply ignore material that is
+  plainly irrelevant to the question.
+- **Its stop-word list deleted clinical vocabulary.** `"time-outs"` tokenized to
+  `outs`; `needs`, `trying`, `know` and `the way` were dropped outright — so
+  "the Rooted Rhythm way" lost "way".
+- **Length normalization promoted stubs over substance.** Intended to stop long
+  hidden transcripts from dominating, it instead surfaced tables of contents
+  ahead of substantive handouts. A sibling-conflict query returned a 155-char
+  fragment of a 1,241-char principles document; a discipline query missed
+  `Setting Boundaries in Parenting` (4,126 chars) entirely.
+
+**Current state: reverted to full context** (~186k chars / ~46.5k tokens, every
+lesson body, built in ~240ms). Verified restored.
+
+The latency problem is real and still unsolved, but it looks solvable without
+touching fidelity: the corpus is static and well above the 1,024-token minimum
+cacheable prefix, and cached prefixes are discounted ~90%. Two things to confirm
+before relying on that — automatic caching is documented for GPT-5.6+ while this
+app runs `openai/gpt-5.4-mini`, and there is per-cache-key rate guidance that
+needs thought at 651 accounts.
+
+**Before Remi's behaviour is changed again, it needs a regression test built
+from real prompts** supplied by the people actually using it — ten or so
+genuine case-review, challenge, and operational queries. Two attempts to reason
+about Remi's users from the code alone both got it wrong.
+
+**Two leftover database artifacts** from the reverted work are still present in
+production: a `lesson.search_tsv` generated column and a 224 kB
+`lesson_search_tsv_idx` GIN index. Nothing in the codebase references either
+(`schema.ts` has no mention of them). They are additive, nullable, and
+`GENERATED ALWAYS` with no triggers — verified inert by running an old-style
+`INSERT` without the column inside a rolled-back transaction. Safe to leave;
+worth dropping at a quiet moment as cleanup rather than urgency.
+
 ## 6. The honest summary
 
-Remi itself is in **good shape**. It stores nothing, its framing is careful
-(explicitly not a therapist, not a clinical record, with a real crisis
-protocol), and the analytics leak that did exist has been closed in code. The
-remaining item there is purging historical PostHog data — an operational task in
-their dashboard, not a code change.
+Remi stores nothing and its framing is careful (explicitly not a therapist, not
+a clinical record, with a real crisis protocol). But it is **not** simply a
+parent-facing guide: staff use it for case planning, résumé review, spreadsheets,
+and to challenge their thinking about specific children (§5b). Any future change
+to its behaviour has to account for all of those audiences, and none of them are
+covered by a test today.
+
+The analytics leak is **fixed on the branch but still live in production** — see
+the correction in §3. Purging historical PostHog data remains an operational task
+in their dashboard.
 
 **The finding that matters most is not about Remi or about memory.** Rooted
 Rhythm takes insurance, which means this platform is very likely already inside
@@ -389,14 +505,25 @@ yet — but memory is not the problem to solve first.** The prerequisites are
 required regardless.
 
 **Audit logging is now built** (`/admin/audit`), which removes the largest
-engineering blocker and means an access question is now answerable. Two things
-remain, and both are decisions rather than code:
+engineering blocker and means an access question is now answerable. What remains,
+in order:
 
-1. **Narrow staff access.** The audit surfaced that **56 accounts**, not 11,
+1. **Ship the PostHog fix.** One file, already written, closes a live leak of
+   member names and emails — and pre-emptively closes the session-recording risk
+   to staff-typed clinical detail described in §5b. Nothing else needs to ship
+   with it.
+2. **Confirm the PostHog session-recording setting** in the dashboard. Cannot be
+   answered from the codebase, and the answer determines whether anything has
+   already been captured.
+3. **Narrow staff access.** The audit surfaced that **56 accounts**, not 11,
    have effective staff access — `isStaffEmail()` grants it by email domain, so
    45 accounts with `role = 'client'` can onboard members and reset passwords.
-   This is free to fix and the highest-value item on the list.
-2. **Get BAAs signed** with Neon, Vercel, OpenAI, and Resend.
+   Free to fix, pending a decision on who genuinely needs access.
+4. **Get BAAs signed** with Neon, Vercel, OpenAI, and Resend — now pressing
+   rather than prudent, since staff routinely send clinical detail about named
+   children to the model provider.
+5. **Collect real Remi prompts** from Sophie, Kate, and the therapists, and turn
+   them into a regression test before touching Remi's behaviour again.
 
 Declining to build memory would not make the platform compliant. It would only
 leave the existing gap unaddressed while also giving up the member experience
