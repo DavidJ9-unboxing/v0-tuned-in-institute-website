@@ -9,6 +9,7 @@ import { auth } from '@/lib/auth'
 import { db } from '@/lib/db'
 import { account, featured, lesson, section, user } from '@/lib/db/schema'
 import { requireAdmin, requireStaff } from '@/lib/session'
+import { AUDIT_ACTIONS, recordAudit } from '@/lib/audit'
 import { toEmbedUrl } from '@/lib/video'
 import { sendWelcomeEmail } from '@/lib/email'
 
@@ -131,6 +132,14 @@ export async function createClientAccount(
       .set({ emailVerified: true, mustChangePassword: true, createdById: staff.id })
       .where(eq(user.email, email))
 
+    await recordAudit({
+      actor: staff,
+      action: AUDIT_ACTIONS.MEMBER_CREATE,
+      targetType: 'user',
+      targetLabel: email,
+      detail: `role: ${role}`,
+    })
+
     // Email the new member their credentials automatically (backup delivery).
     const signInUrl = `${appBaseUrl()}/sign-in`
     const sent = await sendWelcomeEmail({ to: email, name, email, tempPassword: password, signInUrl })
@@ -146,16 +155,43 @@ export async function createClientAccount(
     }
   } catch (err) {
     const message = err instanceof Error ? err.message : 'Could not create the account.'
+    await recordAudit({
+      actor: staff,
+      action: AUDIT_ACTIONS.MEMBER_CREATE,
+      targetType: 'user',
+      targetLabel: email,
+      outcome: 'failure',
+      detail: message,
+    })
     return { status: 'error', message }
   }
 }
 
 export async function changeUserRole(userId: string, role: 'admin' | 'client' | 'therapist') {
-  await requireAdmin()
+  const admin = await requireAdmin()
+
+  // Capture the previous role before the change, so the log shows the actual
+  // transition (a privilege escalation is the interesting case).
+  const [before] = await db
+    .select({ email: user.email, role: user.role })
+    .from(user)
+    .where(eq(user.id, userId))
+    .limit(1)
+
   await auth.api.setRole({
     body: { userId, role: role as 'admin' },
     headers: await headers(),
   })
+
+  await recordAudit({
+    actor: admin,
+    action: AUDIT_ACTIONS.MEMBER_ROLE_CHANGE,
+    targetType: 'user',
+    targetId: userId,
+    targetLabel: before?.email ?? null,
+    detail: `role: ${before?.role ?? 'unknown'} -> ${role}`,
+  })
+
   revalidatePath('/admin/accounts')
 }
 
@@ -166,6 +202,16 @@ export async function removeUser(userId: string): Promise<ActionState> {
   }
 
   try {
+    // Read the member's identity BEFORE deleting. Once the row is gone this is
+    // unrecoverable, and "which member was deleted" is exactly what an
+    // investigation needs to know. The audit row has no FK to `user`, so it
+    // survives the cascade that removes their sessions and credentials.
+    const [before] = await db
+      .select({ email: user.email, role: user.role })
+      .from(user)
+      .where(eq(user.id, userId))
+      .limit(1)
+
     // Delete directly from the database. The Better Auth admin `removeUser`
     // endpoint was leaving the row in place (its session-based authorization
     // can silently reject the call), so we own the deletion here. The session
@@ -180,11 +226,28 @@ export async function removeUser(userId: string): Promise<ActionState> {
       return { status: 'error', message: 'That account no longer exists.' }
     }
 
+    await recordAudit({
+      actor: admin,
+      action: AUDIT_ACTIONS.MEMBER_DELETE,
+      targetType: 'user',
+      targetId: userId,
+      targetLabel: before?.email ?? null,
+      detail: before?.role ? `role was: ${before.role}` : null,
+    })
+
     revalidatePath('/admin/accounts')
     return { status: 'success', message: 'Account removed.' }
   } catch (err) {
     const message = err instanceof Error ? err.message : 'Could not remove the account.'
     console.error('[v0] removeUser failed:', message)
+    await recordAudit({
+      actor: admin,
+      action: AUDIT_ACTIONS.MEMBER_DELETE,
+      targetType: 'user',
+      targetId: userId,
+      outcome: 'failure',
+      detail: message,
+    })
     return { status: 'error', message }
   }
 }
@@ -212,11 +275,31 @@ export async function resetClientPassword(userId: string): Promise<ActionState> 
   // Therapists may only reset passwords for clients they onboarded. Admins can
   // reset anyone.
   if (staff.role !== 'admin' && member.createdById !== staff.id) {
+    // Log the refusal. A staff member repeatedly attempting resets on clients
+    // who aren't theirs is the pattern worth noticing, and it is invisible if
+    // only successes are recorded.
+    await recordAudit({
+      actor: staff,
+      action: AUDIT_ACTIONS.MEMBER_PASSWORD_RESET,
+      targetType: 'user',
+      targetId: userId,
+      targetLabel: member.email,
+      outcome: 'denied',
+      detail: 'not the onboarding therapist for this client',
+    })
     return { status: 'error', message: 'You can only reset passwords for your own clients.' }
   }
 
   try {
     const password = await assignTempPassword(userId, member.name)
+
+    await recordAudit({
+      actor: staff,
+      action: AUDIT_ACTIONS.MEMBER_PASSWORD_RESET,
+      targetType: 'user',
+      targetId: userId,
+      targetLabel: member.email,
+    })
 
     const signInUrl = `${appBaseUrl()}/sign-in`
     const sent = await sendWelcomeEmail({

@@ -1,4 +1,4 @@
-import { pgTable, text, timestamp, boolean, serial, integer } from 'drizzle-orm/pg-core'
+import { pgTable, text, timestamp, boolean, serial, integer, index } from 'drizzle-orm/pg-core'
 
 // --- Better Auth required tables -------------------------------------------
 // Column names are camelCase to match Better Auth's defaults. Do not rename.
@@ -134,6 +134,58 @@ export const lesson = pgTable('lesson', {
   createdAt: timestamp('createdAt').notNull().defaultNow(),
   updatedAt: timestamp('updatedAt').notNull().defaultNow(),
 })
+
+// --- Audit log -------------------------------------------------------------
+// Append-only record of staff access to member data, required by the HIPAA
+// Security Rule (§164.312(b)) and the only way to answer "whose data was
+// affected?" after an incident.
+//
+// Three deliberate design decisions:
+//
+// 1. NO FOREIGN KEYS. `actorId`/`targetId` are plain text, not references. A
+//    cascade would delete the audit trail for a member at the exact moment
+//    someone deletes their account — which is precisely the event most worth
+//    keeping. Actor and target details are also snapshotted (`actorEmail`,
+//    `targetLabel`) so the log stays readable after the row it describes is
+//    gone.
+// 2. APPEND-ONLY BY CONVENTION. There is no update or delete path in the app.
+//    Rows are written once and never modified.
+// 3. NO PHI IN `detail`. This table records *that* an access happened, never
+//    the sensitive content involved. Never write conversation text, clinical
+//    notes, or free-text member disclosures here.
+export const auditLog = pgTable(
+  'audit_log',
+  {
+    id: serial('id').primaryKey(),
+    createdAt: timestamp('createdAt').notNull().defaultNow(),
+    // Who acted. Null only for system/automated events.
+    actorId: text('actorId'),
+    actorEmail: text('actorEmail'),
+    actorRole: text('actorRole'),
+    // What they did, as a stable dotted key (e.g. 'member.password_reset').
+    action: text('action').notNull(),
+    // What it was done to.
+    targetType: text('targetType'),
+    targetId: text('targetId'),
+    targetLabel: text('targetLabel'),
+    // 'success' | 'failure' | 'denied' — denied attempts matter as much as
+    // successful ones, since they are the signal for probing.
+    outcome: text('outcome').notNull().default('success'),
+    // Short, non-PHI context (e.g. 'role: client -> admin', '640 records').
+    detail: text('detail'),
+    ipAddress: text('ipAddress'),
+    userAgent: text('userAgent'),
+  },
+  (table) => [
+    // Supports the default "most recent first" view.
+    index('audit_log_created_at_idx').on(table.createdAt.desc()),
+    // Supports "everything that touched this member" — the question asked
+    // during a breach investigation or a member's access request.
+    index('audit_log_target_idx').on(table.targetType, table.targetId),
+    // Supports "everything this staff member did".
+    index('audit_log_actor_idx').on(table.actorId),
+  ],
+)
 
 // Admin-curated featured content shown on the public resources page. Each row
 // points to a lesson and can override its presentation with a custom headline

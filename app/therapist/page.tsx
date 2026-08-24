@@ -4,6 +4,7 @@ import { and, desc, eq } from 'drizzle-orm'
 import { db } from '@/lib/db'
 import { user } from '@/lib/db/schema'
 import { requireStaff } from '@/lib/session'
+import { AUDIT_ACTIONS, recordAudit } from '@/lib/audit'
 import { TherapistClientManager } from '@/components/therapist/therapist-client-manager'
 
 export const dynamic = 'force-dynamic'
@@ -22,6 +23,17 @@ export default async function TherapistPage() {
     .from(user)
     .where(and(eq(user.createdById, staff.id), eq(user.role, 'client')))
     .orderBy(desc(user.createdAt))
+
+  // Scoped disclosure: only this staff member's own clients. Logged separately
+  // from the full admin list view so the two are distinguishable in review —
+  // a therapist seeing their own caseload is routine, an admin pulling all 640
+  // records is not.
+  await recordAudit({
+    actor: staff,
+    action: AUDIT_ACTIONS.MEMBER_LIST_VIEW_SCOPED,
+    targetType: 'member_list',
+    detail: `${clients.length} own clients disclosed`,
+  })
 
   return (
     <div className="flex flex-col gap-6">

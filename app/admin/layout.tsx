@@ -9,6 +9,7 @@ const adminNav = [
   { href: '/admin/featured', label: 'Featured' },
   { href: '/admin/accounts', label: 'Accounts' },
   { href: '/admin/metrics', label: 'Metrics' },
+  { href: '/admin/audit', label: 'Activity' },
 ]
 
 export default async function AdminLayout({ children }: { children: ReactNode }) {

@@ -82,8 +82,22 @@ export const auth = betterAuth({
     }),
   ],
   trustedOrigins: [
+    // Dev only. The v0 preview is served through a sandbox host
+    // (`sb-*.vercel.run`) that appears in NO environment variable —
+    // V0_RUNTIME_URL is a *different* host (`vm-*.vusercontent.net`) — so the
+    // env-var cascade below can never match the real request origin, and
+    // sign-in fails with a 403 "Invalid origin" that renders no UI error.
+    // Wildcards are supported: verified in
+    // better-auth/dist/auth/trusted-origins.mjs, where a pattern containing
+    // `*` is run through wildcardMatch. Kept behind the dev check so
+    // production continues to compare origins exactly.
     ...(process.env.NODE_ENV === 'development'
-      ? ['http://localhost:3000']
+      ? [
+          'http://localhost:3000',
+          'http://localhost:*',
+          'https://*.vercel.run',
+          'https://*.vusercontent.net',
+        ]
       : []),
     ...(process.env.V0_RUNTIME_URL ? [process.env.V0_RUNTIME_URL] : []),
     ...(process.env.VERCEL_URL ? [`https://${process.env.VERCEL_URL}`] : []),
