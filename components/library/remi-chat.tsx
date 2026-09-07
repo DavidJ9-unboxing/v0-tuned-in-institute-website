@@ -1,7 +1,8 @@
 'use client'
 
-import { useEffect, useMemo, useRef, useState } from 'react'
+import { memo, useEffect, useMemo, useRef, useState } from 'react'
 import { useChat } from '@ai-sdk/react'
+import type { UIMessage } from 'ai'
 import {
   ArrowUp,
   ChevronDown,
@@ -148,6 +149,152 @@ function ResourceCards({
   )
 }
 
+/** Plain-text content of a message, used for copy / listen / share and the transcript. */
+function messagePlainText(message: UIMessage): string {
+  return message.parts
+    .filter((p) => p.type === 'text')
+    .map((p) => (p as { text: string }).text)
+    .join('')
+    .trim()
+}
+
+/** Resources a single reply cited, de-duplicated, in the order Remi gave them. */
+function messageCitedResources(message: UIMessage): RemiResource[] {
+  const out: RemiResource[] = []
+  const seen = new Set<number>()
+  for (const part of message.parts) {
+    if (part.type === 'tool-citeResources' && part.state === 'output-available') {
+      const output = part.output as { resources: RemiResource[] }
+      for (const r of output.resources ?? []) {
+        if (!seen.has(r.id)) {
+          seen.add(r.id)
+          out.push(r)
+        }
+      }
+    }
+  }
+  return out
+}
+
+// One bubble per message, memoised so that while Remi streams a reply only the message
+// being written re-renders. The SDK keeps earlier message objects referentially stable
+// and replaces just the streaming one, so React.memo skips every finished bubble —
+// including its markdown parse — on each incoming token. Without this, a long open
+// conversation re-parsed every previous reply dozens of times a second and the tab
+// visibly stuttered.
+const MessageBubble = memo(function MessageBubble({
+  message,
+  isLastUser,
+  lastUserRef,
+  showActions,
+  speechSupported,
+  isSpeaking,
+  onToggleSpeak,
+  onOpenResource,
+}: {
+  message: UIMessage
+  isLastUser: boolean
+  lastUserRef: React.RefObject<HTMLDivElement | null>
+  showActions: boolean
+  speechSupported: boolean
+  isSpeaking: boolean
+  onToggleSpeak: (id: string, text: string) => void
+  onOpenResource: (resource: RemiResource) => void
+}) {
+  const isUser = message.role === 'user'
+  const messageText = messagePlainText(message)
+  const messageResources = isUser ? [] : messageCitedResources(message)
+
+  return (
+    <div
+      ref={isLastUser ? lastUserRef : undefined}
+      className={`flex items-start gap-3 ${isUser ? 'flex-row-reverse' : ''}`}
+    >
+      {isUser ? <span className="size-8 shrink-0" aria-hidden="true" /> : <RemiAvatar />}
+      <div className={`flex max-w-[85%] flex-col ${isUser ? 'items-end' : 'items-start'}`}>
+        <div
+          className={`rounded-2xl px-4 py-3 ${
+            isUser
+              ? 'rounded-tr-sm bg-deep-teal text-off-white'
+              : 'rounded-tl-sm border border-stone bg-card text-charcoal/85'
+          }`}
+        >
+          {message.parts.map((part, i) => {
+            if (part.type === 'text') {
+              // Remi's replies are rendered as markdown so **bold**, lists, and links
+              // display properly. The member's own messages stay plain pre-wrapped text
+              // so nothing they typed is reinterpreted as formatting.
+              if (isUser) {
+                return (
+                  <p
+                    key={i}
+                    className="whitespace-pre-wrap break-words font-sans text-[15px] leading-relaxed text-off-white"
+                  >
+                    {part.text}
+                  </p>
+                )
+              }
+              return <RemiMarkdown key={i}>{part.text}</RemiMarkdown>
+            }
+            // Files the member attached: show images inline, other files (PDFs)
+            // as a labelled chip. Nothing is stored — this is just a render of
+            // what was sent with the message.
+            if (part.type === 'file') {
+              const filePart = part as {
+                mediaType: string
+                url: string
+                filename?: string
+              }
+              if (isImageType(filePart.mediaType)) {
+                return (
+                  // eslint-disable-next-line @next/next/no-img-element
+                  <img
+                    key={i}
+                    src={filePart.url || '/placeholder.svg'}
+                    alt={filePart.filename ?? 'Attached image'}
+                    className="mt-1 max-h-64 w-auto max-w-full rounded-lg border border-stone/60"
+                  />
+                )
+              }
+              return (
+                <span
+                  key={i}
+                  className={`mt-1 inline-flex items-center gap-2 rounded-lg px-2.5 py-1.5 font-sans text-xs ${
+                    isUser ? 'bg-off-white/15 text-off-white' : 'bg-paper text-charcoal/75'
+                  }`}
+                >
+                  <FileText className="size-3.5 shrink-0" aria-hidden="true" />
+                  <span className="max-w-[180px] truncate">{filePart.filename ?? 'Attachment'}</span>
+                </span>
+              )
+            }
+            // Cited resources are collected and shown below the dialogue,
+            // not inline in the conversation bubbles.
+            return null
+          })}
+        </div>
+        {showActions && (
+          <MessageActions
+            text={messageText}
+            speechSupported={speechSupported}
+            isSpeaking={isSpeaking}
+            onToggleSpeak={() => onToggleSpeak(message.id, messageText)}
+          />
+        )}
+        {!isUser && messageResources.length > 0 && (
+          <div className="mt-2 w-full">
+            <p className="mb-1 font-sans text-[11px] font-semibold uppercase tracking-[0.12em] text-charcoal/45">
+              {messageResources.length} resource
+              {messageResources.length > 1 ? 's' : ''} Remi shared
+            </p>
+            <ResourceCards resources={messageResources} onOpen={onOpenResource} />
+          </div>
+        )}
+      </div>
+    </div>
+  )
+})
+
 export function RemiChat({
   initialQuery = '',
   variant = 'page',
@@ -168,7 +315,9 @@ export function RemiChat({
   // Every Remi surface (this page chat and the slide-over panel) shares one conversation
   // via the store, so it survives navigation and stays in sync between surfaces.
   const { chat, remember, setRemember, clearChat } = useRemiStore()
-  const { messages, sendMessage, status, error } = useChat({ chat })
+  // Coalesce streamed tokens into at most ~20 UI updates a second. Text still appears
+  // to flow continuously, but the page does a fraction of the layout work.
+  const { messages, sendMessage, status, error } = useChat({ chat, experimental_throttle: 50 })
   const [input, setInput] = useState('')
   // Files queued to send with the next message. Held only in memory and cleared on send —
   // nothing is uploaded or stored; each file travels with that single message.
@@ -239,6 +388,13 @@ export function RemiChat({
   }, [initialQuery])
 
   const userMessageCount = messages.filter((m) => m.role === 'user').length
+  // Index of the member's most recent message — the one the scroll anchors to.
+  const lastUserIndex = useMemo(() => {
+    for (let i = messages.length - 1; i >= 0; i--) {
+      if (messages[i].role === 'user') return i
+    }
+    return -1
+  }, [messages])
 
   // When a new question is asked, pin that question to the top of the scroll area so the
   // answer reads top-down below it, instead of snapping to the bottom and forcing a scroll up.
@@ -356,15 +512,13 @@ export function RemiChat({
   const showLengthNotice = conversationGettingLong && !lengthNoticeDismissed
 
   // Publish a plain-text transcript upward so the close dialog can offer "copy & paste to keep it".
+  // The transcript is only read when the member closes the panel, so it's rebuilt once a reply
+  // has finished rather than on every streamed token.
   useEffect(() => {
-    if (!onTranscriptChange) return
+    if (!onTranscriptChange || busy) return
     const transcript = messages
       .map((m) => {
-        const text = m.parts
-          .filter((p) => p.type === 'text')
-          .map((p) => (p as { text: string }).text)
-          .join('')
-          .trim()
+        const text = messagePlainText(m)
         if (!text) return ''
         return `${m.role === 'user' ? 'You' : 'Remi'}: ${text}`
       })
@@ -372,34 +526,31 @@ export function RemiChat({
       .join('\n\n')
     onTranscriptChange(transcript)
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [messages])
+  }, [messages, busy])
 
   // The most recent thing the member said, so the error note can offer a one-tap retry.
-  const lastUserText = [...messages]
-    .reverse()
-    .find((m) => m.role === 'user')
-    ?.parts.filter((p) => p.type === 'text')
-    .map((p) => (p as { text: string }).text)
-    .join('')
-    .trim()
+  const lastUserText = useMemo(() => {
+    for (let i = messages.length - 1; i >= 0; i--) {
+      if (messages[i].role === 'user') return messagePlainText(messages[i])
+    }
+    return ''
+  }, [messages])
 
   // Collect every resource Remi has cited across the whole conversation,
   // de-duplicated and shown together below the dialogue.
-  const sharedResources: RemiResource[] = []
-  const seen = new Set<number>()
-  for (const message of messages) {
-    for (const part of message.parts) {
-      if (part.type === 'tool-citeResources' && part.state === 'output-available') {
-        const output = part.output as { resources: RemiResource[] }
-        for (const r of output.resources ?? []) {
-          if (!seen.has(r.id)) {
-            seen.add(r.id)
-            sharedResources.push(r)
-          }
+  const sharedResources = useMemo(() => {
+    const out: RemiResource[] = []
+    const seen = new Set<number>()
+    for (const message of messages) {
+      for (const r of messageCitedResources(message)) {
+        if (!seen.has(r.id)) {
+          seen.add(r.id)
+          out.push(r)
         }
       }
     }
-  }
+    return out
+  }, [messages])
 
   const resourceCount = sharedResources.length
 
@@ -668,130 +819,22 @@ export function RemiChat({
 
           {messages.map((message, index) => {
             const isUser = message.role === 'user'
-            const isLastUser =
-              isUser && !messages.slice(index + 1).some((m) => m.role === 'user')
-            // The plain-text content of this message, used for copy / listen / share.
-            const messageText = message.parts
-              .filter((p) => p.type === 'text')
-              .map((p) => (p as { text: string }).text)
-              .join('')
-              .trim()
-            // Resources this particular reply cited, shown inline directly beneath the
-            // answer so members can simply scroll down to the answer and tap an article —
-            // no separate panel to hunt for.
-            const messageResources: RemiResource[] = []
-            const seenForMessage = new Set<number>()
-            for (const part of message.parts) {
-              if (part.type === 'tool-citeResources' && part.state === 'output-available') {
-                const output = part.output as { resources: RemiResource[] }
-                for (const r of output.resources ?? []) {
-                  if (!seenForMessage.has(r.id)) {
-                    seenForMessage.add(r.id)
-                    messageResources.push(r)
-                  }
-                }
-              }
-            }
             // Only show the action row on Remi's finished replies that have text — never on
             // the member's own messages, and not while the reply is still streaming in.
-            const showActions =
-              !isUser && messageText.length > 0 && !(busy && index === messages.length - 1)
+            const isStreamingThis = busy && index === messages.length - 1
+            const showActions = !isUser && !isStreamingThis && messagePlainText(message).length > 0
             return (
-              <div
+              <MessageBubble
                 key={message.id}
-                ref={isLastUser ? lastUserRef : undefined}
-                className={`flex items-start gap-3 ${isUser ? 'flex-row-reverse' : ''}`}
-              >
-                {isUser ? (
-                  <span className="size-8 shrink-0" aria-hidden="true" />
-                ) : (
-                  <RemiAvatar />
-                )}
-                <div className={`flex max-w-[85%] flex-col ${isUser ? 'items-end' : 'items-start'}`}>
-                  <div
-                    className={`rounded-2xl px-4 py-3 ${
-                      isUser
-                        ? 'rounded-tr-sm bg-deep-teal text-off-white'
-                        : 'rounded-tl-sm border border-stone bg-card text-charcoal/85'
-                    }`}
-                  >
-                    {message.parts.map((part, i) => {
-                      if (part.type === 'text') {
-                        // Remi's replies are rendered as markdown so **bold**, lists, and links
-                        // display properly. The member's own messages stay plain pre-wrapped text
-                        // so nothing they typed is reinterpreted as formatting.
-                        if (isUser) {
-                          return (
-                            <p
-                              key={i}
-                              className="whitespace-pre-wrap break-words font-sans text-[15px] leading-relaxed text-off-white"
-                            >
-                              {part.text}
-                            </p>
-                          )
-                        }
-                        return <RemiMarkdown key={i}>{part.text}</RemiMarkdown>
-                      }
-                      // Files the member attached: show images inline, other files (PDFs)
-                      // as a labelled chip. Nothing is stored — this is just a render of
-                      // what was sent with the message.
-                      if (part.type === 'file') {
-                        const filePart = part as {
-                          mediaType: string
-                          url: string
-                          filename?: string
-                        }
-                        if (isImageType(filePart.mediaType)) {
-                          return (
-                            // eslint-disable-next-line @next/next/no-img-element
-                            <img
-                              key={i}
-                              src={filePart.url || '/placeholder.svg'}
-                              alt={filePart.filename ?? 'Attached image'}
-                              className="mt-1 max-h-64 w-auto max-w-full rounded-lg border border-stone/60"
-                            />
-                          )
-                        }
-                        return (
-                          <span
-                            key={i}
-                            className={`mt-1 inline-flex items-center gap-2 rounded-lg px-2.5 py-1.5 font-sans text-xs ${
-                              isUser
-                                ? 'bg-off-white/15 text-off-white'
-                                : 'bg-paper text-charcoal/75'
-                            }`}
-                          >
-                            <FileText className="size-3.5 shrink-0" aria-hidden="true" />
-                            <span className="max-w-[180px] truncate">
-                              {filePart.filename ?? 'Attachment'}
-                            </span>
-                          </span>
-                        )
-                      }
-                      // Cited resources are collected and shown below the dialogue,
-                      // not inline in the conversation bubbles.
-                      return null
-                    })}
-                  </div>
-                  {showActions && (
-                    <MessageActions
-                      text={messageText}
-                      speechSupported={speechSupported}
-                      isSpeaking={speakingId === message.id}
-                      onToggleSpeak={() => speak(message.id, messageText)}
-                    />
-                  )}
-                  {!isUser && messageResources.length > 0 && (
-                    <div className="mt-2 w-full">
-                      <p className="mb-1 font-sans text-[11px] font-semibold uppercase tracking-[0.12em] text-charcoal/45">
-                        {messageResources.length} resource
-                        {messageResources.length > 1 ? 's' : ''} Remi shared
-                      </p>
-                      <ResourceCards resources={messageResources} onOpen={setOpenResource} />
-                    </div>
-                  )}
-                </div>
-              </div>
+                message={message}
+                isLastUser={isUser && index === lastUserIndex}
+                lastUserRef={lastUserRef}
+                showActions={showActions}
+                speechSupported={speechSupported}
+                isSpeaking={speakingId === message.id}
+                onToggleSpeak={speak}
+                onOpenResource={setOpenResource}
+              />
             )
           })}
 

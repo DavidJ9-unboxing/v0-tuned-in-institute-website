@@ -212,18 +212,54 @@ function RemiPersistence({
 
   // Mirror the live conversation to storage. We only ever write here — clearing is
   // explicit (clearChat / opting out) so there are no races that could wipe a restore.
+  //
+  // Writes are debounced: sessionStorage/localStorage are synchronous and serialising a
+  // long conversation on every streamed token blocked the main thread badly enough to
+  // make the whole tab stutter. Now the mirror is written at most a few times a second
+  // during a reply, and always once more after the last change lands.
+  const latestRef = useRef({ messages, remember, userId })
+  latestRef.current = { messages, remember, userId }
+
   useEffect(() => {
     if (!hydrated || messages.length === 0) return
-    try {
-      const serialized = JSON.stringify(messages)
-      sessionStorage.setItem(SESSION_KEY, serialized)
-      if (remember && userId) {
-        localStorage.setItem(savedKey(userId), serialized)
-      }
-    } catch {
-      // Ignore quota/storage errors.
-    }
+    const timer = setTimeout(() => writeMirror(latestRef.current), MIRROR_DEBOUNCE_MS)
+    return () => clearTimeout(timer)
   }, [messages, remember, userId, hydrated])
 
+  // Flush immediately if the page is being hidden or unloaded mid-reply so nothing is lost.
+  useEffect(() => {
+    if (!hydrated) return
+    const flush = () => {
+      if (latestRef.current.messages.length > 0) writeMirror(latestRef.current)
+    }
+    window.addEventListener('pagehide', flush)
+    return () => {
+      window.removeEventListener('pagehide', flush)
+      flush()
+    }
+  }, [hydrated])
+
   return null
+}
+
+const MIRROR_DEBOUNCE_MS = 400
+
+function writeMirror({
+  messages,
+  remember,
+  userId,
+}: {
+  messages: UIMessage[]
+  remember: boolean
+  userId: string | null
+}) {
+  try {
+    const serialized = JSON.stringify(messages)
+    sessionStorage.setItem(SESSION_KEY, serialized)
+    if (remember && userId) {
+      localStorage.setItem(savedKey(userId), serialized)
+    }
+  } catch {
+    // Ignore quota/storage errors.
+  }
 }
