@@ -47,11 +47,16 @@ export function MemberAnnouncements() {
         <div className="flex flex-col gap-4 lg:w-5/12">
           <div className="flex items-center gap-2 font-sans text-xs font-semibold uppercase tracking-[0.16em] text-sage-deep">
             <Users className="size-4" aria-hidden="true" />
-            New support groups
+            New learning &amp; connection groups
           </div>
           <h3 className="font-serif text-2xl font-semibold text-deep-teal text-balance">
             {POD_NAME}
           </h3>
+          <p className="rounded-lg bg-secondary px-4 py-3 font-sans text-sm leading-relaxed text-charcoal">
+            <strong className="font-semibold text-deep-teal">These are not therapy groups.</strong>{' '}
+            Pods are learning and connection groups that support your Tuned In learning journey
+            alongside your family&apos;s work with your therapist.
+          </p>
           <p className="font-serif text-[15px] leading-relaxed text-charcoal/80">
             Sophie (our founder) and our parent coaches are starting{' '}
             <strong className="font-semibold text-charcoal">parent pods</strong>: small groups of at
@@ -65,8 +70,15 @@ export function MemberAnnouncements() {
             and connection.
           </p>
           <p className="font-serif text-[15px] leading-relaxed text-charcoal/80">
-            Sign up and tell us a little about your interest and goals. We&apos;ll contact you if
-            and when a pod is formed.
+            Sign up with the form here, or email{' '}
+            <a
+              href="mailto:pod@rootedrhythm.com"
+              className="font-semibold text-deep-teal underline underline-offset-2"
+            >
+              pod@rootedrhythm.com
+            </a>{' '}
+            and tell us about your interest and goals. We&apos;ll contact you if and when a pod is
+            formed.
           </p>
         </div>
         <div className="lg:flex-1">
