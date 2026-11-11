@@ -135,6 +135,21 @@ export const lesson = pgTable('lesson', {
   updatedAt: timestamp('updatedAt').notNull().defaultNow(),
 })
 
+// Members who signed up for a parenting pod (parents of kids or teens) or an
+// adult self-care & connection group. Staff review these to form groups.
+export const groupInterest = pgTable('group_interest', {
+  id: serial('id').primaryKey(),
+  userId: text('userId').references(() => user.id, { onDelete: 'set null' }),
+  name: text('name').notNull(),
+  email: text('email').notNull(),
+  groupType: text('groupType').notNull(),
+  childAge: text('childAge'),
+  goals: text('goals'),
+  availability: text('availability'),
+  status: text('status').notNull().default('new'),
+  createdAt: timestamp('createdAt').notNull().defaultNow(),
+})
+
 // Admin-curated featured content shown on the public resources page. Each row
 // points to a lesson and can override its presentation with a custom headline
 // and blurb. `position` controls display order.

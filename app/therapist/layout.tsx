@@ -24,6 +24,12 @@ export default async function TherapistLayout({ children }: { children: ReactNod
               Clinical update
             </Link>
             <Link
+              href="/therapist/groups"
+              className="hidden font-sans text-sm font-medium text-deep-teal hover:underline sm:inline"
+            >
+              Group sign-ups
+            </Link>
+            <Link
               href="/therapist/help"
               className="hidden font-sans text-sm font-medium text-deep-teal hover:underline sm:inline"
             >
