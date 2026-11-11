@@ -84,7 +84,7 @@ export function GroupInterestForm() {
           className={inputClass}
           placeholder={
             isAdult
-              ? 'What would you like from a self-care and connection group?'
+              ? 'What would you like from a self-care and connection pod?'
               : 'What would you like support with while your child or teen is in therapy?'
           }
         />
@@ -111,7 +111,7 @@ export function GroupInterestForm() {
       )}
 
       <Button type="submit" size="lg" disabled={pending} className="font-sans font-semibold">
-        {pending ? 'Sending…' : 'Sign up for a group'}
+        {pending ? 'Sending…' : 'Sign up for a pod'}
       </Button>
     </form>
   )

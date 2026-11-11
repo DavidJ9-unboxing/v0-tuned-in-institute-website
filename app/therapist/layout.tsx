@@ -27,7 +27,7 @@ export default async function TherapistLayout({ children }: { children: ReactNod
               href="/therapist/groups"
               className="hidden font-sans text-sm font-medium text-deep-teal hover:underline sm:inline"
             >
-              Group sign-ups
+              Pod sign-ups
             </Link>
             <Link
               href="/therapist/help"

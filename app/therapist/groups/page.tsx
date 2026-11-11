@@ -6,7 +6,7 @@ import { requireStaff } from '@/lib/session'
 import { GROUP_TYPES, type GroupType } from '@/lib/groups'
 
 export const metadata: Metadata = {
-  title: 'Group sign-ups',
+  title: 'Pod sign-ups',
   robots: { index: false, follow: false },
 }
 
@@ -25,11 +25,11 @@ export default async function GroupSignupsPage() {
   return (
     <main className="mx-auto flex max-w-4xl flex-col gap-10 px-4 py-10 sm:px-6">
       <header className="flex flex-col gap-2">
-        <h1 className="font-serif text-3xl font-semibold text-deep-teal">Group sign-ups</h1>
+        <h1 className="font-serif text-3xl font-semibold text-deep-teal">Pod sign-ups</h1>
         <p className="max-w-2xl font-serif text-[15px] leading-relaxed text-charcoal/75">
-          Families and adults who signed up for a parenting pod or an adult connection group from
-          the library. Each new sign-up is also emailed to Sophie, Kate, and Erica. A group can
-          start once there are at least 4 people.
+          Families and adults who signed up for a Connection &amp; Learning Pod from the library.
+          Each new sign-up is also emailed to pod@rootedrhythm.com and Sophie. A pod can start once
+          there are at least 4 people.
         </p>
       </header>
 

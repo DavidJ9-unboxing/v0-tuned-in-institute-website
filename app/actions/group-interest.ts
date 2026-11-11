@@ -6,11 +6,7 @@ import { groupInterest } from '@/lib/db/schema'
 import { getCurrentUser } from '@/lib/session'
 import { GROUP_TYPES, type GroupType } from '@/lib/groups'
 
-const GROUP_TEAM = [
-  'sophie@rootedrhythm.com',
-  'kate@rootedrhythm.com',
-  'erica.liberati@rootedrhythm.com',
-]
+const GROUP_TEAM = ['pod@rootedrhythm.com', 'sophie@rootedrhythm.com']
 const FROM = 'The Tuned In Institute <no-reply@tunedininstitute.org>'
 
 export type GroupInterestState = {
@@ -81,19 +77,19 @@ export async function submitGroupInterest(
         from: FROM,
         to: GROUP_TEAM,
         replyTo: user.email,
-        subject: `Group sign-up: ${user.name} (${GROUP_TYPES[groupType]})`,
+        subject: `Pod sign-up: ${user.name} (${GROUP_TYPES[groupType]})`,
         html: `
           <div style="font-family:Georgia,serif;color:#2a2a2a;line-height:1.6;max-width:560px;">
-            <h2 style="color:#1b505a;margin:0 0 12px;">New group sign-up</h2>
+            <h2 style="color:#1b505a;margin:0 0 12px;">New Connection &amp; Learning Pod sign-up</h2>
             <table style="width:100%;border-collapse:collapse;background:#faf5ed;border:1px solid #d8d2c5;">
               ${row('Name', escapeHtml(user.name))}
               ${row('Email', escapeHtml(user.email))}
               ${row('Group', escapeHtml(GROUP_TYPES[groupType]))}
-              ${row('Child / teen age', escapeHtml(childAge) || 'N/A (adult group)')}
+              ${row('Child / teen age', escapeHtml(childAge) || 'N/A (adult pod)')}
               ${row('Availability', escapeHtml(availability) || 'Not specified')}
               ${row('Interest & goals', escapeHtml(goals).replace(/\n/g, '<br>'))}
             </table>
-            <p style="font-size:13px;color:#5b574f;margin-top:16px;">The full list of sign-ups is in the Tuned In Institute under Therapist &rsaquo; Group sign-ups.</p>
+            <p style="font-size:13px;color:#5b574f;margin-top:16px;">The full list of sign-ups is in the Tuned In Institute under Therapist &rsaquo; Pod sign-ups.</p>
           </div>`,
       })
     } catch (error) {
@@ -104,6 +100,6 @@ export async function submitGroupInterest(
   return {
     status: 'success',
     message:
-      "Thank you for signing up. We'll reach out once a group with at least 4 members is ready to start.",
+      "Thank you for signing up. We'll reach out once a pod with at least 4 members is ready to start.",
   }
 }

@@ -1,5 +1,5 @@
 import { ArrowUpRight, Megaphone, Users } from 'lucide-react'
-import { PSILOCYBIN_PARENT_PROGRAM_URL } from '@/lib/groups'
+import { POD_NAME, PSILOCYBIN_PARENT_PROGRAM_URL } from '@/lib/groups'
 import { GroupInterestForm } from '@/components/library/group-interest-form'
 
 export function MemberAnnouncements() {
@@ -50,23 +50,23 @@ export function MemberAnnouncements() {
             New support groups
           </div>
           <h3 className="font-serif text-2xl font-semibold text-deep-teal text-balance">
-            Parenting pods and adult connection groups
+            {POD_NAME}
           </h3>
           <p className="font-serif text-[15px] leading-relaxed text-charcoal/80">
             Sophie (our founder) and our parent coaches are starting{' '}
-            <strong className="font-semibold text-charcoal">parenting pods</strong>: small support
-            groups of at least 4 parents who meet for 30 to 45 minutes each week while their child
-            or teen is in therapy with us. Each week you&apos;ll connect over the Tuned In material
-            and get feedback on how to support your child or teen.
+            <strong className="font-semibold text-charcoal">parent pods</strong>: small groups of at
+            least 4 parents who meet for 30 to 45 minutes each week while their child or teen is in
+            therapy with us. Each week you&apos;ll connect over the Tuned In material and get
+            feedback on how to support your child or teen.
           </p>
           <p className="font-serif text-[15px] leading-relaxed text-charcoal/80">
             We&apos;re also starting{' '}
-            <strong className="font-semibold text-charcoal">self-care and connection groups</strong>{' '}
-            for adults.
+            <strong className="font-semibold text-charcoal">adult pods</strong> focused on self-care
+            and connection.
           </p>
           <p className="font-serif text-[15px] leading-relaxed text-charcoal/80">
             Sign up and tell us a little about your interest and goals. We&apos;ll contact you if
-            and when a group is formed.
+            and when a pod is formed.
           </p>
         </div>
         <div className="lg:flex-1">
