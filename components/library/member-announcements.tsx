@@ -59,8 +59,8 @@ export function MemberAnnouncements() {
           </p>
           <p className="font-serif text-[15px] leading-relaxed text-charcoal/80">
             Sophie (our founder) and our parent coaches are starting{' '}
-            <strong className="font-semibold text-charcoal">parent pods</strong>: small groups of at
-            least 4 parents who meet for 30 to 45 minutes each week while their child or teen is in
+            <strong className="font-semibold text-charcoal">parent pods</strong>: groups of parents
+            who meet for 30 to 45 minutes each week while their child or teen is in
             therapy with us. Each week you&apos;ll connect over the Tuned In material and get
             feedback on how to support your child or teen.
           </p>

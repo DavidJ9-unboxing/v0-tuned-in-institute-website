@@ -100,6 +100,6 @@ export async function submitGroupInterest(
   return {
     status: 'success',
     message:
-      "Thank you for signing up. We'll reach out once a pod with at least 4 members is ready to start.",
+      "Thank you for signing up. We'll reach out once a pod that fits you is ready to start.",
   }
 }

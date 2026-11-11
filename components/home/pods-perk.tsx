@@ -17,7 +17,7 @@ const podTypes = [
 
 const details = [
   '30 to 45 minutes, once a week',
-  'Small groups of at least 4',
+  'Learning and connection, not therapy',
   'Led by our founder, Sophie, and parent coaches',
 ]
 

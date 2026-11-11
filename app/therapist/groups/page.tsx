@@ -28,8 +28,7 @@ export default async function GroupSignupsPage() {
         <h1 className="font-serif text-3xl font-semibold text-deep-teal">Pod sign-ups</h1>
         <p className="max-w-2xl font-serif text-[15px] leading-relaxed text-charcoal/75">
           Families and adults who signed up for a Connection &amp; Learning Pod from the library.
-          Each new sign-up is also emailed to pod@rootedrhythm.com and Sophie. A pod can start once
-          there are at least 4 people.
+          Each new sign-up is also emailed to pod@rootedrhythm.com and Sophie.
         </p>
       </header>
 
@@ -41,7 +40,6 @@ export default async function GroupSignupsPage() {
             </h2>
             <span className="font-sans text-sm text-charcoal/60">
               {g.people.length} {g.people.length === 1 ? 'person' : 'people'}
-              {g.people.length >= 4 ? ' · ready to form' : ''}
             </span>
           </div>
           {g.people.length === 0 ? (

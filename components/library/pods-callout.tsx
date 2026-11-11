@@ -15,7 +15,7 @@ export function PodsCallout({ className = '' }: { className?: string }) {
         </div>
         <p className="max-w-2xl font-serif text-[15px] leading-relaxed text-charcoal/85">
           <strong className="font-semibold text-deep-teal">Not therapy groups.</strong> Small weekly
-          learning and connection groups (30 to 45 minutes, at least 4 people) that support your
+          learning and connection groups (30 to 45 minutes each week) that support your
           Tuned In learning journey. We offer parent pods and adult self-care pods. Sign up here or
           email{' '}
           <a
