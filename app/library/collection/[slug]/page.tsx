@@ -4,6 +4,7 @@ import { notFound } from 'next/navigation'
 import { ChevronLeft } from 'lucide-react'
 import { getCollectionBySlug, getSectionsForCollection } from '@/lib/content'
 import { SectionCard } from '@/components/library/section-card'
+import { PodsCallout } from '@/components/library/pods-callout'
 
 export async function generateMetadata({
   params,
@@ -79,6 +80,8 @@ export default async function CollectionPage({
           </div>
         </section>
       )}
+
+      <PodsCallout className="mt-12" />
     </div>
   )
 }
