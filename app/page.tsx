@@ -11,6 +11,7 @@ import { FeaturedGrid } from '@/components/site/featured-grid'
 import { Hero } from '@/components/home/hero'
 import { BookCover3D } from '@/components/home/book-cover-3d'
 import { ScrollToTopOnLoad } from '@/components/home/scroll-to-top-on-load'
+import { PodsPerk } from '@/components/home/pods-perk'
 import { programs, clinicalFoundations, whatWeAre, whatWeAreNot } from '@/lib/site'
 import { getFeaturedLessons } from '@/lib/content'
 import { getCurrentUser } from '@/lib/session'
@@ -39,6 +40,7 @@ const membershipFeatures = [
   'Video, audio and transcripts',
   'Full resource library',
   'Remi, your AI concierge',
+  'Connection & Learning Pods',
 ]
 
 const stats = [
@@ -474,6 +476,8 @@ export default async function HomePage() {
           <AccessCta className="mt-10 bg-off-white font-sans font-semibold text-deep-teal hover:bg-off-white/90" />
         </div>
       </section>
+
+      <PodsPerk isMember={Boolean(user)} />
 
       {/* AI Concierge preview */}
       <section className="bg-off-white">

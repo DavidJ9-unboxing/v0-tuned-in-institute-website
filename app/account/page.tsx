@@ -3,6 +3,7 @@ import Link from 'next/link'
 import { ChevronLeft } from 'lucide-react'
 import { requireUser } from '@/lib/session'
 import { AccountSettings } from '@/components/account/account-settings'
+import { PodsCallout } from '@/components/library/pods-callout'
 
 export const metadata: Metadata = {
   title: 'Account settings',
@@ -35,6 +36,8 @@ export default async function AccountPage() {
         <div className="mt-8">
           <AccountSettings name={user.name} email={user.email} />
         </div>
+
+        <PodsCallout className="mt-10" />
       </div>
     </section>
   )

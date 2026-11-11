@@ -18,6 +18,18 @@ export default async function TherapistLayout({ children }: { children: ReactNod
           </Link>
           <div className="flex items-center gap-3">
             <Link
+              href="/therapist/clinical-update"
+              className="hidden font-sans text-sm font-medium text-deep-teal hover:underline sm:inline"
+            >
+              Clinical update
+            </Link>
+            <Link
+              href="/therapist/groups"
+              className="hidden font-sans text-sm font-medium text-deep-teal hover:underline sm:inline"
+            >
+              Pod sign-ups
+            </Link>
+            <Link
               href="/therapist/help"
               className="hidden font-sans text-sm font-medium text-deep-teal hover:underline sm:inline"
             >

@@ -5,6 +5,7 @@ import { getLibraryEntries } from '@/lib/content'
 import { LibrarySearch } from '@/components/library/library-search'
 import { SectionCard } from '@/components/library/section-card'
 import { CollectionCard } from '@/components/library/collection-card'
+import { MemberAnnouncements } from '@/components/library/member-announcements'
 
 export const metadata: Metadata = {
   title: 'Content Library',
@@ -44,6 +45,8 @@ export default async function LibraryPage({
           resources.
         </p>
       </div>
+
+      <MemberAnnouncements />
 
       {entries.length === 0 ? (
         <div className="mt-12 flex flex-col items-center gap-4 rounded-2xl border border-dashed border-stone bg-card px-8 py-16 text-center">

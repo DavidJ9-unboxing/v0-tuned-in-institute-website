@@ -4,6 +4,7 @@ import { notFound } from 'next/navigation'
 import { ChevronLeft } from 'lucide-react'
 import { getCollectionById, getLessonsForSection, getSectionBySlug } from '@/lib/content'
 import { LessonViewer } from '@/components/library/lesson-viewer'
+import { PodsCallout } from '@/components/library/pods-callout'
 
 export async function generateMetadata({
   params,
@@ -66,6 +67,8 @@ export default async function SectionPage({
           indexFirst={slug === 'caregiver-handouts'}
         />
       </div>
+
+      <PodsCallout className="mt-12" />
     </div>
   )
 }
