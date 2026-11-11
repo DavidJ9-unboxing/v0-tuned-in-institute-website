@@ -77,6 +77,26 @@ export function ArticleMarkdown({ children }: { children: string }) {
             </td>
           ),
           hr: () => <hr className="my-6 border-stone" />,
+          img: ({ src, alt }) => {
+            if (typeof src !== 'string') return null
+            return (
+              <a
+                href={src}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="my-5 block"
+                aria-label={alt ? `Open full-size image: ${alt}` : 'Open full-size image'}
+              >
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img
+                  src={src}
+                  alt={alt ?? ''}
+                  loading="lazy"
+                  className="block h-auto w-full rounded-xl border border-stone"
+                />
+              </a>
+            )
+          },
         }}
       >
         {children}
