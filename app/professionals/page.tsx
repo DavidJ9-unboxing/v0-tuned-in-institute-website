@@ -37,7 +37,7 @@ const audiences = [
 const partnership = [
   'Evidence-based curriculum built on SPS, polyvagal, and attachment research',
   'A shared, non-pathologizing language to use with families',
-  'Referral pathway to Rooted Rhythm Therapy in Dallas, Atlanta, Colorado, and New Jersey',
+  'Referral pathway to Rooted Rhythm Therapy, with in-person care across four states',
   'Group and organizational licensing for the full library',
 ]
 
@@ -109,8 +109,7 @@ export default function ProfessionalsPage() {
           </h2>
           <p className="mx-auto mt-5 max-w-xl font-serif text-lg leading-relaxed text-off-white/85">
             For families who need direct support, we partner with Rooted Rhythm Therapy, a clinical
-            practice specializing in sensitive children, teens, and adults across Dallas, Atlanta,
-            Colorado, and New Jersey.
+            practice specializing in sensitive children, teens, and adults across four states.
           </p>
           <div className="mt-8 flex flex-col justify-center gap-3 sm:flex-row">
             <Button
