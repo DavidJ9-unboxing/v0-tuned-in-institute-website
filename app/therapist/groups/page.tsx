@@ -63,7 +63,7 @@ export default async function GroupSignupsPage() {
                     <p className="font-sans text-sm text-charcoal/75">Age: {p.childAge}</p>
                   )}
                   {p.availability && (
-                    <p className="font-sans text-sm text-charcoal/75">Availability: {p.availability}</p>
+                    <p className="font-sans text-sm text-charcoal/75">Ideal time slots: {p.availability}</p>
                   )}
                   {p.goals && (
                     <p className="whitespace-pre-line font-serif text-[15px] leading-relaxed text-charcoal/85">
