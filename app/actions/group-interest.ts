@@ -4,7 +4,7 @@ import { Resend } from 'resend'
 import { db } from '@/lib/db'
 import { groupInterest } from '@/lib/db/schema'
 import { getCurrentUser } from '@/lib/session'
-import { GROUP_TYPES, type GroupType } from '@/lib/groups'
+import { GROUP_TYPES, POD_SLOTS, type GroupType } from '@/lib/groups'
 
 const GROUP_TEAM = ['pod@rootedrhythm.com', 'sophie@rootedrhythm.com']
 const FROM = 'The Tuned In Institute <no-reply@tunedininstitute.org>'
@@ -38,7 +38,17 @@ export async function submitGroupInterest(
   const groupType = clip(formData.get('groupType'), 40) as GroupType
   const childAge = clip(formData.get('childAge'), 100)
   const goals = clip(formData.get('goals'), 2000)
-  const availability = clip(formData.get('availability'), 300)
+  const slots = [...new Set(formData.getAll('slots').map(String))].filter((slot) =>
+    POD_SLOTS.includes(slot),
+  )
+  const availability = POD_SLOTS.filter((slot) => slots.includes(slot)).join(', ')
+
+  if (slots.length === 0) {
+    return {
+      status: 'error',
+      message: 'Please choose at least one time slot you could commit to for 6 weeks.',
+    }
+  }
 
   if (!(groupType in GROUP_TYPES)) {
     return { status: 'error', message: 'Please choose which group you are interested in.' }
@@ -86,7 +96,7 @@ export async function submitGroupInterest(
               ${row('Email', escapeHtml(user.email))}
               ${row('Group', escapeHtml(GROUP_TYPES[groupType]))}
               ${row('Child / teen age', escapeHtml(childAge) || 'N/A (adult pod)')}
-              ${row('Availability', escapeHtml(availability) || 'Not specified')}
+              ${row('Ideal time slots', escapeHtml(availability))}
               ${row('Interest & goals', escapeHtml(goals).replace(/\n/g, '<br>'))}
             </table>
             <p style="font-size:13px;color:#5b574f;margin-top:16px;">The full list of sign-ups is in the Tuned In Institute under Therapist &rsaquo; Pod sign-ups.</p>

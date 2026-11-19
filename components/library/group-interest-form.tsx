@@ -3,7 +3,7 @@
 import { useActionState, useState } from 'react'
 import { CheckCircle2, AlertCircle } from 'lucide-react'
 import { submitGroupInterest, type GroupInterestState } from '@/app/actions/group-interest'
-import { GROUP_TYPES, type GroupType } from '@/lib/groups'
+import { GROUP_TYPES, POD_DAYS, POD_TIMES, type GroupType } from '@/lib/groups'
 import { Button } from '@/components/ui/button'
 
 const initialState: GroupInterestState = { status: 'idle', message: '' }
@@ -90,18 +90,45 @@ export function GroupInterestForm() {
         />
       </div>
 
-      <div className="flex flex-col gap-2">
-        <label htmlFor="availability" className={labelClass}>
-          Days and times that usually work <span className="text-charcoal/50">(optional)</span>
-        </label>
-        <input
-          id="availability"
-          name="availability"
-          maxLength={300}
-          className={inputClass}
-          placeholder="e.g. weekday evenings, Saturday mornings"
-        />
-      </div>
+      <fieldset className="flex flex-col gap-3">
+        <legend className={`${labelClass} mb-1`}>Ideal time slots</legend>
+        <p className="font-sans text-sm leading-relaxed text-charcoal/70">
+          Please select the time slots that would be most ideal for you to commit to a weekly
+          group meeting over a 6-week period. Choose as many as work, and we&apos;ll use your
+          answers to match you with a pod.
+        </p>
+        <div className="flex flex-col gap-2">
+          {POD_DAYS.map((day) => (
+            <div
+              key={day}
+              role="group"
+              aria-label={day}
+              className="flex flex-col gap-2 sm:flex-row sm:items-center sm:gap-3"
+            >
+              <span className="font-sans text-sm font-medium text-charcoal sm:w-24 sm:shrink-0">
+                {day}
+              </span>
+              <div className="grid grid-cols-4 gap-2 sm:flex-1">
+                {POD_TIMES.map((time) => (
+                  <label
+                    key={time}
+                    className="flex cursor-pointer items-center justify-center rounded-lg border border-stone bg-card px-2 py-2 font-sans text-sm text-charcoal transition-colors focus-within:ring-2 focus-within:ring-deep-teal/30 has-[:checked]:border-deep-teal has-[:checked]:bg-deep-teal has-[:checked]:text-primary-foreground"
+                  >
+                    <input
+                      type="checkbox"
+                      name="slots"
+                      value={`${day} ${time}`}
+                      className="sr-only"
+                    />
+                    <span className="sr-only">{day} </span>
+                    {time}
+                  </label>
+                ))}
+              </div>
+            </div>
+          ))}
+        </div>
+      </fieldset>
 
       {state.status === 'error' && (
         <p role="alert" className="flex items-start gap-2 font-sans text-sm text-destructive">
