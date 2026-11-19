@@ -93,8 +93,9 @@ export function GroupInterestForm() {
       <fieldset className="flex flex-col gap-3">
         <legend className={`${labelClass} mb-1`}>Ideal time slots</legend>
         <p className="font-sans text-sm leading-relaxed text-charcoal/70">
-          Pods run Monday through Friday at 8:15am, 12pm, 12:30pm, and 3pm. Please select the
-          time slots you&apos;d be able to commit to for a 6-week group. Choose as many as work.
+          Please select the time slots that would be most ideal for you to commit to a weekly
+          group meeting over a 6-week period. Choose as many as work, and we&apos;ll use your
+          answers to match you with a pod.
         </p>
         <div className="flex flex-col gap-2">
           {POD_DAYS.map((day) => (
