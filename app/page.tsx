@@ -217,7 +217,7 @@ export default async function HomePage() {
               Tuned In, from the page to your nervous system.
             </h2>
             <p className="mx-auto mt-4 max-w-2xl font-serif text-lg leading-relaxed text-charcoal/85">
-              Three companion guides and a hands-on workbook by Sophie Schauermann, LCSW — the
+              Three companion guides and two hands-on workbooks by Sophie Schauermann, LCSW — the
               research-backed foundation behind every program at the Institute.
             </p>
           </div>
@@ -300,7 +300,11 @@ export default async function HomePage() {
               <p className="mt-4 max-w-md font-serif text-[15px] leading-relaxed text-charcoal/85">
                 Regulation tools to help you understand your nervous system and find your way back to
                 steady. Now available in paperback and on Kindle, or read the complete book free with
-                your library access.
+                your library access. Pair it with the new{' '}
+                <a href="#adult-workbook" className="font-semibold text-deep-teal underline underline-offset-2">
+                  companion workbook
+                </a>
+                .
               </p>
               <div className="mt-7 flex flex-col items-center gap-3">
                 <Button asChild size="lg" className="font-sans font-semibold">
@@ -412,42 +416,80 @@ export default async function HomePage() {
             </div>
           </div>
 
-          {/* Companion workbook */}
-          <div
-            id="workbook"
-            className="mt-16 flex scroll-mt-24 flex-col items-center gap-10 rounded-lg border border-stone bg-off-white p-8 sm:p-10 md:flex-row md:gap-14"
-          >
-            <div className="w-full max-w-[200px] shrink-0">
-              <BookCover3D
-                src="/images/tuned-in-workbook-cover.jpg"
-                alt="Tuned In: A practical guide for parents of sensitive children, Workbook Companion Series, by Sophie Schauermann, LCSW"
-              />
+          {/* Companion workbooks */}
+          <div id="workbook" className="mt-16 grid scroll-mt-24 gap-8 lg:grid-cols-2">
+            <div className="flex flex-col items-center gap-8 rounded-lg border border-stone bg-off-white p-8 text-center sm:flex-row sm:items-start sm:text-left">
+              <div className="w-full max-w-[160px] shrink-0">
+                <BookCover3D
+                  src="/images/tuned-in-workbook-cover.jpg"
+                  alt="Tuned In: A practical guide for parents of sensitive children, Workbook Companion Series, by Sophie Schauermann, LCSW"
+                />
+              </div>
+              <div className="flex flex-col items-center sm:items-start">
+                <p className="font-sans text-xs font-semibold uppercase tracking-[0.18em] text-sage-dark">
+                  Companion Workbook · Parents
+                </p>
+                <h3 className="mt-3 font-serif text-2xl font-semibold leading-tight text-deep-teal text-balance">
+                  The Tuned In Workbook
+                </h3>
+                <p className="mt-2 font-serif text-base italic text-charcoal/85">
+                  A practical guide for parents of sensitive children
+                </p>
+                <p className="mt-4 font-serif text-[15px] leading-relaxed text-charcoal/85">
+                  Put the ideas from Book One into practice. Guided reflections, exercises, and
+                  at-home tools to help you understand your sensitive child and respond with more
+                  calm and confidence — one page at a time.
+                </p>
+                <div className="mt-6">
+                  <Button asChild size="lg" className="font-sans font-semibold">
+                    <a
+                      href="https://www.amazon.com/dp/B0HNJFJ17D"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                    >
+                      Buy the Workbook on Amazon
+                    </a>
+                  </Button>
+                </div>
+              </div>
             </div>
-            <div className="flex flex-col items-center text-center md:items-start md:text-left">
-              <p className="font-sans text-xs font-semibold uppercase tracking-[0.18em] text-sage-dark">
-                New · Companion Workbook
-              </p>
-              <h3 className="mt-3 font-serif text-3xl font-semibold leading-tight text-deep-teal text-balance">
-                The Tuned In Workbook
-              </h3>
-              <p className="mt-2 font-serif text-lg italic text-charcoal/85">
-                A practical guide for parents of sensitive children
-              </p>
-              <p className="mt-4 max-w-xl font-serif text-[15px] leading-relaxed text-charcoal/85">
-                Put the ideas from Book One into practice. Guided reflections, exercises, and
-                at-home tools to help you understand your sensitive child and respond with more
-                calm and confidence — one page at a time.
-              </p>
-              <div className="mt-7">
-                <Button asChild size="lg" className="font-sans font-semibold">
-                  <a
-                    href="https://www.amazon.com/dp/B0HNJFJ17D"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                  >
-                    Buy the Workbook on Amazon
-                  </a>
-                </Button>
+
+            <div
+              id="adult-workbook"
+              className="flex scroll-mt-24 flex-col items-center gap-8 rounded-lg border border-stone bg-off-white p-8 text-center sm:flex-row sm:items-start sm:text-left"
+            >
+              <div className="w-full max-w-[160px] shrink-0">
+                <BookCover3D
+                  src="/images/tuned-in-adults-workbook-cover.jpg"
+                  alt="Tuned In: Regulation Tools for Adults, An 8-Week Journey to Greater Calm and Connection, by Sophie Schauermann, LCSW"
+                />
+              </div>
+              <div className="flex flex-col items-center sm:items-start">
+                <p className="font-sans text-xs font-semibold uppercase tracking-[0.18em] text-sage-dark">
+                  New · Companion Workbook · Adults
+                </p>
+                <h3 className="mt-3 font-serif text-2xl font-semibold leading-tight text-deep-teal text-balance">
+                  Regulation Tools for Adults
+                </h3>
+                <p className="mt-2 font-serif text-base italic text-charcoal/85">
+                  An 8-week journey to greater calm and connection
+                </p>
+                <p className="mt-4 font-serif text-[15px] leading-relaxed text-charcoal/85">
+                  Regulation 101, alongside Book Two. Learn your nervous system&apos;s states, build
+                  a personal toolkit, set loving boundaries, and practice rupture and repair — with a
+                  seven-day practice, reflections, and journaling pages in every chapter.
+                </p>
+                <div className="mt-6">
+                  <Button asChild size="lg" className="font-sans font-semibold">
+                    <a
+                      href="https://www.amazon.com/dp/B0HSSNCTLM"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                    >
+                      Buy the Workbook on Amazon
+                    </a>
+                  </Button>
+                </div>
               </div>
             </div>
           </div>
